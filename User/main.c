@@ -1,8 +1,20 @@
 
 #include "stm32f10x.h"
 
-#include "stdio.h"
 #include "Tool.h"
+#include "stdio.h"
+
+#include "Key.h"   // 按键相关头文件
+#include "SPI_Flash.h"
+#include "led.h"   // LED相关头文件
+#include "buzzer.h"
+
+#include "Task_Key.h"   // 按键任务头文件
+
+#include "hw_config.h"
+#include "usb_lib.h"
+#include "usb_desc.h"
+#include "usb_pwr.h"
 
 /***************** 类型声明 *****************/
 
@@ -16,6 +28,7 @@ typedef struct {
 /***************** 变量声明 *****************/
 
 RCC_ClocksTypeDef RCC_Clocks;   // 系统时钟频率
+uint32_t          SysTick_Count = 0;
 
 /***************** 函数声明 *****************/
 
@@ -27,6 +40,8 @@ void TaskNull(void);       // 空任务
 TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
     {TaskNull, 1000},
+    {LED_Task, 50},   // LED任务，每50ms执行一次
+    {Key_Task, 10},   // 按键任务，每10ms执行一次
 
     // 在上面添加任务。。。。
 };
@@ -44,7 +59,16 @@ int main(void) {
     SysTick_Config(RCC_Clocks.SYSCLK_Frequency / 1000);   // 配置SysTick定时器，每1ms中断一次
 
     /* 外设初始化 */
+    LED_Init();      // 初始化LED
+    Key_Init();      // 初始化按键
+    W25QXX_Init();   // 初始化SPI Flash
+    Buzzer_Init();
 
+    Set_System();
+    Set_USBClock();
+    USB_Interrupts_Config();
+    USB_Init();
+    
     /* 进行任务处理 */
     Task_Process();
     while (1) {
@@ -55,7 +79,7 @@ int main(void) {
 
 /**
  * @brief  任务调度函数
- * @note
+ * @note   滴答定时器中断
  * @retval None
  */
 void Task_Remarks(void) {
@@ -73,11 +97,12 @@ void Task_Remarks(void) {
             TaskList[i].Ready = 1;                   // 设置任务就绪标志
         }
     }
+    SysTick_Count = SysTick_Count + 1;
 }
 
 /**
  * @brief  任务处理函数
- * @note
+ * @note   主循环
  * @retval None
  */
 void Task_Process(void) {

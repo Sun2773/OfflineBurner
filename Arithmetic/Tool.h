@@ -101,7 +101,7 @@ char* strnstr(char* str1, char* str2, size_t n);
 
 #define ArraySize(array) (sizeof(array) / sizeof(array[0]))
 
-#define BIT_VAL(addr, bitnum) *((uint32_t*) ((((uint32_t) addr & 0xF0000000) + 0x2000000 + (((uint32_t) addr & 0xFFFFF) << 5) + (bitnum << 2))))
+#define BIT_VAL(addr, bitnum) *((uint32_t*) ((((uint32_t) (&addr) & 0xF0000000) + 0x2000000 + (((uint32_t) (&addr) & 0xFFFFF) << 5) + (bitnum << 2))))
 
 #define IF_BIT(reg, bit)    if ((reg & bit) == bit)
 #define IF_NO_BIT(reg, bit) if ((reg & bit) != bit)

@@ -23,6 +23,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
+#include "usb_lib.h"
+#include "usb_istr.h"
+#include "usb_pwr.h"
+
 /** @addtogroup STM32F10x_StdPeriph_Template
  * @{
  */
@@ -116,14 +120,39 @@ void DebugMon_Handler(void) {
 // {
 // }
 
+void Task_Remarks(void);
+
 /**
  * @brief  This function handles SysTick Handler.
  * @param  None
  * @retval None
  */
 void SysTick_Handler(void) {
+    Task_Remarks();   // 任务处理
 }
 
+/*******************************************************************************
+* Function Name  : USB_IRQHandler
+* Description    : This function handles USB Low Priority interrupts
+*                  requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_LP_CAN1_RX0_IRQHandler(void) {
+  USB_Istr();
+}
+
+/*******************************************************************************
+* Function Name  : USB_FS_WKUP_IRQHandler
+* Description    : This function handles USB WakeUp interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USBWakeUp_IRQHandler(void) {
+  EXTI_ClearITPendingBit(EXTI_Line18);
+}
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
