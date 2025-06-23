@@ -1,0 +1,22 @@
+# 代码样式
+---
+BasedOnStyle :                      Chromium       # 大括号跟随声明后置
+IndentWidth :                       4              # 缩进宽度
+ColumnLimit :                       0              # 单行代码长度限制
+AlignConsecutiveAssignments :       true           # 连续赋值时 对齐等号
+AlignConsecutiveDeclarations :      true           # 连续声明时 对其变量名
+AlignTrailingComments:                             # 对其连续的尾随注释
+  Kind: Always                                     # 
+  OverEmptyLines: 0                                # 
+SpacesBeforeTrailingComments :      3              # 尾随行注释前的空格数
+SpaceAfterCStyleCast :              true           # 在C风格类型转换后添加空格
+SpaceBeforeAssignmentOperators :    true           # 在赋值运算符之前添加空格
+PointerAlignment :                  Left           # 指针的*的位置
+BinPackArguments :                  false          # 收拾格子参数
+BinPackParameters :                 false          # 纸盒包装参数
+AlignConsecutiveMacros :            true           # 宏定义值对齐
+AlignArrayOfStructures :            None           # 对齐数组列
+AlignConsecutiveBitFields :         Consecutive    # 对齐连续的位字段
+#PointerAlignment :                  Left           # 指针的对齐: Left, Right, Middle
+FixNamespaceComments :              true           # 自动添加区域注释
+InsertBraces :                      true           # 自动插入花括号

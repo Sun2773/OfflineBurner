@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "rtt",
+            "type": "shell",
+            "command": "JLinkRTTClient.exe",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "rtt(新窗口)",
+            "type": "shell",
+            "command": "start JLinkRTTClient.exe",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "清理编译",
+            "type": "shell",
+            "command": ".\\Script\\clean.bat",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "启动IAR",
+            "type": "shell",
+            "command": ".\\Project.eww",
+            "args": [],
+            "problemMatcher": []
+        },
+        {
+            "label": "打开文件夹",
+            "type": "shell",
+            "command": "explorer",
+            "args": [
+                "${workspaceFolder}"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "iar",
+            "command": "build",
+            "project": "${command:iar-config.project-file}",
+            "config": "${command:iar-config.project-configuration}",
+            "builder": "${command:iar-config.toolchain}/common/bin/iarbuild.exe",
+            "label": "iar: Build Project",
+            "argumentVariablesFile": "${command:iar-config.workspace-file}",
+            "problemMatcher": [
+                "$iar-cc",
+                "$iar-linker"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
