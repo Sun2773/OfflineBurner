@@ -75,6 +75,9 @@ int main(void) {
     SystemCoreClockUpdate();                              // 更新系统时钟频率
     SysTick_Config(RCC_Clocks.SYSCLK_Frequency / 1000);   // 配置SysTick定时器，每1ms中断一次
 
+    /* 时钟初始化 */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+
     /* 外设初始化 */
     LED_Init();      // 初始化LED
     Key_Init();      // 初始化按键
