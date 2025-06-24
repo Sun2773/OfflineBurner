@@ -4,17 +4,21 @@
 #include "Tool.h"
 #include "stdio.h"
 
-#include "Key.h"   // 按键相关头文件
+#include "Key.h"
 #include "SPI_Flash.h"
-#include "led.h"   // LED相关头文件
 #include "buzzer.h"
+#include "led.h"
 
-#include "Task_Key.h"   // 按键任务头文件
+#include "Task_Key.h"
 
 #include "hw_config.h"
-#include "usb_lib.h"
 #include "usb_desc.h"
+#include "usb_lib.h"
 #include "usb_pwr.h"
+
+#include "DAP.h"
+#include "DAP_config.h"
+#include "SWD_host.h"
 
 /***************** 类型声明 *****************/
 
@@ -29,17 +33,30 @@ typedef struct {
 
 RCC_ClocksTypeDef RCC_Clocks;   // 系统时钟频率
 uint32_t          SysTick_Count = 0;
+uint8_t           test_out      = 0;
+uint8_t           test_in       = 0;
+
+// SWD_TargetInfo TargetInfo;
+
+// 0x1BA01477
+// SWD_STA  SWD_Res;
+uint32_t FlashSize = 0;
+uint32_t Data[5];
+uint8_t  SWD_Res = 0;   // SWD操作结果
+uint8_t  Buffer[1024];
+uint32_t Flash_Page_Size = 1024;
 
 /***************** 函数声明 *****************/
 
-void Task_Process(void);   // 任务处理函数
-void TaskNull(void);       // 空任务
+void Task_Process(void);      // 任务处理函数
+void TaskNull(void);          // 空任务
+void Delay(uint32_t delay);   // 延时函数
 
 /***************** 任务定义 *****************/
 
 TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
-    {TaskNull, 1000},
+    {TaskNull, 10},
     {LED_Task, 50},   // LED任务，每50ms执行一次
     {Key_Task, 10},   // 按键任务，每10ms执行一次
 
@@ -62,13 +79,41 @@ int main(void) {
     LED_Init();      // 初始化LED
     Key_Init();      // 初始化按键
     W25QXX_Init();   // 初始化SPI Flash
-    Buzzer_Init();
+    Buzzer_Init();   // 初始化蜂鸣器
+    // SWD_Init();      // 初始化SWD接口
 
     Set_System();
     Set_USBClock();
     USB_Interrupts_Config();
     USB_Init();
-    
+
+    SWD_Res = swd_init_debug();   // 初始化SWD调试接口
+    // 下载编程算法到目标MCU的SRAM，并初始化
+    SWD_Res = swd_read_memory(0x1FFFF7E0, (uint8_t*) &FlashSize, 2);
+    if (SWD_Res) {
+        asm("nop");   // 如果初始化成功，执行空操作
+    }
+    // SWD_Init();
+    //
+    // SWD_Res = SWD_Target_Init(&TargetInfo);
+    // // SWD_Target_Reset();
+    // SWD_Res = SWD_Target_RegisterRead(0x1FFFF7E0, &FlashSize);
+    // SWD_Res = SWD_Target_WordRW();
+    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[0]);
+    // SWD_Res = SWD_Target_HalfWordRW();
+    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[1]);
+    // SWD_Res = SWD_Target_ByteRW();
+    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[2]);
+
+    //----------------------测试代码区---------------------------
+    // while (1) {
+    //     SWD_Target_RegisterWrite(0x4001100C, 0x00002000);
+    //     Delay(1000);
+    //     SWD_Target_RegisterWrite(0x4001100C, 0x00000000);
+    //     Delay(1000);
+    //     // 测试代码
+    // }
+
     /* 进行任务处理 */
     Task_Process();
     while (1) {

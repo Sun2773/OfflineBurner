@@ -2,9 +2,9 @@
     "files.encoding": "gb2312",
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
+        "*.dbclient-js": "javascript",
         "*.sqlbook": "sql",
         "*.ndjson": "jsonl",
-        "*.dbclient-js": "javascript",
         "stdarg.h": "c",
         "task_drive_window.h": "c",
         "task_drive_backup.h": "c",
@@ -143,7 +143,9 @@
         "035.h": "c",
         "task_drive_para.h": "c",
         "045.h": "c",
-        "010.h": "c"
+        "010.h": "c",
+        "cmsis_os2.h": "c",
+        "dap_config.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"

@@ -10,10 +10,10 @@
  * 测试版本     对于一些版本的测试的序号，不对外发布，只在进行测试的情况更新此字段
  */
 
-#define PROJECT_NAME   "Offline"   // 工程名称
-#define SYSTEM_VERSION "0.01"      // 系统版本
-#define DEVICE_TYPE    ""          // 设备型号
-#ifdef DEBUG                       // 调试版本尾缀
+#define PROJECT_NAME   "Burner"   // 工程名称
+#define SYSTEM_VERSION "0.01"     // 系统版本
+#define DEVICE_TYPE    ""         // 设备型号
+#ifdef DEBUG                      // 调试版本尾缀
 #define SYSTEM_VERSION_SUFFIX "-Alpha"
 #else
 #define SYSTEM_VERSION_SUFFIX

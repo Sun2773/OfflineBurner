@@ -221,7 +221,7 @@
                 <option>
                     <name>CCDefines</name>
                     <state>STM32F10x</state>
-                    <state>DEBUG</state>
+                    <state>BLUEPILL</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -349,6 +349,9 @@
                     <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\Arithmetic</state>
                     <state>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc</state>
+                    <state>$PROJ_DIR$\..\Arithmetic\SWD</state>
+                    <state>$PROJ_DIR$\..\Arithmetic\DAP</state>
+                    <state>$PROJ_DIR$\..\Arithmetic\algo</state>
                     <state>$PROJ_DIR$\..\Board</state>
                     <state>$PROJ_DIR$\..\Chip</state>
                     <state>$PROJ_DIR$\..\Library\CMSIS\CM3\DeviceSupport\ST\STM32F10x</state>
@@ -1074,6 +1077,72 @@
     <group>
         <name>Arithmetic</name>
         <group>
+            <name>algo</name>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F10x_128.c</name>
+            </file>
+        </group>
+        <group>
+            <name>DAP</name>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\DAP.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\DAP.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\DAP_config.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\DAP_vendor.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\debug_ca.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\debug_cm.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\JTAG_DP.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\SW_DP.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\DAP\SWO.c</name>
+            </file>
+        </group>
+        <group>
+            <name>SWD</name>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\error.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\error.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_flash.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_flash.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_host.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_host.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.h</name>
+            </file>
+        </group>
+        <group>
             <name>VirtualCOM</name>
             <group>
                 <name>inc</name>
@@ -1118,6 +1187,12 @@
                 </file>
             </group>
         </group>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\CMSIS-DAP.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\DAP_config.h</name>
+        </file>
     </group>
     <group>
         <name>Board</name>
