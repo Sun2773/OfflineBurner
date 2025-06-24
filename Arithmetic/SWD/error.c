@@ -5,8 +5,7 @@
 
 #include "error.h"
 
-static const char *const error_message[] =
-{
+static const char* const error_message[] = {
 
     /* Shared errors */
 
@@ -16,7 +15,6 @@ static const char *const error_message[] =
     "An error has occurred",
     // ERROR_INTERNAL
     "An internal error has occurred",
-
 
     /* Target flash errors */
 
@@ -40,8 +38,7 @@ static const char *const error_message[] =
     "Flash algorithm write command FAILURE",
 };
 
-static error_type_t error_type[] =
-{
+static error_type_t error_type[] = {
 
     /* These should always stay the same for each error type. */
 
@@ -51,7 +48,6 @@ static error_type_t error_type[] =
     ERROR_TYPE_INTERNAL,
     // ERROR_INTERNAL
     ERROR_TYPE_INTERNAL,
-
 
     /* Target flash errors */
 
@@ -75,26 +71,22 @@ static error_type_t error_type[] =
     ERROR_TYPE_TARGET,
 };
 
-const char *error_get_string(error_t error)
-{
-    const char *msg = 0;
+const char* error_get_string(error_t error) {
+    const char* msg = 0;
 
-    if(error < ERROR_COUNT)
-        {
-            msg = error_message[error];
-        }
+    if (error < ERROR_COUNT) {
+        msg = error_message[error];
+    }
 
     return msg;
 }
 
-error_type_t error_get_type(error_t error)
-{
+error_type_t error_get_type(error_t error) {
     error_type_t type = ERROR_TYPE_INTERNAL;
 
-    if(error < ERROR_COUNT)
-        {
-            type = error_type[error];
-        }
+    if (error < ERROR_COUNT) {
+        type = error_type[error];
+    }
 
     return type;
 }
