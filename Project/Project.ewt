@@ -1206,6 +1206,78 @@
             </file>
         </group>
         <group>
+            <name>MSC</name>
+            <group>
+                <name>inc</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\hw_config.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\mass_mal.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\memory.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_bot.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_conf.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_desc.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_istr.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_prop.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_pwr.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\inc\usb_scsi.h</name>
+                </file>
+            </group>
+            <group>
+                <name>src</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\hw_config.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\mass_mal.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\memory.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\scsi_data.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_bot.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_desc.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_endp.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_istr.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_prop.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_pwr.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\MSC\src\usb_scsi.c</name>
+                </file>
+            </group>
+        </group>
+        <group>
             <name>SWD</name>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\error.c</name>
@@ -1232,54 +1304,6 @@
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.h</name>
             </file>
         </group>
-        <group>
-            <name>VirtualCOM</name>
-            <group>
-                <name>inc</name>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\hw_config.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\usb_conf.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\usb_desc.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\usb_istr.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\usb_prop.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\inc\usb_pwr.h</name>
-                </file>
-            </group>
-            <group>
-                <name>src</name>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\hw_config.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\usb_desc.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\usb_endp.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\usb_istr.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\usb_prop.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\VirtualCOM\src\usb_pwr.c</name>
-                </file>
-            </group>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\Arithmetic\DAP_config.h</name>
-        </file>
     </group>
     <group>
         <name>Board</name>
@@ -1363,6 +1387,36 @@
                     <name>$PROJ_DIR$\..\Library\CMSIS-DAP\Source\SW_DP.c</name>
                 </file>
             </group>
+        </group>
+        <group>
+            <name>FATFS</name>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\diskio.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\diskio.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ff.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ff.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ffconf.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ffext.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ffext.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ffsystem.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\FATFS\ffunicode.c</name>
+            </file>
         </group>
         <group>
             <name>STM32_USB-FS-Device_Driver</name>
