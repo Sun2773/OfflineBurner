@@ -1188,6 +1188,12 @@
     <group>
         <name>.Task</name>
         <file>
+            <name>$PROJ_DIR$\..\Task\Task_Burner.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_Burner.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\Task\Task_Key.c</name>
         </file>
         <file>
@@ -1203,6 +1209,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F10x_128.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F10x_OPT.c</name>
             </file>
         </group>
         <group>

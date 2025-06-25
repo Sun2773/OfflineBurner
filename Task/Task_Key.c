@@ -1,4 +1,5 @@
 #include "Task_Key.h"
+#include "Task_Burner.h"
 
 /**
  * @brief  按键处理任务
@@ -49,6 +50,7 @@ void Key_Task(void) {
  * @retval 1: 事件处理成功, 0: 事件处理失败
  */
 static uint8_t Key_ClickEvent(uint32_t key) {
+    BurnerCtrl.Start = 1;
     return 1;
 }
 

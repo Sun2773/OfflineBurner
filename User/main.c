@@ -13,6 +13,7 @@
 
 #include "BurnerConfig.h"
 #include "Task_Key.h"
+#include "Task_Burner.h"
 
 #include "hw_config.h"
 #include "usb_desc.h"
@@ -65,6 +66,7 @@ TaskUnti_t TaskList[] = {
     {TaskNull, 10},
     {LED_Task, 50},   // LED任务，每50ms执行一次
     {Key_Task, 10},   // 按键任务，每10ms执行一次
+    {Burner_Task, 50},
 
     // 在上面添加任务。。。。
 };

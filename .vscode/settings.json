@@ -1,5 +1,5 @@
 {
-    "files.encoding": "gb2312",
+    "files.encoding": "utf8",
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "*.dbclient-js": "javascript",
@@ -148,7 +148,9 @@
         "dap_config.h": "c",
         "debug_cm.h": "c",
         "dap.h": "c",
-        "burnerconfig.h": "c"
+        "burnerconfig.h": "c",
+        "cjson.h": "c",
+        "swd_opt.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"

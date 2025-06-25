@@ -10,13 +10,7 @@
 #include "led.h"
 #include "string.h"
 
-struct {
-    uint32_t Flag;            // Flash大小
-    uint32_t FileAddress;     // 文件地址
-    uint32_t FileSize;        // 文件大小
-    uint32_t FileCrc;         // 文件CRC32校验码
-    char     FilePath[128];   // 文件路径
-} BurnerConfigInfo = {
+BurnerConfigInfo_t BurnerConfigInfo = {
     .FilePath = "",
 };
 
