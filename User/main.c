@@ -2,13 +2,16 @@
 #include "stm32f10x.h"
 
 #include "Tool.h"
+#include "heap.h"
 #include "stdio.h"
 
 #include "Key.h"
 #include "SPI_Flash.h"
 #include "buzzer.h"
+#include "cJSON.h"
 #include "led.h"
 
+#include "BurnerConfig.h"
 #include "Task_Key.h"
 
 #include "hw_config.h"
@@ -20,7 +23,7 @@
 #include "DAP_config.h"
 #include "SWD_host.h"
 
-#include "ff.h"			/* Declarations of FatFs API */
+#include "ff.h" /* Declarations of FatFs API */
 
 /***************** 类型声明 *****************/
 
@@ -47,7 +50,7 @@ uint32_t Data[5];
 uint8_t  SWD_Res = 0;   // SWD操作结果
 uint8_t  Buffer[1024];
 uint32_t Flash_Page_Size = 1024;
-FATFS Fs;
+FATFS    Fs;
 
 /***************** 函数声明 *****************/
 
@@ -86,7 +89,15 @@ int main(void) {
     Key_Init();      // 初始化按键
     W25QXX_Init();   // 初始化SPI Flash
     Buzzer_Init();   // 初始化蜂鸣器
-    // SWD_Init();      // 初始化SWD接口
+
+    /* 初始化JSON */
+    cJSON_Hooks hooks = {
+        pvPortMalloc,
+        vPortFree,
+    };
+    cJSON_InitHooks(&hooks);
+
+    BurnerConfig();   // 初始化烧录配置
 
     Set_System();
     Set_USBClock();
@@ -99,29 +110,9 @@ int main(void) {
     if (SWD_Res) {
         asm("nop");   // 如果初始化成功，执行空操作
     }
-    
-        FRESULT res;
 
-    /*在SD卡上挂载文件体统*/
-    res = f_mount(&Fs, "0:", 1);
-    /*没有文件系统*/
-    if(res == FR_NO_FILESYSTEM){
-        /*格式化Flash*/
-        res = f_mkfs ("0:", 0, NULL, 4096);
-        /*取消挂载*/
-        res = f_mount(0,"0:",1);
-        /*再次挂载*/
-        res = f_mount(&Fs,"0:",1);
-    }
-        /*获取容量*/
-    // DWORD fre_clust;
-    // res = f_getfree("0:", &fre_clust, &Fs);
-    /*创建工作路径*/
-    res = f_mkdir("0:Test2");
-        /* 挂载失败 */
-    if (res != FR_OK) {
-        asm("nop");   // 如果初始化成功，执行空操作
-    }
+    FRESULT res;
+
     // SWD_Init();
     //
     // SWD_Res = SWD_Target_Init(&TargetInfo);

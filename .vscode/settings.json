@@ -147,7 +147,8 @@
         "cmsis_os2.h": "c",
         "dap_config.h": "c",
         "debug_cm.h": "c",
-        "dap.h": "c"
+        "dap.h": "c",
+        "burnerconfig.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"

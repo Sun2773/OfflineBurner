@@ -56,17 +56,9 @@ void Set_USBClock(void);
 void Enter_LowPowerMode(void);
 void Leave_LowPowerMode(void);
 void USB_Interrupts_Config(void);
-void Led_Config(void);
-void Led_RW_ON(void);
-void Led_RW_OFF(void);
-void USB_Configured_LED(void);
-void USB_NotConfigured_LED(void);
 void USB_Cable_Config (FunctionalState NewState);
 void Get_SerialNum(void);
 void MAL_Config(void);
-#if !defined (USE_STM32L152_EVAL) 
-void USB_Disconnect_Config(void);
-#endif /* (USE_STM32L152_EVAL) */
 /* External variables --------------------------------------------------------*/
 
 #endif  /*__HW_CONFIG_H*/

@@ -57,6 +57,7 @@
 #include "hw_config.h"
 #include "mass_mal.h"
 #include "usb_lib.h"
+#include "heap.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -66,7 +67,8 @@ __IO uint32_t Block_Read_count = 0;
 __IO uint32_t Block_offset;
 __IO uint32_t Counter = 0;
 uint32_t  Idx;
-uint32_t Data_Buffer[BULK_MAX_PACKET_SIZE * 2 * 8]; /* 4096 bytes*/
+// uint32_t Data_Buffer[BULK_MAX_PACKET_SIZE * 2 * 8]; /* 4096 bytes*/
+uint32_t *Data_Buffer = NULL; /* 4096 bytes*/
 uint8_t TransferState = TXFR_IDLE;
 /* Extern variables ----------------------------------------------------------*/
 extern uint8_t Bulk_Data_Buff[BULK_MAX_PACKET_SIZE];  /* data buffer*/
@@ -97,6 +99,10 @@ void Read_Memory(uint8_t lun, uint32_t Memory_Offset, uint32_t Transfer_Length)
     Offset = Memory_Offset * Mass_Block_Size[lun];
     Length = Transfer_Length * Mass_Block_Size[lun];
     TransferState = TXFR_ONGOING;
+  }
+
+  if (Data_Buffer == NULL) {
+    Data_Buffer = pvPortMalloc(BULK_MAX_PACKET_SIZE * 2 * 8 * sizeof(uint32_t));
   }
 
   if (TransferState == TXFR_ONGOING )
@@ -157,6 +163,10 @@ void Write_Memory (uint8_t lun, uint32_t Memory_Offset, uint32_t Transfer_Length
     W_Offset = Memory_Offset * Mass_Block_Size[lun];
     W_Length = Transfer_Length * Mass_Block_Size[lun];
     TransferState = TXFR_ONGOING;
+  }
+
+  if (Data_Buffer == NULL) {
+    Data_Buffer = pvPortMalloc(BULK_MAX_PACKET_SIZE * 2 * 8 * sizeof(uint32_t));
   }
 
   if (TransferState == TXFR_ONGOING )

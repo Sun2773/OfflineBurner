@@ -1304,6 +1304,24 @@
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.h</name>
             </file>
         </group>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\BurnerConfig.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\BurnerConfig.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\crc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\crc.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\heap.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\heap.h</name>
+        </file>
     </group>
     <group>
         <name>Board</name>
@@ -1343,6 +1361,15 @@
     </group>
     <group>
         <name>Library</name>
+        <group>
+            <name>cJson</name>
+            <file>
+                <name>$PROJ_DIR$\..\Library\cJson\cJSON.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\cJson\cJSON.h</name>
+            </file>
+        </group>
         <group>
             <name>CMSIS</name>
             <file>

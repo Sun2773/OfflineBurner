@@ -56,14 +56,10 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+uint32_t Mass_Memory_Offset[2];
 uint32_t Mass_Memory_Size[2];
 uint32_t Mass_Block_Size[2];
 uint32_t Mass_Block_Count[2];
-__IO uint32_t Status = 0;
-
-#if defined(USE_STM3210E_EVAL) || defined(USE_STM32L152D_EVAL)
-SD_CardInfo mSDCardInfo;
-#endif
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -76,24 +72,25 @@ SD_CardInfo mSDCardInfo;
 *******************************************************************************/
 uint16_t MAL_Init(uint8_t lun)
 {
-  uint16_t status = MAL_OK;
+    uint16_t stat = MAL_FAIL;
 
-  switch (lun)
-  {
-    case 0:
-        /*存储器初始化*/
-        W25QXX_Init();
-        
-        Mass_Memory_Size[0] = W25QXX_ReadCapacity();  //Flash容量
-        Mass_Block_Size[0]  = W25QXX_BLOCK_SIZE;        //块大小
-        Mass_Block_Count[0] = Mass_Memory_Size[0] / Mass_Block_Size[0]; //块数量
-        
-        status = MAL_OK;
-      break;
-    default:
-      return MAL_FAIL;
-  }
-  return status;
+    switch (lun) {
+        case 0: {
+            /* 存储器初始化 */
+            W25QXX_Init();
+            
+            Mass_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // Flash容量
+            Mass_Memory_Offset[0] = Mass_Memory_Size[0] / 2;                    // Flash偏移地址
+            Mass_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // 块大小
+            Mass_Block_Count[0]   = Mass_Memory_Size[0] / Mass_Block_Size[0];   // 块数量
+            
+            if (Mass_Memory_Size[0] != 0x0000) {
+                stat = MAL_OK;
+            }
+        } break;
+    }
+
+    return stat;
 }
 /*******************************************************************************
 * Function Name  : MAL_Write
@@ -104,42 +101,49 @@ uint16_t MAL_Init(uint8_t lun)
 *******************************************************************************/
 uint16_t MAL_Write(uint8_t lun, uint32_t Memory_Offset, uint32_t *Writebuff, uint16_t Transfer_Length)
 {
+    uint16_t stat = MAL_FAIL;
 
-  switch (lun)
-  {
-    case 0:
-        
-        /*存储器写*/
-        W25QXX_EraseSector(Memory_Offset);                                  //擦除扇区
-        W25QXX_Write((uint8_t*)Writebuff,Memory_Offset,Transfer_Length);    //直接写入数据 自动换页 无校验
-              
-      break;
-    default:
-      return MAL_FAIL;
-  }
-  return MAL_OK;
+    switch (lun) {
+        case 0: {
+            Memory_Offset += Mass_Memory_Offset[0];
+            while (Transfer_Length) {
+                W25QXX_EraseSector(Memory_Offset);
+                W25QXX_Write((uint8_t*) Writebuff,
+                             Memory_Offset,
+                             Mass_Block_Size[0]);
+                Memory_Offset += Mass_Block_Size[0];
+                Writebuff += Mass_Block_Size[0] / 4;
+                Transfer_Length -= Mass_Block_Size[0];
+            }
+            stat = MAL_OK;
+        } break;
+    }
+
+    return stat;
 }
 
 /*******************************************************************************
 * Function Name  : MAL_Read
 * Description    : Read sectors
 * Input          : None
-* Output         : None
+* * Output         : None
 * Return         : Buffer pointer
 *******************************************************************************/
 uint16_t MAL_Read(uint8_t lun, uint32_t Memory_Offset, uint32_t *Readbuff, uint16_t Transfer_Length)
 {
+    uint16_t stat = MAL_FAIL;
 
-  switch (lun)
-  {
-    case 0:
-        /*存储器读*/
-        W25QXX_Read((uint8_t*)Readbuff, Memory_Offset, Transfer_Length);     
-      break;
-    default:
-      return MAL_FAIL;
-  }
-  return MAL_OK;
+    switch (lun) {
+        case 0: {
+            Memory_Offset += Mass_Memory_Offset[0];
+            /* 存储器读 */
+            W25QXX_Read((uint8_t*) Readbuff,
+                        Memory_Offset,
+                        Transfer_Length);
+            stat = MAL_OK;
+        } break;
+    }
+    return stat;
 }
 
 /*******************************************************************************
@@ -151,8 +155,14 @@ uint16_t MAL_Read(uint8_t lun, uint32_t Memory_Offset, uint32_t *Readbuff, uint1
 *******************************************************************************/
 uint16_t MAL_GetStatus (uint8_t lun)
 {
-      return MAL_OK;
+    uint16_t stat = MAL_FAIL;
 
+    switch (lun) {
+        case 0: {
+            stat = MAL_OK;
+        } break;
+    }
+    return stat;
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

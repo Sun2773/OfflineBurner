@@ -358,6 +358,7 @@
                     <state>$PROJ_DIR$\..\Library\STM32F10x_StdPeriph_Driver\inc</state>
                     <state>$PROJ_DIR$\..\Library\STM32_USB-FS-Device_Driver\inc</state>
                     <state>$PROJ_DIR$\..\Library\FATFS</state>
+                    <state>$PROJ_DIR$\..\Library\cJson</state>
                     <state>$PROJ_DIR$\..\Task</state>
                     <state>$PROJ_DIR$\..\User</state>
                 </option>
@@ -1185,6 +1186,24 @@
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.h</name>
             </file>
         </group>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\BurnerConfig.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\BurnerConfig.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\crc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\crc.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\heap.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Arithmetic\heap.h</name>
+        </file>
     </group>
     <group>
         <name>Board</name>
@@ -1224,6 +1243,15 @@
     </group>
     <group>
         <name>Library</name>
+        <group>
+            <name>cJson</name>
+            <file>
+                <name>$PROJ_DIR$\..\Library\cJson\cJSON.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Library\cJson\cJSON.h</name>
+            </file>
+        </group>
         <group>
             <name>CMSIS</name>
             <file>

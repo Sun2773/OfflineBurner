@@ -94,7 +94,7 @@ void Set_System(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  
+
   /* MAL configuration */
   MAL_Config();
  
@@ -173,29 +173,6 @@ void USB_Interrupts_Config(void)
 *******************************************************************************/
 void USB_Cable_Config (FunctionalState NewState)
 {
-
-#if defined(STM32L1XX_MD)
-  if (NewState != DISABLE)
-  {
-    STM32L15_USB_CONNECT;
-  }
-  else
-  {
-    STM32L15_USB_DISCONNECT;
-  }  
- 
-#elif defined(STM32L1XX_HD) || defined(STM32L1XX_MD_PLUS)
-  if (NewState != DISABLE)
-  {
-    GPIO_ResetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
-    SYSCFG_USBPuCmd(ENABLE);
-  }
-  else
-  {
-    GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
-    SYSCFG_USBPuCmd(DISABLE);
-  }
-#endif /* STM32L1XX_MD */
 }
 
 /*******************************************************************************
@@ -265,19 +242,5 @@ void MAL_Config(void)
 {
   MAL_Init(0);
 }
-
-#if !defined (USE_STM32L152_EVAL) 
-/*******************************************************************************
-* Function Name  : USB_Disconnect_Config
-* Description    : Disconnect pin configuration
-* Input          : None.
-* Return         : None.
-*******************************************************************************/
-void USB_Disconnect_Config(void)
-{
-
-}
-#endif /* USE_STM3210B_EVAL or USE_STM3210E_EVAL */
-
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------/
-/  Configurations of FatFs Module
+/  FatFs Functional Configurations
 /---------------------------------------------------------------------------*/
 
-#define FFCONF_DEF	5385	/* Revision ID */
+#define FFCONF_DEF 86631 /* Revision ID */
 
 /*---------------------------------------------------------------------------/
 / Function Configurations
@@ -238,9 +238,9 @@
 
 
 #define FF_FS_NORTC		1
-#define FF_NORTC_MON	6
+#define FF_NORTC_MON	1
 #define FF_NORTC_MDAY	1
-#define FF_NORTC_YEAR	2025
+#define FF_NORTC_YEAR	2000
 /* The option FF_FS_NORTC switches timestamp feature. If the system does not have
 /  an RTC or valid timestamp is not needed, set FF_FS_NORTC = 1 to disable the
 /  timestamp feature. Every object modified by FatFs will have a fixed timestamp
