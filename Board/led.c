@@ -1,38 +1,38 @@
 #include "led.h"
 
-static uint8_t LED_Mode = 0;   // LEDÄ£Ê½±êÖ¾ 0 ¿ÕÏÐÄ£Ê½
+static uint8_t LED_Mode = 0;   // LEDæ¨¡å¼æ ‡å¿— 0 ç©ºé—²æ¨¡å¼
 
 /**
- * @brief  LED IO³õÊ¼»¯
+ * @brief  LED IOåˆå§‹åŒ–
  * @note
  * @retval None
  */
 void LED_Init(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_APB2PeriphClockCmd(LED_RCCCLOCK, ENABLE);   // Ê¹ÄÜPC¶Ë¿ÚÊ±ÖÓ
+    RCC_APB2PeriphClockCmd(LED_RCCCLOCK, ENABLE);   // ä½¿èƒ½PCç«¯å£æ—¶é’Ÿ
 
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;   // ÍÆÍìÊä³ö
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;    // IO¿ÚËÙ¶ÈÎª2MHz
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;   // æŽ¨æŒ½è¾“å‡º
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;    // IOå£é€Ÿåº¦ä¸º2MHz
 
     GPIO_InitStructure.GPIO_Pin = RUN_LED_PIN;
-    GPIO_Init(RUN_LED_PORT, &GPIO_InitStructure);   // ³õÊ¼»¯
+    GPIO_Init(RUN_LED_PORT, &GPIO_InitStructure);   // åˆå§‹åŒ–
     LED_Off(RUN);
 
     GPIO_InitStructure.GPIO_Pin = ERR_LED_PIN;
-    GPIO_Init(ERR_LED_PORT, &GPIO_InitStructure);   // ³õÊ¼»¯
+    GPIO_Init(ERR_LED_PORT, &GPIO_InitStructure);   // åˆå§‹åŒ–
     LED_Off(ERR);
 }
 
 /**
- * @brief  LEDÔËÐÐÈÎÎñ
- * @note   50msÊ±¼äÆ¬
+ * @brief  LEDè¿è¡Œä»»åŠ¡
+ * @note   50msæ—¶é—´ç‰‡
  * @retval None
  */
 void LED_Task(void) {
-    static uint16_t led_timer = 0;   // LED¼ÆÊ±Æ÷
+    static uint16_t led_timer = 0;   // LEDè®¡æ—¶å™¨
     switch (LED_Mode) {
-        case 0: {   // ¿ÕÏÐÄ£Ê½
-            /* Ã¿100msÇÐ»»Ò»´ÎµÆ×´Ì¬ */
+        case 0: {   // ç©ºé—²æ¨¡å¼
+            /* æ¯100msåˆ‡æ¢ä¸€æ¬¡ç¯çŠ¶æ€ */
             if (led_timer++ >= 20) {
                 led_timer = 0;
                 LED_OnOff(RUN);

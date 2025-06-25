@@ -339,7 +339,7 @@ Configures the DAP Hardware I/O pins for Serial Wire Debug (SWD) mode:
  - TDI, nTRST to HighZ mode (pins are unused in SWD mode).
 */
 __STATIC_INLINE void PORT_SWD_SETUP (void) {
-  /* ÅäÖÃSWCLKÎªÍÆÍìÊä³ö£¬²¢Êä³ö¸ßµçÆ½ */
+  /* é…ç½®SWCLKä¸ºæŽ¨æŒ½è¾“å‡ºï¼Œå¹¶è¾“å‡ºé«˜ç”µå¹³ */
   GPIO_OUTPUT_H(SWCLK);
 #if(SWD_SWCLK_BIT < 8)
   SWD_SWCLK_PORT->CRL GPIO_MODE_CLR(SWD_SWCLK_BIT);
@@ -349,7 +349,7 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   SWD_SWCLK_PORT->CRH GPIO_MODE_OUT(SWD_SWCLK_BIT - 8);
 #endif
 
-  /* ÅäÖÃSWDIOµÄÊä³öÎªÍÆÍìÊä³ö£¬²¢Êä³ö¸ßµçÆ½ */
+  /* é…ç½®SWDIOçš„è¾“å‡ºä¸ºæŽ¨æŒ½è¾“å‡ºï¼Œå¹¶è¾“å‡ºé«˜ç”µå¹³ */
   GPIO_OUTPUT_H(SWDIO_O);
 #if(SWD_SWDIO_O_BIT < 8)
   SWD_SWDIO_O_PORT->CRL GPIO_MODE_CLR(SWD_SWDIO_O_BIT);
@@ -359,7 +359,7 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   SWD_SWDIO_O_PORT->CRH GPIO_MODE_OUT(SWD_SWDIO_O_BIT - 8);
 #endif
 
-  /* ÅäÖÃSWDIOµÄÊäÈëÎª¸¡¿ÕÊäÈë */
+  /* é…ç½®SWDIOçš„è¾“å…¥ä¸ºæµ®ç©ºè¾“å…¥ */
 #if(SWD_SWDIO_I_BIT < 8)
   SWD_SWDIO_I_PORT->CRL GPIO_MODE_CLR(SWD_SWDIO_I_BIT);
   SWD_SWDIO_I_PORT->CRL GPIO_MODE_IN(SWD_SWDIO_I_BIT);
@@ -368,7 +368,7 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   SWD_SWDIO_I_PORT->CRH GPIO_MODE_IN(SWD_SWDIO_I_BIT - 8);
 #endif
 
-  /* ÅäÖÃnRESETÎªÍÆÍìÊä³ö£¬²¢Êä³öµÍµçÆ½ */
+  /* é…ç½®nRESETä¸ºæŽ¨æŒ½è¾“å‡ºï¼Œå¹¶è¾“å‡ºä½Žç”µå¹³ */
   GPIO_OUTPUT_L(nRESET);
 #if(SWD_nRESET_BIT < 8)
   SWD_nRESET_PORT->CRL GPIO_MODE_CLR(SWD_nRESET_BIT);
@@ -388,7 +388,7 @@ Disables the DAP Hardware I/O pins which configures:
  - TCK/SWCLK, TMS/SWDIO, TDI, TDO, nTRST, nRESET to High-Z mode.
 */
 __STATIC_INLINE void PORT_OFF (void) {
-  /* ÅäÖÃSWCLKÎª¸ß×èÌ¬ */
+  /* é…ç½®SWCLKä¸ºé«˜é˜»æ€ */
 #if(SWD_SWCLK_BIT < 8)
   SWD_SWCLK_PORT->CRL GPIO_MODE_CLR(SWD_SWCLK_BIT);
   SWD_SWCLK_PORT->CRL GPIO_MODE_HZ(SWD_SWCLK_BIT);
@@ -397,7 +397,7 @@ __STATIC_INLINE void PORT_OFF (void) {
   SWD_SWCLK_PORT->CRH GPIO_MODE_HZ(SWD_SWCLK_BIT - 8);
 #endif
 
-  /* ÅäÖÃSWDIOµÄÊä³öÎª¸ß×èÌ¬ */
+  /* é…ç½®SWDIOçš„è¾“å‡ºä¸ºé«˜é˜»æ€ */
 #if(SWD_SWDIO_O_BIT < 8)
   SWD_SWDIO_O_PORT->CRL GPIO_MODE_CLR(SWD_SWDIO_O_BIT);
   SWD_SWDIO_O_PORT->CRL GPIO_MODE_HZ(SWD_SWDIO_O_BIT);
@@ -406,7 +406,7 @@ __STATIC_INLINE void PORT_OFF (void) {
   SWD_SWDIO_O_PORT->CRH GPIO_MODE_HZ(SWD_SWDIO_O_BIT - 8);
 #endif
 
-  /* ÅäÖÃSWDIOµÄÊäÈëÎª¸¡¸ß×èÌ¬ */
+  /* é…ç½®SWDIOçš„è¾“å…¥ä¸ºæµ®é«˜é˜»æ€ */
 #if(SWD_SWDIO_I_BIT < 8)
   SWD_SWDIO_I_PORT->CRL GPIO_MODE_CLR(SWD_SWDIO_I_BIT);
   SWD_SWDIO_I_PORT->CRL GPIO_MODE_HZ(SWD_SWDIO_I_BIT);
@@ -415,7 +415,7 @@ __STATIC_INLINE void PORT_OFF (void) {
   SWD_SWDIO_I_PORT->CRH GPIO_MODE_HZ(SWD_SWDIO_I_BIT - 8);
 #endif
 
-  /* ÅäÖÃnRESETÎª¸ß×èÌ¬ */
+  /* é…ç½®nRESETä¸ºé«˜é˜»æ€ */
 #if(SWD_nRESET_BIT < 8)
   SWD_nRESET_PORT->CRL GPIO_MODE_CLR(SWD_nRESET_BIT);
   SWD_nRESET_PORT->CRL GPIO_MODE_HZ(SWD_nRESET_BIT);

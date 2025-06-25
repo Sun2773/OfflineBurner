@@ -245,13 +245,13 @@ typedef struct {
 /* File information structure (FILINFO) */
 
 typedef struct {
-	FSIZE_t	fsize;			/* ÎÄ¼ş´óĞ¡ */
-	WORD	fdate;			/* ĞŞ¸ÄÈÕÆÚ */
-	WORD	ftime;			/* ĞŞ¸ÄÊ±¼ä */
-	BYTE	fattrib;		/* ÎÄ¼şÊôĞÔ */
+	FSIZE_t	fsize;			/* æ–‡ä»¶å¤§å° */
+	WORD	fdate;			/* ä¿®æ”¹æ—¥æœŸ */
+	WORD	ftime;			/* ä¿®æ”¹æ—¶é—´ */
+	BYTE	fattrib;		/* æ–‡ä»¶å±æ€§ */
 #if FF_USE_LFN
-	TCHAR	altname[FF_SFN_BUF + 1];/* Ìæ´úÎÄ¼şÃû */
-	TCHAR	fname[FF_LFN_BUF + 1];	/* Ö÷ÎÄ¼şÃû */
+	TCHAR	altname[FF_SFN_BUF + 1];/* æ›¿ä»£æ–‡ä»¶å */
+	TCHAR	fname[FF_LFN_BUF + 1];	/* ä¸»æ–‡ä»¶å */
 #else
 	TCHAR	fname[12 + 1];	/* File name */
 #endif
@@ -274,26 +274,26 @@ typedef struct {
 /* File function return code (FRESULT) */
 
 typedef enum {
-	FR_OK = 0,				/* (0) ³É¹¦ */
-	FR_DISK_ERR,			/* (1) µÍ¼¶´ÅÅÌI/O²ãÖĞ·¢ÉúÁËÑÏÖØ´íÎó */
-	FR_INT_ERR,				/* (2) ¶ÏÑÔÊ§°ÜÁË */
-	FR_NOT_READY,			/* (3) ÎïÀíÇı¶¯ÎŞ·¨Õı³£¹¤×÷ */
-	FR_NO_FILE,				/* (4) ÕÒ²»µ½ÎÄ¼ş */
-	FR_NO_PATH,				/* (5) ÕÒ²»µ½Â·¾¶ */
-	FR_INVALID_NAME,		/* (6) Â·¾¶Ãû¸ñÊ½ÎŞĞ§ */
-	FR_DENIED,				/* (7) ÓÉÓÚ½ûÖ¹·ÃÎÊ»òÄ¿Â¼ÒÑÂú¶ø¾Ü¾ø·ÃÎÊ */
-	FR_EXIST,				/* (8) ÓÉÓÚ½ûÖ¹·ÃÎÊ¶ø¾Ü¾ø·ÃÎÊ */
-	FR_INVALID_OBJECT,		/* (9) ÎÄ¼ş/Ä¿Â¼¶ÔÏóÎŞĞ§ */
-	FR_WRITE_PROTECTED,		/* (10) ÎïÀíÇı¶¯Æ÷ÊÜ±£»¤ */
-	FR_INVALID_DRIVE,		/* (11) Âß¼­Çı¶¯Æ÷ºÅÎŞĞ§ */
-	FR_NOT_ENABLED,			/* (12) ¸Ã¾íÃ»ÓĞ¹¤×÷ÇøÓò */
-	FR_NO_FILESYSTEM,		/* (13) Ã»ÓĞÓĞĞ§µÄÎÄ¼şÏµÍ³ */
+	FR_OK = 0,				/* (0) æˆåŠŸ */
+	FR_DISK_ERR,			/* (1) ä½çº§ç£ç›˜I/Oå±‚ä¸­å‘ç”Ÿäº†ä¸¥é‡é”™è¯¯ */
+	FR_INT_ERR,				/* (2) æ–­è¨€å¤±è´¥äº† */
+	FR_NOT_READY,			/* (3) ç‰©ç†é©±åŠ¨æ— æ³•æ­£å¸¸å·¥ä½œ */
+	FR_NO_FILE,				/* (4) æ‰¾ä¸åˆ°æ–‡ä»¶ */
+	FR_NO_PATH,				/* (5) æ‰¾ä¸åˆ°è·¯å¾„ */
+	FR_INVALID_NAME,		/* (6) è·¯å¾„åæ ¼å¼æ— æ•ˆ */
+	FR_DENIED,				/* (7) ç”±äºç¦æ­¢è®¿é—®æˆ–ç›®å½•å·²æ»¡è€Œæ‹’ç»è®¿é—® */
+	FR_EXIST,				/* (8) ç”±äºç¦æ­¢è®¿é—®è€Œæ‹’ç»è®¿é—® */
+	FR_INVALID_OBJECT,		/* (9) æ–‡ä»¶/ç›®å½•å¯¹è±¡æ— æ•ˆ */
+	FR_WRITE_PROTECTED,		/* (10) ç‰©ç†é©±åŠ¨å™¨å—ä¿æŠ¤ */
+	FR_INVALID_DRIVE,		/* (11) é€»è¾‘é©±åŠ¨å™¨å·æ— æ•ˆ */
+	FR_NOT_ENABLED,			/* (12) è¯¥å·æ²¡æœ‰å·¥ä½œåŒºåŸŸ */
+	FR_NO_FILESYSTEM,		/* (13) æ²¡æœ‰æœ‰æ•ˆçš„æ–‡ä»¶ç³»ç»Ÿ */
 	FR_MKFS_ABORTED,		/* (14) The f_mkfs() aborted due to any problem */
-	FR_TIMEOUT,				/* (15) ÎŞ·¨»ñµÃÔù¿îÒÔÔÚ¶¨ÒåµÄÆÚ¼äÄÚ·ÃÎÊ¾í */
-	FR_LOCKED,				/* (16) ¸Ã²Ù×÷¸ù¾İÎÄ¼ş¹²Ïí²ßÂÔ¾Ü¾ø */
-	FR_NOT_ENOUGH_CORE,		/* (17) LFN¹¤×÷»º³åÇøÎŞ·¨·ÖÅä */
-	FR_TOO_MANY_OPEN_FILES,	/* (18) ´ò¿ªÎÄ¼şµÄÊıÁ¿> ff_fs_lock */
-	FR_INVALID_PARAMETER	/* (19) ¸ø¶¨²ÎÊıÎŞĞ§ */
+	FR_TIMEOUT,				/* (15) æ— æ³•è·å¾—èµ æ¬¾ä»¥åœ¨å®šä¹‰çš„æœŸé—´å†…è®¿é—®å· */
+	FR_LOCKED,				/* (16) è¯¥æ“ä½œæ ¹æ®æ–‡ä»¶å…±äº«ç­–ç•¥æ‹’ç» */
+	FR_NOT_ENOUGH_CORE,		/* (17) LFNå·¥ä½œç¼“å†²åŒºæ— æ³•åˆ†é… */
+	FR_TOO_MANY_OPEN_FILES,	/* (18) æ‰“å¼€æ–‡ä»¶çš„æ•°é‡> ff_fs_lock */
+	FR_INVALID_PARAMETER	/* (19) ç»™å®šå‚æ•°æ— æ•ˆ */
 } FRESULT;
 
 
@@ -301,40 +301,40 @@ typedef enum {
 /*--------------------------------------------------------------*/
 /* FatFs module application interface                           */
 
-FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);				/* ´ò¿ª»ò´´½¨ÎÄ¼ş */
-FRESULT f_close (FIL* fp);											/* ¹Ø±Õ´ò¿ªµÄÎÄ¼ş¶ÔÏó */
-FRESULT f_read (FIL* fp, void* buff, UINT btr, UINT* br);			/* ´ÓÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ */
-FRESULT f_write (FIL* fp, const void* buff, UINT btw, UINT* bw);	/* ½«Êı¾İĞ´ÈëÎÄ¼ş */
-FRESULT f_lseek (FIL* fp, FSIZE_t ofs);								/* ÒÆ¶¯ÎÄ¼ş¶ÔÏóµÄÎÄ¼şÖ¸Õë */
-FRESULT f_truncate (FIL* fp);										/* ½Ø¶ÏÎÄ¼ş */
-FRESULT f_sync (FIL* fp);											/* ÆëÆ½µÄĞ´ÈëÎÄ¼şµÄÊı¾İ */
-FRESULT f_opendir (DIR* dp, const TCHAR* path);						/* ´ò¿ªÄ¿Â¼ */
-FRESULT f_closedir (DIR* dp);										/* ¹Ø±ÕÒ»¸ö¿ª·ÅÄ¿Â¼ */
-FRESULT f_readdir (DIR* dp, FILINFO* fno);							/* ÔÄ¶ÁÄ¿Â¼ÏîÄ¿ */
-FRESULT f_findfirst (DIR* dp, FILINFO* fno, const TCHAR* path, const TCHAR* pattern);	/* ²éÕÒµÚÒ»¸öÎÄ¼ş */
-FRESULT f_findnext (DIR* dp, FILINFO* fno);							/* ²éÕÒÏÂÒ»¸öÎÄ¼ş */
-FRESULT f_mkdir (const TCHAR* path);								/* ´´½¨Ò»¸ö×ÓÄ¿Â¼ */
-FRESULT f_unlink (const TCHAR* path);								/* É¾³ıÏÖÓĞÎÄ¼ş»òÄ¿Â¼ */
-FRESULT f_rename (const TCHAR* path_old, const TCHAR* path_new);	/* ÖØÃüÃû/ÒÆ¶¯ÎÄ¼ş»òÄ¿Â¼ */
-FRESULT f_stat (const TCHAR* path, FILINFO* fno);					/* »ñÈ¡ÎÄ¼ş×´Ì¬ */
-FRESULT f_chmod (const TCHAR* path, BYTE attr, BYTE mask);			/* ¸ü¸ÄÎÄ¼ş/dirµÄÊôĞÔ */
-FRESULT f_utime (const TCHAR* path, const FILINFO* fno);			/* ¸ü¸ÄÎÄ¼ş/dirµÄÊ±¼ä´Á */
-FRESULT f_chdir (const TCHAR* path);								/* ¸ü¸Äµ±Ç°Ä¿Â¼ */
-FRESULT f_chdrive (const TCHAR* path);								/* ¸ü¸Äµ±Ç°Çı¶¯Æ÷ */
-FRESULT f_getcwd (TCHAR* buff, UINT len);							/* »ñÈ¡µ±Ç°Ä¿Â¼ */
-FRESULT f_getfree (const TCHAR* path, DWORD* nclst, FATFS** fatfs);	/* ÔÚÇı¶¯Æ÷ÉÏ»ñÈ¡ÊıÁ¿µÄÃâ·ÑÈº¼¯ */
-FRESULT f_getlabel (const TCHAR* path, TCHAR* label, DWORD* vsn);	/* »ñÈ¡ÒôÁ¿±êÇ© */
-FRESULT f_setlabel (const TCHAR* label);							/* ÉèÖÃ¾í±êÇ© */
-FRESULT f_forward (FIL* fp, UINT(*func)(const BYTE*,UINT), UINT btf, UINT* bf);	/* ½«Êı¾İ×ª·¢µ½Á÷ */
-FRESULT f_expand (FIL* fp, FSIZE_t fsz, BYTE opt);					/* ½«Ò»¸öÁ¬ĞøµÄ¿é·ÖÅä¸øÎÄ¼ş */
-FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt);			/* °²×°/Ğ¶ÏÂÂß¼­Çı¶¯Æ÷ */
-FRESULT f_mkfs (const TCHAR* path, const MKFS_PARM* opt, void* work, UINT len);	/* ´´½¨Ò»¸öÖ¬·¾ */
-FRESULT f_fdisk (BYTE pdrv, const LBA_t ptbl[], void* work);		/* ½«ÎïÀíÇı¶¯Æ÷·ÖÎªÄ³Ğ©·ÖÇø */
-FRESULT f_setcp (WORD cp);											/* ÉèÖÃµ±Ç°´úÂëÒ³ */
-int f_putc (TCHAR c, FIL* fp);										/* ½«×Ö·û·ÅÔÚÎÄ¼şÖĞ */
-int f_puts (const TCHAR* str, FIL* cp);								/* ½«×Ö·û´®·ÅÔÚÎÄ¼ş */
-int f_printf (FIL* fp, const TCHAR* str, ...);						/* ½«¸ñÊ½µÄ×Ö·û´®·ÅÔÚÎÄ¼şÖĞ */
-TCHAR* f_gets (TCHAR* buff, int len, FIL* fp);						/* ´ÓÎÄ¼şÖĞ»ñÈ¡×Ö·û´® */
+FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);				/* æ‰“å¼€æˆ–åˆ›å»ºæ–‡ä»¶ */
+FRESULT f_close (FIL* fp);											/* å…³é—­æ‰“å¼€çš„æ–‡ä»¶å¯¹è±¡ */
+FRESULT f_read (FIL* fp, void* buff, UINT btr, UINT* br);			/* ä»æ–‡ä»¶ä¸­è¯»å–æ•°æ® */
+FRESULT f_write (FIL* fp, const void* buff, UINT btw, UINT* bw);	/* å°†æ•°æ®å†™å…¥æ–‡ä»¶ */
+FRESULT f_lseek (FIL* fp, FSIZE_t ofs);								/* ç§»åŠ¨æ–‡ä»¶å¯¹è±¡çš„æ–‡ä»¶æŒ‡é’ˆ */
+FRESULT f_truncate (FIL* fp);										/* æˆªæ–­æ–‡ä»¶ */
+FRESULT f_sync (FIL* fp);											/* é½å¹³çš„å†™å…¥æ–‡ä»¶çš„æ•°æ® */
+FRESULT f_opendir (DIR* dp, const TCHAR* path);						/* æ‰“å¼€ç›®å½• */
+FRESULT f_closedir (DIR* dp);										/* å…³é—­ä¸€ä¸ªå¼€æ”¾ç›®å½• */
+FRESULT f_readdir (DIR* dp, FILINFO* fno);							/* é˜…è¯»ç›®å½•é¡¹ç›® */
+FRESULT f_findfirst (DIR* dp, FILINFO* fno, const TCHAR* path, const TCHAR* pattern);	/* æŸ¥æ‰¾ç¬¬ä¸€ä¸ªæ–‡ä»¶ */
+FRESULT f_findnext (DIR* dp, FILINFO* fno);							/* æŸ¥æ‰¾ä¸‹ä¸€ä¸ªæ–‡ä»¶ */
+FRESULT f_mkdir (const TCHAR* path);								/* åˆ›å»ºä¸€ä¸ªå­ç›®å½• */
+FRESULT f_unlink (const TCHAR* path);								/* åˆ é™¤ç°æœ‰æ–‡ä»¶æˆ–ç›®å½• */
+FRESULT f_rename (const TCHAR* path_old, const TCHAR* path_new);	/* é‡å‘½å/ç§»åŠ¨æ–‡ä»¶æˆ–ç›®å½• */
+FRESULT f_stat (const TCHAR* path, FILINFO* fno);					/* è·å–æ–‡ä»¶çŠ¶æ€ */
+FRESULT f_chmod (const TCHAR* path, BYTE attr, BYTE mask);			/* æ›´æ”¹æ–‡ä»¶/dirçš„å±æ€§ */
+FRESULT f_utime (const TCHAR* path, const FILINFO* fno);			/* æ›´æ”¹æ–‡ä»¶/dirçš„æ—¶é—´æˆ³ */
+FRESULT f_chdir (const TCHAR* path);								/* æ›´æ”¹å½“å‰ç›®å½• */
+FRESULT f_chdrive (const TCHAR* path);								/* æ›´æ”¹å½“å‰é©±åŠ¨å™¨ */
+FRESULT f_getcwd (TCHAR* buff, UINT len);							/* è·å–å½“å‰ç›®å½• */
+FRESULT f_getfree (const TCHAR* path, DWORD* nclst, FATFS** fatfs);	/* åœ¨é©±åŠ¨å™¨ä¸Šè·å–æ•°é‡çš„å…è´¹ç¾¤é›† */
+FRESULT f_getlabel (const TCHAR* path, TCHAR* label, DWORD* vsn);	/* è·å–éŸ³é‡æ ‡ç­¾ */
+FRESULT f_setlabel (const TCHAR* label);							/* è®¾ç½®å·æ ‡ç­¾ */
+FRESULT f_forward (FIL* fp, UINT(*func)(const BYTE*,UINT), UINT btf, UINT* bf);	/* å°†æ•°æ®è½¬å‘åˆ°æµ */
+FRESULT f_expand (FIL* fp, FSIZE_t fsz, BYTE opt);					/* å°†ä¸€ä¸ªè¿ç»­çš„å—åˆ†é…ç»™æ–‡ä»¶ */
+FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt);			/* å®‰è£…/å¸ä¸‹é€»è¾‘é©±åŠ¨å™¨ */
+FRESULT f_mkfs (const TCHAR* path, const MKFS_PARM* opt, void* work, UINT len);	/* åˆ›å»ºä¸€ä¸ªè„‚è‚ª */
+FRESULT f_fdisk (BYTE pdrv, const LBA_t ptbl[], void* work);		/* å°†ç‰©ç†é©±åŠ¨å™¨åˆ†ä¸ºæŸäº›åˆ†åŒº */
+FRESULT f_setcp (WORD cp);											/* è®¾ç½®å½“å‰ä»£ç é¡µ */
+int f_putc (TCHAR c, FIL* fp);										/* å°†å­—ç¬¦æ”¾åœ¨æ–‡ä»¶ä¸­ */
+int f_puts (const TCHAR* str, FIL* cp);								/* å°†å­—ç¬¦ä¸²æ”¾åœ¨æ–‡ä»¶ */
+int f_printf (FIL* fp, const TCHAR* str, ...);						/* å°†æ ¼å¼çš„å­—ç¬¦ä¸²æ”¾åœ¨æ–‡ä»¶ä¸­ */
+TCHAR* f_gets (TCHAR* buff, int len, FIL* fp);						/* ä»æ–‡ä»¶ä¸­è·å–å­—ç¬¦ä¸² */
 
 #define f_eof(fp) ((int)((fp)->fptr == (fp)->obj.objsize))
 #define f_error(fp) ((fp)->err)
@@ -382,14 +382,14 @@ int ff_del_syncobj (FF_SYNC_t sobj);	/* Delete a sync object */
 /*--------------------------------------------------------------*/
 /* Flags and offset address                                     */
 
-/* ÎÄ¼ş·ÃÎÊÄ£Ê½ºÍ´ò¿ª·½·¨±êÖ¾ (3rd argument of f_open) */
-#define FA_READ          0x01 /* ¶Á */
-#define FA_WRITE         0x02 /* Ğ´ */
-#define FA_OPEN_EXISTING 0x00 /* ´ò¿ªÏÖÓĞÎÄ¼ş(Ä¬ÈÏ) */
-#define FA_CREATE_NEW    0x04 /* ´´½¨Ò»¸öĞÂÎÄ¼ş */
-#define FA_CREATE_ALWAYS 0x08 /* ¸²¸ÇÒ»¸öÎÄ¼ş */
-#define FA_OPEN_ALWAYS   0x10 /* ´ò¿ªÒ»¸öÎÄ¼ş */
-#define FA_OPEN_APPEND   0x30 /* ´ò¿ªÎÄ¼ş²¢ÒÆÖ¸Õëµ½½áÎ² */
+/* æ–‡ä»¶è®¿é—®æ¨¡å¼å’Œæ‰“å¼€æ–¹æ³•æ ‡å¿— (3rd argument of f_open) */
+#define FA_READ          0x01 /* è¯» */
+#define FA_WRITE         0x02 /* å†™ */
+#define FA_OPEN_EXISTING 0x00 /* æ‰“å¼€ç°æœ‰æ–‡ä»¶(é»˜è®¤) */
+#define FA_CREATE_NEW    0x04 /* åˆ›å»ºä¸€ä¸ªæ–°æ–‡ä»¶ */
+#define FA_CREATE_ALWAYS 0x08 /* è¦†ç›–ä¸€ä¸ªæ–‡ä»¶ */
+#define FA_OPEN_ALWAYS   0x10 /* æ‰“å¼€ä¸€ä¸ªæ–‡ä»¶ */
+#define FA_OPEN_APPEND   0x30 /* æ‰“å¼€æ–‡ä»¶å¹¶ç§»æŒ‡é’ˆåˆ°ç»“å°¾ */
 
 /* Fast seek controls (2nd argument of f_lseek) */
 #define CREATE_LINKMAP	((FSIZE_t)0 - 1)
@@ -407,12 +407,12 @@ int ff_del_syncobj (FF_SYNC_t sobj);	/* Delete a sync object */
 #define FS_FAT32	3
 #define FS_EXFAT	4
 
-/* Ä¿Â¼ÌõÄ¿µÄÎÄ¼şÊôĞÔÎ» (FILINFO.fattrib) */
-#define	AM_RDO	0x01	/* Ö»¶Á */
-#define	AM_HID	0x02	/* Òş²Ø */
-#define	AM_SYS	0x04	/* ÏµÍ³ */
-#define AM_DIR	0x10	/* ÎÄ¼ş¼Ğ */
-#define AM_ARC	0x20	/* µµ°¸ */
+/* ç›®å½•æ¡ç›®çš„æ–‡ä»¶å±æ€§ä½ (FILINFO.fattrib) */
+#define	AM_RDO	0x01	/* åªè¯» */
+#define	AM_HID	0x02	/* éšè— */
+#define	AM_SYS	0x04	/* ç³»ç»Ÿ */
+#define AM_DIR	0x10	/* æ–‡ä»¶å¤¹ */
+#define AM_ARC	0x20	/* æ¡£æ¡ˆ */
 
 #include "ffext.h"
 

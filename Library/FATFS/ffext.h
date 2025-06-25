@@ -3,7 +3,7 @@
 
 #include "ff.h"
 
-FRESULT f_cpname(const TCHAR* path_old, const TCHAR* path_new); /* ¸´ÖÆÎÄ¼ş/ÎÄ¼ş¼Ğ */
-FRESULT f_del(const TCHAR* path);                               /* É¾³ıÎÄ¼ş/ÎÄ¼ş¼Ğ */
+FRESULT f_cpname(const TCHAR* path_old, const TCHAR* path_new); /* å¤åˆ¶æ–‡ä»¶/æ–‡ä»¶å¤¹ */
+FRESULT f_del(const TCHAR* path);                               /* åˆ é™¤æ–‡ä»¶/æ–‡ä»¶å¤¹ */
 
 #endif

@@ -1,19 +1,19 @@
 #include "beep.h"
 
-/*¾ä±úÉùÃ÷*/
+/*å¥æŸ„å£°æ˜*/
 
-const uint32_t _BEEP_Stop[]                = {0};                                     // Í£Ö¹
-const uint32_t _BEEP_VeryShort[]           = {5, 0};                                  // ³¬¶ÌÃùÒ»´Î    5ms
-const uint32_t _BEEP_Short[]               = {100, 0};                                // ¶ÌÃùÒ»´Î      100ms
-const uint32_t _BEEP_Medium[]              = {500, 0};                                // ÖĞÃùÒ»´Î      500ms
-const uint32_t _BEEP_Long[]                = {1000, 0};                               // ³¤ÃùÒ»´Î      1s
-const uint32_t _BEEP_DoubleShort[]         = {80, 160, 80, 680, 0};                   // Ë«¶ÌÃùÒ»´Î
-const uint32_t _BEEP_DoubleShortContinue[] = {80, 160, 80, 680, 0xFFFFFFFF};          // Ë«¶ÌÃù³ÖĞø
-const uint32_t _BEEP_Alarm[]               = {80, 50, 80, 50, 80, 600, 0xFFFFFFFF};   // ±¨¾¯Òô³ÖĞø
-const uint32_t _BEEP_WarningTone_1[]       = {500, 160, 80, 160, 80, 0};              // ÌáÊ¾Òô1
-const uint32_t _BEEP_WarningTone_2[]       = {80, 50, 80, 50, 80, 0};                 // ÌáÊ¾Òô2
-const uint32_t _BEEP_WarningTone_3[]       = {80, 50, 80, 0};                         // ÌáÊ¾Òô3
-const uint32_t _BEEP_WarningTone_4[]       = {150, 50, 80, 0};                        // ÌáÊ¾Òô4
+const uint32_t _BEEP_Stop[]                = {0};                                     // åœæ­¢
+const uint32_t _BEEP_VeryShort[]           = {5, 0};                                  // è¶…çŸ­é¸£ä¸€æ¬¡    5ms
+const uint32_t _BEEP_Short[]               = {100, 0};                                // çŸ­é¸£ä¸€æ¬¡      100ms
+const uint32_t _BEEP_Medium[]              = {500, 0};                                // ä¸­é¸£ä¸€æ¬¡      500ms
+const uint32_t _BEEP_Long[]                = {1000, 0};                               // é•¿é¸£ä¸€æ¬¡      1s
+const uint32_t _BEEP_DoubleShort[]         = {80, 160, 80, 680, 0};                   // åŒçŸ­é¸£ä¸€æ¬¡
+const uint32_t _BEEP_DoubleShortContinue[] = {80, 160, 80, 680, 0xFFFFFFFF};          // åŒçŸ­é¸£æŒç»­
+const uint32_t _BEEP_Alarm[]               = {80, 50, 80, 50, 80, 600, 0xFFFFFFFF};   // æŠ¥è­¦éŸ³æŒç»­
+const uint32_t _BEEP_WarningTone_1[]       = {500, 160, 80, 160, 80, 0};              // æç¤ºéŸ³1
+const uint32_t _BEEP_WarningTone_2[]       = {80, 50, 80, 50, 80, 0};                 // æç¤ºéŸ³2
+const uint32_t _BEEP_WarningTone_3[]       = {80, 50, 80, 0};                         // æç¤ºéŸ³3
+const uint32_t _BEEP_WarningTone_4[]       = {150, 50, 80, 0};                        // æç¤ºéŸ³4
 
 const uint32_t* BeepVoice[] = {
 
@@ -31,7 +31,7 @@ const uint32_t* BeepVoice[] = {
     _BEEP_WarningTone_4,
 };
 
-/*ÏµÍ³¹¤×÷Ö¸Ê¾µÆÈÎÎñ*/
+/*ç³»ç»Ÿå·¥ä½œæŒ‡ç¤ºç¯ä»»åŠ¡*/
 void Task_Beep(void) {
     BaseType_t xReturn    = pdTRUE;
     uint32_t   notify     = 0;

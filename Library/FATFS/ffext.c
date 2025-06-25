@@ -3,28 +3,28 @@
 #include "string.h"
 
 /**
- * @brief  ¸´ÖÆÎÄ¼þ/ÎÄ¼þ¼Ð
- * @note   Èô´«ÈëµÄÂ·¾¶ÊÇÎÄ¼þ¼Ð£¬ÔòµÝ¹é¸´ÖÆÎÄ¼þ¼ÐÄÚµÄÎÄ¼þ
- * @param  path_old: Ô´ÎÄ¼þÂ·¾¶
- * @param  path_new: Ä¿±êÎÄ¼þÂ·¾¶
- * @retval Ö´ÐÐ½á¹û
+ * @brief  å¤åˆ¶æ–‡ä»¶/æ–‡ä»¶å¤¹
+ * @note   è‹¥ä¼ å…¥çš„è·¯å¾„æ˜¯æ–‡ä»¶å¤¹ï¼Œåˆ™é€’å½’å¤åˆ¶æ–‡ä»¶å¤¹å†…çš„æ–‡ä»¶
+ * @param  path_old: æºæ–‡ä»¶è·¯å¾„
+ * @param  path_new: ç›®æ ‡æ–‡ä»¶è·¯å¾„
+ * @retval æ‰§è¡Œç»“æžœ
  */
 FRESULT f_cpname(const TCHAR* path_old, const TCHAR* path_new) {
-    FRESULT  f_res        = FR_OK;                          // ÎÄ¼þÏµÍ³²Ù×÷½á¹û
-    FILINFO* f_info       = ff_memalloc(sizeof(FILINFO));   // ÎÄ¼þÐÅÏ¢¶ÔÏó
-    DIR      dir          = {0};                            // ÎÄ¼þ¼Ð¶ÔÏó
-    BYTE*    buffer       = NULL;                           // ÎÄ¼þ»º´æ
-    FIL*     file_old     = NULL;                           // Ô­Ê¼ÎÄ¼þ¶ÔÏó
-    FIL*     file_new     = NULL;                           // ÐÂÄ¿±êÎÄ¼þ¶ÔÏó
-    TCHAR*   path_sub_old = NULL;                           // Ô­Ê¼×ÓÂ·¾¶
-    TCHAR*   path_sub_new = NULL;                           // ÐÂÄ¿±ê×ÓÂ·¾¶
-    UINT     rw_cnt       = 0;                              // ¶ÁÐ´¼ÆÊý
+    FRESULT  f_res        = FR_OK;                          // æ–‡ä»¶ç³»ç»Ÿæ“ä½œç»“æžœ
+    FILINFO* f_info       = ff_memalloc(sizeof(FILINFO));   // æ–‡ä»¶ä¿¡æ¯å¯¹è±¡
+    DIR      dir          = {0};                            // æ–‡ä»¶å¤¹å¯¹è±¡
+    BYTE*    buffer       = NULL;                           // æ–‡ä»¶ç¼“å­˜
+    FIL*     file_old     = NULL;                           // åŽŸå§‹æ–‡ä»¶å¯¹è±¡
+    FIL*     file_new     = NULL;                           // æ–°ç›®æ ‡æ–‡ä»¶å¯¹è±¡
+    TCHAR*   path_sub_old = NULL;                           // åŽŸå§‹å­è·¯å¾„
+    TCHAR*   path_sub_new = NULL;                           // æ–°ç›®æ ‡å­è·¯å¾„
+    UINT     rw_cnt       = 0;                              // è¯»å†™è®¡æ•°
 
-    /* ¼ì²éÂ·¾¶ */
+    /* æ£€æŸ¥è·¯å¾„ */
     if ((f_res = f_stat(path_old, f_info)) != FR_OK) {
         goto ex;
     }
-    /* ¸ÃÂ·¾¶ÊÇ¸öÎÄ¼þ¼Ð */
+    /* è¯¥è·¯å¾„æ˜¯ä¸ªæ–‡ä»¶å¤¹ */
     if (f_info->fattrib & AM_DIR) {
         if ((f_res = f_mkdir(path_new)) != FR_OK && f_res != FR_EXIST) {
             goto ex;
@@ -33,129 +33,129 @@ FRESULT f_cpname(const TCHAR* path_old, const TCHAR* path_new) {
             goto ex;
         }
         while (1) {
-            /* ¶ÁÈ¡ÎÄ¼þ */
+            /* è¯»å–æ–‡ä»¶ */
             if ((f_res = f_readdir(&dir, f_info)) != FR_OK) {
                 goto ex;
             }
-            /* ÎÞÎÄ¼þ½áÊø */
+            /* æ— æ–‡ä»¶ç»“æŸ */
             if (*f_info->fname == NULL) {
                 break;
             }
-            /* Éú³É×ÓÂ·¾¶ */
+            /* ç”Ÿæˆå­è·¯å¾„ */
             path_sub_old = ff_memalloc((strlen(path_old) + strlen(f_info->fname) + 2) +
                                        (strlen(path_new) + strlen(f_info->fname) + 2));
             path_sub_new = path_sub_old + (strlen(path_old) + strlen(f_info->fname) + 2);
             sprintf(path_sub_old, "%s/%s", path_old, f_info->fname);
             sprintf(path_sub_new, "%s/%s", path_new, f_info->fname);
-            /* µÝ¹é¸´ÖÆ */
+            /* é€’å½’å¤åˆ¶ */
             f_res = f_cpname(path_sub_old, path_sub_new);
-            /* ÊÍ·Å»º´æ */
+            /* é‡Šæ”¾ç¼“å­˜ */
             ff_memfree(path_sub_old);
         }
         f_closedir(&dir);
     }
-    /* ¸ÃÂ·¾¶ÊÇÎÄ¼þ */
+    /* è¯¥è·¯å¾„æ˜¯æ–‡ä»¶ */
     else if (f_info->fattrib & AM_ARC) {
         file_old = (FIL*) ff_memalloc(sizeof(FIL) * 2 + FF_MAX_SS);
         file_new = (FIL*) &file_old[1];
         buffer   = (BYTE*) &file_new[1];
-        /* Ö»¶Á´ò¿ªÔ´ÎÄ¼þ */
+        /* åªè¯»æ‰“å¼€æºæ–‡ä»¶ */
         if ((f_res = f_open(file_old, path_old, FA_READ)) != FR_OK) {
             goto ex;
         }
-        /* ¸´Î»ÎÄ¼þÖ¸Õë */
+        /* å¤ä½æ–‡ä»¶æŒ‡é’ˆ */
         if ((f_res = f_lseek(file_old, 0)) != FR_OK) {
             goto ex;
         }
-        /* ´ò¿ªÄ¿±êÎÄ¼þ */
+        /* æ‰“å¼€ç›®æ ‡æ–‡ä»¶ */
         if ((f_res = f_open(file_new, path_new, FA_WRITE | FA_CREATE_NEW)) != FR_OK) {
             goto ex;
         }
-        /* ¸´Î»ÎÄ¼þÖ¸Õë */
+        /* å¤ä½æ–‡ä»¶æŒ‡é’ˆ */
         if ((f_res = f_lseek(file_new, 0)) != FR_OK) {
             goto ex;
         }
-        /* ¿ªÊ¼¸´ÖÆÎÄ¼þ */
+        /* å¼€å§‹å¤åˆ¶æ–‡ä»¶ */
         while (1) {
-            /* ¶ÁÈ¡ÎÄ¼þ */
+            /* è¯»å–æ–‡ä»¶ */
             if ((f_res = f_read(file_old, buffer, FF_MAX_SS, &rw_cnt)) != FR_OK) {
                 goto ex;
             }
-            /* ¶ÁÈ¡Íê³É */
+            /* è¯»å–å®Œæˆ */
             if (rw_cnt == 0) {
                 break;
             }
-            /* ¶ÁÈ¡ÎÄ¼þ */
+            /* è¯»å–æ–‡ä»¶ */
             if ((f_res = f_write(file_new, buffer, rw_cnt, &rw_cnt)) != FR_OK) {
                 goto ex;
             }
         }
-        /* ¸´ÖÆÍê³É£¬¹Ø±ÕÎÄ¼þ */
+        /* å¤åˆ¶å®Œæˆï¼Œå…³é—­æ–‡ä»¶ */
         f_res = f_close(file_old);
         f_res = f_close(file_new);
     }
 ex:
-    /* ÊÍ·ÅÄÚ´æ */
+    /* é‡Šæ”¾å†…å­˜ */
     if (f_info != NULL) {
         ff_memfree(f_info);
     }
     if (file_old != NULL) {
         ff_memfree(file_old);
     }
-    /* ·µ»Ø½á¹û */
+    /* è¿”å›žç»“æžœ */
     return f_res;
 }
 
 /**
- * @brief  É¾³ýÎÄ¼þ/ÎÄ¼þ¼Ð
- * @note   Èô´«ÈëµÄÂ·¾¶ÊÇÎÄ¼þ¼Ð£¬ÔòµÝ¹éÉ¾³ýÎÄ¼þ¼ÐÄÚµÄÎÄ¼þ
- * @param  path: Ä¿±êÂ·¾¶
- * @retval Ö´ÐÐ½á¹û
+ * @brief  åˆ é™¤æ–‡ä»¶/æ–‡ä»¶å¤¹
+ * @note   è‹¥ä¼ å…¥çš„è·¯å¾„æ˜¯æ–‡ä»¶å¤¹ï¼Œåˆ™é€’å½’åˆ é™¤æ–‡ä»¶å¤¹å†…çš„æ–‡ä»¶
+ * @param  path: ç›®æ ‡è·¯å¾„
+ * @retval æ‰§è¡Œç»“æžœ
  */
 FRESULT f_del(const TCHAR* path) {
-    FRESULT  f_res    = FR_OK;                          // ÎÄ¼þÏµÍ³²Ù×÷½á¹û
-    FILINFO* f_info   = ff_memalloc(sizeof(FILINFO));   // ÎÄ¼þÐÅÏ¢¶ÔÏó
-    DIR      dir      = {0};                            // ÎÄ¼þ¼Ð¶ÔÏó
-    TCHAR*   path_sub = NULL;                           // Ô­Ê¼×ÓÂ·¾¶
+    FRESULT  f_res    = FR_OK;                          // æ–‡ä»¶ç³»ç»Ÿæ“ä½œç»“æžœ
+    FILINFO* f_info   = ff_memalloc(sizeof(FILINFO));   // æ–‡ä»¶ä¿¡æ¯å¯¹è±¡
+    DIR      dir      = {0};                            // æ–‡ä»¶å¤¹å¯¹è±¡
+    TCHAR*   path_sub = NULL;                           // åŽŸå§‹å­è·¯å¾„
 
-    /* ¼ì²éÂ·¾¶ */
+    /* æ£€æŸ¥è·¯å¾„ */
     if ((f_res = f_stat(path, f_info)) != FR_OK) {
         goto ex;
     }
-    /* ¸ÃÂ·¾¶ÊÇ¸öÎÄ¼þ¼Ð */
+    /* è¯¥è·¯å¾„æ˜¯ä¸ªæ–‡ä»¶å¤¹ */
     if (f_info->fattrib & AM_DIR) {
         if ((f_res = f_opendir(&dir, path)) != FR_OK) {
             goto ex;
         }
         while (1) {
-            /* ¶ÁÈ¡ÎÄ¼þ */
+            /* è¯»å–æ–‡ä»¶ */
             if ((f_res = f_readdir(&dir, f_info)) != FR_OK) {
                 goto ex;
             }
-            /* ÎÞÎÄ¼þ½áÊø */
+            /* æ— æ–‡ä»¶ç»“æŸ */
             if (*f_info->fname == NULL) {
                 break;
             }
-            /* Éú³É×ÓÂ·¾¶ */
+            /* ç”Ÿæˆå­è·¯å¾„ */
             path_sub = ff_memalloc((strlen(path) + strlen(f_info->fname) + 2));
             sprintf(path_sub, "%s/%s", path, f_info->fname);
-            /* µÝ¹é¸´ÖÆ */
+            /* é€’å½’å¤åˆ¶ */
             f_res = f_del(path_sub);
-            /* ÊÍ·Å»º´æ */
+            /* é‡Šæ”¾ç¼“å­˜ */
             ff_memfree(path_sub);
         }
         f_closedir(&dir);
         f_res = f_unlink(path);
     }
-    /* ¸ÃÂ·¾¶ÊÇÎÄ¼þ */
+    /* è¯¥è·¯å¾„æ˜¯æ–‡ä»¶ */
     else if (f_info->fattrib & AM_ARC) {
         f_res = f_unlink(path);
     }
 ex:
-    /* ÊÍ·ÅÄÚ´æ */
+    /* é‡Šæ”¾å†…å­˜ */
     if (f_info != NULL) {
         ff_memfree(f_info);
     }
-    /* ·µ»Ø½á¹û */
+    /* è¿”å›žç»“æžœ */
     return f_res;
 }

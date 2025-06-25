@@ -11,12 +11,12 @@
 #define ERR_LED_PORT GPIOA
 #define ERR_LED_PIN  GPIO_Pin_2
 
-#define LED_On(led)    GPIO_ResetBits(led##_LED_PORT, led##_LED_PIN)           // ¿ªµÆ
-#define LED_Off(led)   GPIO_SetBits(led##_LED_PORT, led##_LED_PIN)             // ¹ØµÆ
-#define LED_OnOff(led) (led##_LED_PORT->ODR ^= led##_LED_PIN)                  // ×ª»»µÆ
-#define LED_Get(led)   !GPIO_ReadInputDataBit(led##_LED_PORT, led##_LED_PIN)   // »ñÈ¡µÆ×´Ì¬
+#define LED_On(led)    GPIO_ResetBits(led##_LED_PORT, led##_LED_PIN)           // å¼€ç¯
+#define LED_Off(led)   GPIO_SetBits(led##_LED_PORT, led##_LED_PIN)             // å…³ç¯
+#define LED_OnOff(led) (led##_LED_PORT->ODR ^= led##_LED_PIN)                  // è½¬æ¢ç¯
+#define LED_Get(led)   !GPIO_ReadInputDataBit(led##_LED_PORT, led##_LED_PIN)   // è·å–ç¯çŠ¶æ€
 
-void LED_Init(void);   // LED IO³õÊ¼»¯
-void LED_Task(void);   // LEDÔËĞĞÈÎÎñ
+void LED_Init(void);   // LED IOåˆå§‹åŒ–
+void LED_Task(void);   // LEDè¿è¡Œä»»åŠ¡
 
 #endif

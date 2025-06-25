@@ -128,7 +128,7 @@ void Task_Remarks(void);
  * @retval None
  */
 void SysTick_Handler(void) {
-    Task_Remarks();   // 任务处理
+    Task_Remarks();   // 浠诲姟澶勭悊
 }
 
 /*******************************************************************************

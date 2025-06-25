@@ -1,6 +1,6 @@
 /**
  * @file    SWD_flash.c
- * @brief   Í¨¹ıSWDĞ­Òé¶ÔMCUµÄFLASH±à³Ì
+ * @brief   é€šè¿‡SWDåè®®å¯¹MCUçš„FLASHç¼–ç¨‹
  */
 #include "SWD_flash.h"
 #include "swd_host.h"
@@ -12,7 +12,7 @@ error_t target_flash_init(uint32_t flash_start) {
         return ERROR_RESET;
     }
 
-    // ÏÂÔØ±à³ÌËã·¨µ½Ä¿±êMCUµÄSRAM£¬²¢³õÊ¼»¯
+    // ä¸‹è½½ç¼–ç¨‹ç®—æ³•åˆ°ç›®æ ‡MCUçš„SRAMï¼Œå¹¶åˆå§‹åŒ–
     if (0 == swd_write_memory(flash_algo.algo_start, (uint8_t*) flash_algo.algo_blob, flash_algo.algo_size)) {
         return ERROR_ALGO_DL;
     }

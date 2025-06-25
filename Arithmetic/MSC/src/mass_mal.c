@@ -76,13 +76,13 @@ uint16_t MAL_Init(uint8_t lun)
 
     switch (lun) {
         case 0: {
-            /* ´æ´¢Æ÷³õÊ¼»¯ */
+            /* Â´Ã¦Â´Â¢Ã†Ã·Â³ÃµÃŠÂ¼Â»Â¯ */
             W25QXX_Init();
             
-            Mass_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // FlashÈİÁ¿
-            Mass_Memory_Offset[0] = Mass_Memory_Size[0] / 2;                    // FlashÆ«ÒÆµØÖ·
-            Mass_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // ¿é´óĞ¡
-            Mass_Block_Count[0]   = Mass_Memory_Size[0] / Mass_Block_Size[0];   // ¿éÊıÁ¿
+            Mass_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // FlashÃˆÃÃÂ¿
+            Mass_Memory_Offset[0] = Mass_Memory_Size[0] / 2;                    // FlashÃ†Â«Ã’Ã†ÂµÃ˜Ã–Â·
+            Mass_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // Â¿Ã©Â´Ã³ÃÂ¡
+            Mass_Block_Count[0]   = Mass_Memory_Size[0] / Mass_Block_Size[0];   // Â¿Ã©ÃŠÃ½ÃÂ¿
             
             if (Mass_Memory_Size[0] != 0x0000) {
                 stat = MAL_OK;
@@ -136,7 +136,7 @@ uint16_t MAL_Read(uint8_t lun, uint32_t Memory_Offset, uint32_t *Readbuff, uint1
     switch (lun) {
         case 0: {
             Memory_Offset += Mass_Memory_Offset[0];
-            /* ´æ´¢Æ÷¶Á */
+            /* Â´Ã¦Â´Â¢Ã†Ã·Â¶Ã */
             W25QXX_Read((uint8_t*) Readbuff,
                         Memory_Offset,
                         Transfer_Length);

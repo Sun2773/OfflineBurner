@@ -4,8 +4,8 @@
 #include "stdlib.h"
 
 /**
- * @brief  Ã°ÅİÅÅĞòÕıÏò
- * @note   ÓÉĞ¡ÖÁ´ó
+ * @brief  å†’æ³¡æ’åºæ­£å‘
+ * @note   ç”±å°è‡³å¤§
  * @retval NULL
  */
 #define BubbleSort_P(c, a)                                    \
@@ -22,8 +22,8 @@
     }
 
 /**
- * @brief  Ã°ÅİÅÅĞò·´Ïò
- * @note   ÓÉ´óÖÁĞ¡
+ * @brief  å†’æ³¡æ’åºåå‘
+ * @note   ç”±å¤§è‡³å°
  * @retval NULL
  */
 #define BubbleSort_N(c, a)                                    \
@@ -40,8 +40,8 @@
     }
 
 /**
- * @brief  ÏòÁ´±íÖĞ²åÈëÒ»Ïî
- * @note   ²åÈëµ½Á´±íÍ·²¿
+ * @brief  å‘é“¾è¡¨ä¸­æ’å…¥ä¸€é¡¹
+ * @note   æ’å…¥åˆ°é“¾è¡¨å¤´éƒ¨
  */
 #define List_Insert(class, head, item)   \
     {                                    \
@@ -57,8 +57,8 @@
     }
 
 /**
- * @brief  ÏòÁ´±íÖĞ²åÈëÒ»Ïî
- * @note   ²åÈëµ½Á´±íÎ²²¿
+ * @brief  å‘é“¾è¡¨ä¸­æ’å…¥ä¸€é¡¹
+ * @note   æ’å…¥åˆ°é“¾è¡¨å°¾éƒ¨
  */
 #define List_InsertEnd(class, head, item)  \
     {                                      \
@@ -78,7 +78,7 @@
     }
 
 /**
- * @brief  ´ÓÁ´±íÖĞÒÆ³ıÒ»Ïî
+ * @brief  ä»é“¾è¡¨ä¸­ç§»é™¤ä¸€é¡¹
  * @note
  */
 #define List_Remove(class, head, item)     \
@@ -94,9 +94,9 @@
         }                                  \
     }
 
-/* ÅĞ¶Ï×Ö·û´®¿ªÍ· */
+/* åˆ¤æ–­å­—ç¬¦ä¸²å¼€å¤´ */
 int StrStartWith(char* src, char* head);
-/* ÔÚstr1ÖĞÑ°ÕÒµÚÒ»´Î³öÏÖstr2µÄÎ»ÖÃ£¬×î¶à²éÕÒn×Ö½Ú */
+/* åœ¨str1ä¸­å¯»æ‰¾ç¬¬ä¸€æ¬¡å‡ºç°str2çš„ä½ç½®ï¼Œæœ€å¤šæŸ¥æ‰¾nå­—èŠ‚ */
 char* strnstr(char* str1, char* str2, size_t n);
 
 #define ArraySize(array) (sizeof(array) / sizeof(array[0]))

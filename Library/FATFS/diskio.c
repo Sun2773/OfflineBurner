@@ -34,7 +34,7 @@ DSTATUS disk_status (
             uint16_t id = W25QXX_ReadID();
             if ((id != 0x0000) &&
                 (id != 0xFFFF)) {
-                /* Éè±¸ID¶ÁÈ¡½á¹ûÕıÈ· */
+                /* è®¾å¤‡IDè¯»å–ç»“æœæ­£ç¡® */
                 stat &= ~STA_NOINIT;
             }
         } break;
@@ -56,13 +56,13 @@ DSTATUS disk_initialize (
 
     switch (pdrv) {
         case DEV_SPI_FLASH: {
-            /* ´æ´¢Æ÷³õÊ¼»¯ */
+            /* å­˜å‚¨å™¨åˆå§‹åŒ– */
             W25QXX_Init();
 
-            Fat_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // FlashÈİÁ¿
-            Fat_Memory_Offset[0] = Fat_Memory_Size[0] / 2;                    // FlashÆ«ÒÆµØÖ·
-            Fat_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // ¿é´óĞ¡
-            Fat_Block_Count[0]   = Fat_Memory_Size[0] / Fat_Block_Size[0];   // ¿éÊıÁ¿
+            Fat_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // Flashå®¹é‡
+            Fat_Memory_Offset[0] = Fat_Memory_Size[0] / 2;                    // Flashåç§»åœ°å€
+            Fat_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // å—å¤§å°
+            Fat_Block_Count[0]   = Fat_Memory_Size[0] / Fat_Block_Size[0];   // å—æ•°é‡
 
             stat = disk_status(pdrv);
         }
@@ -88,7 +88,7 @@ DRESULT disk_read (
     switch (pdrv) {
         case DEV_SPI_FLASH: {
             sector += Fat_Memory_Offset[0] / Fat_Block_Size[0];
-            /* ´æ´¢Æ÷¶Á */
+            /* å­˜å‚¨å™¨è¯» */
             W25QXX_Read(buff,
                         sector * Fat_Block_Size[0],
                         count * Fat_Block_Size[0]);
@@ -119,7 +119,7 @@ DRESULT disk_write (
 
     switch (pdrv) {
         case DEV_SPI_FLASH: {
-            sector += Fat_Memory_Offset[0] / Fat_Block_Size[0]; // Ìí¼ÓÆ«ÒÆµØÖ·
+            sector += Fat_Memory_Offset[0] / Fat_Block_Size[0]; // æ·»åŠ åç§»åœ°å€
             while (count--) {
                 W25QXX_EraseSector(sector * Fat_Block_Size[0]);
                 W25QXX_Write((uint8_t*) buff,
@@ -154,13 +154,13 @@ DRESULT disk_ioctl (
         case DEV_SPI_FLASH: {
             switch (cmd) {
                 case GET_SECTOR_COUNT:
-                    *(DWORD*) buff = Fat_Block_Count[0]; // ·µ»Ø¿éÊıÁ¿
+                    *(DWORD*) buff = Fat_Block_Count[0]; // è¿”å›å—æ•°é‡
                     break;
-                    /* ÉÈÇø´óĞ¡  */
+                    /* æ‰‡åŒºå¤§å°  */
                 case GET_SECTOR_SIZE:
                     *(WORD*) buff = Fat_Block_Size[0];
                     break;
-                    /* Í¬Ê±²Á³ıÉÈÇø¸öÊı */
+                    /* åŒæ—¶æ“¦é™¤æ‰‡åŒºä¸ªæ•° */
                 case GET_BLOCK_SIZE:
                     *(DWORD*) buff = 1;
                     break;

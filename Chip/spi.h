@@ -3,16 +3,16 @@
 
 #include "stm32f10x.h"
 
-void    SPI1_Init(void);                      // ³õÊ¼»¯SPI1¿Ú
-void    SPI1_SetSpeed(uint8_t SpeedSet);      // ÉèÖÃSPI1ËÙ¶È
-uint8_t SPI1_ReadWriteByte(uint8_t TxData);   // SPI1×ÜÏß¶ÁĞ´Ò»¸ö×Ö½Ú
+void    SPI1_Init(void);                      // åˆå§‹åŒ–SPI1å£
+void    SPI1_SetSpeed(uint8_t SpeedSet);      // è®¾ç½®SPI1é€Ÿåº¦
+uint8_t SPI1_ReadWriteByte(uint8_t TxData);   // SPI1æ€»çº¿è¯»å†™ä¸€ä¸ªå­—èŠ‚
 
-void    SPI2_Init(void);                      // ³õÊ¼»¯SPI2¿Ú
-void    SPI2_SetSpeed(uint8_t SpeedSet);      // ÉèÖÃSPI2ËÙ¶È
-uint8_t SPI2_ReadWriteByte(uint8_t TxData);   // SPI2×ÜÏß¶ÁĞ´Ò»¸ö×Ö½Ú
+void    SPI2_Init(void);                      // åˆå§‹åŒ–SPI2å£
+void    SPI2_SetSpeed(uint8_t SpeedSet);      // è®¾ç½®SPI2é€Ÿåº¦
+uint8_t SPI2_ReadWriteByte(uint8_t TxData);   // SPI2æ€»çº¿è¯»å†™ä¸€ä¸ªå­—èŠ‚
 
-void    SPI3_Init(void);                      // ³õÊ¼»¯SPI3¿Ú
-void    SPI3_SetSpeed(uint8_t SpeedSet);      // ÉèÖÃSPI3ËÙ¶È
-uint8_t SPI3_ReadWriteByte(uint8_t TxData);   // SPI3×ÜÏß¶ÁĞ´Ò»¸ö×Ö½Ú
+void    SPI3_Init(void);                      // åˆå§‹åŒ–SPI3å£
+void    SPI3_SetSpeed(uint8_t SpeedSet);      // è®¾ç½®SPI3é€Ÿåº¦
+uint8_t SPI3_ReadWriteByte(uint8_t TxData);   // SPI3æ€»çº¿è¯»å†™ä¸€ä¸ªå­—èŠ‚
 
 #endif

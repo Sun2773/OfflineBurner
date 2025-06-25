@@ -1,14 +1,14 @@
 #include "Task_Key.h"
 
 /**
- * @brief  °´¼ü´¦ÀíÈÎÎñ
- * @note   10msÊ±¼äÆ¬
+ * @brief  æŒ‰é”®å¤„ç†ä»»åŠ¡
+ * @note   10msæ—¶é—´ç‰‡
  * @retval None
  */
 void Key_Task(void) {
-    static uint32_t key_last    = 0;   // °´¼üÉÏÒ»´ÎµÄ×´Ì¬
-    static uint8_t  key_trigger = 0;   // °´¼ü´¥·¢
-    static uint16_t key_tim     = 0;   // °´¼ü¼ÆÊ±Æ÷
+    static uint32_t key_last    = 0;   // æŒ‰é”®ä¸Šä¸€æ¬¡çš„çŠ¶æ€
+    static uint8_t  key_trigger = 0;   // æŒ‰é”®è§¦å‘
+    static uint16_t key_tim     = 0;   // æŒ‰é”®è®¡æ—¶å™¨
 
     uint32_t key = Key_Get();
 
@@ -43,30 +43,30 @@ void Key_Task(void) {
 }
 
 /**
- * @brief  °´¼üµ¥»÷ÊÂ¼ş
+ * @brief  æŒ‰é”®å•å‡»äº‹ä»¶
  * @note
- * @param  key: ´¥·¢¼üÖµ
- * @retval 1: ÊÂ¼ş´¦Àí³É¹¦, 0: ÊÂ¼ş´¦ÀíÊ§°Ü
+ * @param  key: è§¦å‘é”®å€¼
+ * @retval 1: äº‹ä»¶å¤„ç†æˆåŠŸ, 0: äº‹ä»¶å¤„ç†å¤±è´¥
  */
 static uint8_t Key_ClickEvent(uint32_t key) {
     return 1;
 }
 
 /**
- * @brief  °´¼ü³¤°´ÊÂ¼ş
+ * @brief  æŒ‰é”®é•¿æŒ‰äº‹ä»¶
  * @note
- * @param  key: ´¥·¢¼üÖµ
- * @retval 1: ÊÂ¼ş´¦Àí³É¹¦, 0: ÊÂ¼ş´¦ÀíÊ§°Ü
+ * @param  key: è§¦å‘é”®å€¼
+ * @retval 1: äº‹ä»¶å¤„ç†æˆåŠŸ, 0: äº‹ä»¶å¤„ç†å¤±è´¥
  */
 static uint8_t Key_LongPressEvent(uint32_t key) {
     return 1;
 }
 
 /**
- * @brief  °´¼üÒ»Ö±°´ÊÂ¼ş
+ * @brief  æŒ‰é”®ä¸€ç›´æŒ‰äº‹ä»¶
  * @note
- * @param  key: ´¥·¢¼üÖµ
- * @retval 1: ÊÂ¼ş´¦Àí³É¹¦, 0: ÊÂ¼ş´¦ÀíÊ§°Ü
+ * @param  key: è§¦å‘é”®å€¼
+ * @retval 1: äº‹ä»¶å¤„ç†æˆåŠŸ, 0: äº‹ä»¶å¤„ç†å¤±è´¥
  */
 static uint8_t Key_AlwaysPressEvent(uint32_t key) {
     return 0;

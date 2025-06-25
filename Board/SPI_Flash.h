@@ -3,7 +3,7 @@
 
 #include "spi.h"
 
-// Ö¸Áî±í
+// æŒ‡ä»¤è¡¨
 #define W25QX_WriteEnable      0x06
 #define W25QX_WriteDisable     0x04
 #define W25QX_ReadStatusReg    0x05
@@ -37,7 +37,7 @@
     }
 
 /**
- * SPIĞèÒª³õÊ¼»¯Îª ¿ÕÏĞµçÆ½µÍ µÚÒ»Ìø±äÑØ²ÉÑùÊı¾İ
+ * SPIéœ€è¦åˆå§‹åŒ–ä¸º ç©ºé—²ç”µå¹³ä½ ç¬¬ä¸€è·³å˜æ²¿é‡‡æ ·æ•°æ®
  */
 #define W25QXX_SPI_Init() \
     {                     \
@@ -50,35 +50,35 @@
 
 typedef enum {
 
-    SPI_Flash_WorkState_OK = 0,     // ²Ù×÷³É¹¦
-    SPI_Flash_WorkState_Busy,       // Ã¦
-    SPI_Flash_WorkState_Error,      // ´íÎó
-    SPI_Flash_WorkState_Idle,       // ¿ÕÏĞ
-    SPI_Flash_WorkState_Writing,    // ÕıÔÚĞ´Èë
-    SPI_Flash_WorkState_Reading,    // ÕıÔÚ¶ÁÈ¡
-    SPI_Flash_WorkState_Eraseing,   // ÕıÔÚ²Á³ı
-    SPI_Flash_WorkState_Init,       // ³õÊ¼×´Ì¬
+    SPI_Flash_WorkState_OK = 0,     // æ“ä½œæˆåŠŸ
+    SPI_Flash_WorkState_Busy,       // å¿™
+    SPI_Flash_WorkState_Error,      // é”™è¯¯
+    SPI_Flash_WorkState_Idle,       // ç©ºé—²
+    SPI_Flash_WorkState_Writing,    // æ­£åœ¨å†™å…¥
+    SPI_Flash_WorkState_Reading,    // æ­£åœ¨è¯»å–
+    SPI_Flash_WorkState_Eraseing,   // æ­£åœ¨æ“¦é™¤
+    SPI_Flash_WorkState_Init,       // åˆå§‹çŠ¶æ€
 
 } SPI_FlashWorkState;
 
-#define SPI_FLASH_Init()                     W25QXX_Init()                       // ³õÊ¼»¯
-#define SPI_FLASH_Write(w_bf, w_addr, count) W25QXX_Write(w_bf, w_addr, count)   // Ğ´ÈëÊı¾İ
-#define SPI_FLASH_Read(r_bf, r_addr, count)  W25QXX_Read(r_bf, r_addr, count)    // ¶ÁÈ¡Êı¾İ
-#define SPI_FLASH_Erase(address)             W25QXX_EraseSector(address)         // ²Á³ıÉÈÇø
+#define SPI_FLASH_Init()                     W25QXX_Init()                       // åˆå§‹åŒ–
+#define SPI_FLASH_Write(w_bf, w_addr, count) W25QXX_Write(w_bf, w_addr, count)   // å†™å…¥æ•°æ®
+#define SPI_FLASH_Read(r_bf, r_addr, count)  W25QXX_Read(r_bf, r_addr, count)    // è¯»å–æ•°æ®
+#define SPI_FLASH_Erase(address)             W25QXX_EraseSector(address)         // æ“¦é™¤æ‰‡åŒº
 
-void     W25QXX_Init(void);                                                    // ³õÊ¼»¯W25Qxx
-uint8_t  W25QXX_ReadSR(void);                                                  // ¶ÁSR¼Ä´æÆ÷
-void     W25QXX_Write_Enable(void);                                            // W25Qxx Ğ´Ê¹ÄÜ
-void     W25QXX_Write_Disable(void);                                           // W25Qxx Ğ´½ûÖ¹
-uint16_t W25QXX_ReadID(void);                                                  // W25Qxx ¶ÁÈ¡Ğ¾Æ¬ID
-uint32_t W25QXX_ReadCapacity(void);                                            // ¶ÁÈ¡Ğ¾Æ¬ÈİÁ¿
-void     W25QXX_Read(void* r_bf, uint32_t r_addr, uint16_t count);             // Ö±½Ó¶ÁÈ¡Êı¾İ
-void     W25QXX_WritePage(void* w_bf, uint32_t w_addr, uint16_t count);        // Ğ´Ò³ ×î´ó256×Ö½Ú
-void     W25QXX_Write(void* w_bf, uint32_t w_addr, uint16_t count);            // Ö±½ÓĞ´ÈëÊı¾İ ×Ô¶¯»»Ò³ ÎŞĞ£Ñé
-void     W25QXX_WriteAutoErase(void* w_bf, uint32_t w_addr, uint16_t count);   // Ğ´ÈëÊı¾İ×Ô¶¯²Á³ı
-void     W25QXX_EraseSector(uint32_t address);                                 // ²Á³ıÉÈÇø
-void     W25QXX_WaitBusy(void);                                                // Ã¦Î»µÈ´ı
-void     W25QXX_PowerDown(void);                                               // ½øÈëµôµçÄ£Ê½
-void     W25QXX_WAKEUP(void);                                                  // »½ĞÑ
+void     W25QXX_Init(void);                                                    // åˆå§‹åŒ–W25Qxx
+uint8_t  W25QXX_ReadSR(void);                                                  // è¯»SRå¯„å­˜å™¨
+void     W25QXX_Write_Enable(void);                                            // W25Qxx å†™ä½¿èƒ½
+void     W25QXX_Write_Disable(void);                                           // W25Qxx å†™ç¦æ­¢
+uint16_t W25QXX_ReadID(void);                                                  // W25Qxx è¯»å–èŠ¯ç‰‡ID
+uint32_t W25QXX_ReadCapacity(void);                                            // è¯»å–èŠ¯ç‰‡å®¹é‡
+void     W25QXX_Read(void* r_bf, uint32_t r_addr, uint16_t count);             // ç›´æ¥è¯»å–æ•°æ®
+void     W25QXX_WritePage(void* w_bf, uint32_t w_addr, uint16_t count);        // å†™é¡µ æœ€å¤§256å­—èŠ‚
+void     W25QXX_Write(void* w_bf, uint32_t w_addr, uint16_t count);            // ç›´æ¥å†™å…¥æ•°æ® è‡ªåŠ¨æ¢é¡µ æ— æ ¡éªŒ
+void     W25QXX_WriteAutoErase(void* w_bf, uint32_t w_addr, uint16_t count);   // å†™å…¥æ•°æ®è‡ªåŠ¨æ“¦é™¤
+void     W25QXX_EraseSector(uint32_t address);                                 // æ“¦é™¤æ‰‡åŒº
+void     W25QXX_WaitBusy(void);                                                // å¿™ä½ç­‰å¾…
+void     W25QXX_PowerDown(void);                                               // è¿›å…¥æ‰ç”µæ¨¡å¼
+void     W25QXX_WAKEUP(void);                                                  // å”¤é†’
 
 #endif

@@ -7,7 +7,7 @@
 #define BUZZER_PORT     GPIOB
 #define BUZZER_PIN      GPIO_Pin_1
 
-#define BUZZER_CTRL (BIT_VAL(TIM3->CCER, 12))   // ·äÃùÆ÷¿ª¹Ø
+#define BUZZER_CTRL (BIT_VAL(TIM3->CCER, 12))   // èœ‚é¸£å™¨å¼€å…³
 
 #define Buzzer_Freq(freq)  (TIM3->PSC = (uint16_t) (720000 / freq) - 1)
 #define Buzzer_Volume(vol) (TIM3->CCR4 = vol - 1)
@@ -15,16 +15,16 @@
 #define Beep_Off()         (BUZZER_CTRL = 0)
 
 typedef enum {
-    BEEP_Stop,                  // ¶ÌÃùÒ»´Î      100ms
-    BEEP_UltraShort,            // ¶ÌÃùÒ»´Î      100ms
-    BEEP_Short,                 // ¶ÌÃùÒ»´Î      100ms
-    BEEP_Medium,                // ÖĞÃùÒ»´Î      500ms
-    BEEP_Long,                  // ³¤ÃùÒ»´Î      1s
-    BEEP_DoubleShort,           // Ë«¶ÌÃùÒ»´Î
-    BEEP_DoubleShortContinue,   // Ë«¶ÌÃù³ÖĞø
+    BEEP_Stop,                  // çŸ­é¸£ä¸€æ¬¡      100ms
+    BEEP_UltraShort,            // çŸ­é¸£ä¸€æ¬¡      100ms
+    BEEP_Short,                 // çŸ­é¸£ä¸€æ¬¡      100ms
+    BEEP_Medium,                // ä¸­é¸£ä¸€æ¬¡      500ms
+    BEEP_Long,                  // é•¿é¸£ä¸€æ¬¡      1s
+    BEEP_DoubleShort,           // åŒçŸ­é¸£ä¸€æ¬¡
+    BEEP_DoubleShortContinue,   // åŒçŸ­é¸£æŒç»­
 
 } BEEP_MODE;
 
-void Buzzer_Init(void);   // ³õÊ¼»¯
+void Buzzer_Init(void);   // åˆå§‹åŒ–
 
 #endif

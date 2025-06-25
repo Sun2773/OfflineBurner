@@ -1,7 +1,7 @@
 #include "Key.h"
 #include "Tool.h"
 
-/* °´¼ü¿ª¹ØIO¶¨Òå */
+/* æŒ‰é”®å¼€å…³IOå®šä¹‰ */
 static struct {
     GPIO_TypeDef* GPIOx;
     uint16_t      GPIO_Pin;
@@ -10,29 +10,29 @@ static struct {
 };
 
 /**
- * @brief  °´¼ü³õÊ¼»¯
+ * @brief  æŒ‰é”®åˆå§‹åŒ–
  * @note
  * @retval None
  */
 void Key_Init(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    RCC_APB2PeriphClockCmd(KEY_RCCCLOCK, ENABLE);   // Ê¹ÄÜGPIOÊ±ÖÓ
+    RCC_APB2PeriphClockCmd(KEY_RCCCLOCK, ENABLE);   // ä½¿èƒ½GPIOæ—¶é’Ÿ
 
-    /* GPIO³õÊ¼»¯ÉèÖÃ */
+    /* GPIOåˆå§‹åŒ–è®¾ç½® */
     for (uint8_t i = 0; i < ArraySize(Key_Gpio); i++) {
-        GPIO_InitStructure.GPIO_Pin  = Key_Gpio[i].GPIO_Pin;   // Òı½ÅÅäÖÃ
-        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;          // ÉÏÀ­ÊäÈë
-        GPIO_Init(Key_Gpio[i].GPIOx, &GPIO_InitStructure);     // ³õÊ¼»¯Òı½Å
+        GPIO_InitStructure.GPIO_Pin  = Key_Gpio[i].GPIO_Pin;   // å¼•è„šé…ç½®
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;          // ä¸Šæ‹‰è¾“å…¥
+        GPIO_Init(Key_Gpio[i].GPIOx, &GPIO_InitStructure);     // åˆå§‹åŒ–å¼•è„š
     }
 
     return;
 }
 
 /**
- * @brief  »ñÈ¡°´¼üÖµ
+ * @brief  è·å–æŒ‰é”®å€¼
  * @note
- * @retval ¼üÖµ
+ * @retval é”®å€¼
  */
 uint32_t Key_Get(void) {
     uint32_t key = 0;

@@ -4,13 +4,13 @@
 #include "Key.h"
 #include "stm32f10x.h"
 
-#define Key_SHORT_TIME  5     // 按键短按时间
-#define Key_LONG_TIME   100   // 按键长按时间
-#define Key_ALWAYS_TIME 20    // 按键一直按时间
+#define Key_SHORT_TIME  5     // 鎸夐敭鐭寜鏃堕棿
+#define Key_LONG_TIME   100   // 鎸夐敭闀挎寜鏃堕棿
+#define Key_ALWAYS_TIME 20    // 鎸夐敭涓�鐩存寜鏃堕棿
 
-void           Key_Task(void);                       // 按键处理任务
-static uint8_t Key_ClickEvent(uint32_t key);         // 按键单击事件
-static uint8_t Key_LongPressEvent(uint32_t key);     // 按键长按事件
-static uint8_t Key_AlwaysPressEvent(uint32_t key);   // 按键一直按事件
+void           Key_Task(void);                       // 鎸夐敭澶勭悊浠诲姟
+static uint8_t Key_ClickEvent(uint32_t key);         // 鎸夐敭鍗曞嚮浜嬩欢
+static uint8_t Key_LongPressEvent(uint32_t key);     // 鎸夐敭闀挎寜浜嬩欢
+static uint8_t Key_AlwaysPressEvent(uint32_t key);   // 鎸夐敭涓�鐩存寜浜嬩欢
 
 #endif

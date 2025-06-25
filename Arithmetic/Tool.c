@@ -1,10 +1,10 @@
 #include "string.h"
 
 /**
- * @brief  ÅĞ¶Ï×Ö·û´®¿ªÍ·
- * @note   ÅĞ¶Ï×Ö·û´®srcÊÇ·ñÒÔ×Ö·û´®headÎª¿ªÍ·
- * @param  src: ±»¼ì²é×Ö·û´®
- * @param  head: ¼ì²éÓÃ×Ö·û´®
+ * @brief  åˆ¤æ–­å­—ç¬¦ä¸²å¼€å¤´
+ * @note   åˆ¤æ–­å­—ç¬¦ä¸²srcæ˜¯å¦ä»¥å­—ç¬¦ä¸²headä¸ºå¼€å¤´
+ * @param  src: è¢«æ£€æŸ¥å­—ç¬¦ä¸²
+ * @param  head: æ£€æŸ¥ç”¨å­—ç¬¦ä¸²
  * @retval
  */
 int StrStartWith(char* src, char* head) {
@@ -17,12 +17,12 @@ int StrStartWith(char* src, char* head) {
 }
 
 /**
- * @brief  ÔÚstr1ÖĞÑ°ÕÒµÚÒ»´Î³öÏÖstr2µÄÎ»ÖÃ£¬×î¶à²éÕÒn×Ö½Ú
+ * @brief  åœ¨str1ä¸­å¯»æ‰¾ç¬¬ä¸€æ¬¡å‡ºç°str2çš„ä½ç½®ï¼Œæœ€å¤šæŸ¥æ‰¾nå­—èŠ‚
  * @note
- * @param  str1: ±»²éÕÒ×Ö·û´®
- * @param  str2: ²éÕÒ×Ö·û´®
- * @param  n: ×î´ó²éÕÒ´óĞ¡
- * @retval ·µ»Ø²éÕÒµ½µÄÎ»ÖÃ
+ * @param  str1: è¢«æŸ¥æ‰¾å­—ç¬¦ä¸²
+ * @param  str2: æŸ¥æ‰¾å­—ç¬¦ä¸²
+ * @param  n: æœ€å¤§æŸ¥æ‰¾å¤§å°
+ * @retval è¿”å›æŸ¥æ‰¾åˆ°çš„ä½ç½®
  */
 char* strnstr(char* str1, char* str2, size_t n) {
     size_t l1, l2;

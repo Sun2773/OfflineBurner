@@ -25,18 +25,18 @@
 
 #include "ff.h" /* Declarations of FatFs API */
 
-/***************** ÀàĞÍÉùÃ÷ *****************/
+/***************** ç±»å‹å£°æ˜ *****************/
 
 typedef struct {
-    void (*Hook)(void);   // ÈÎÎñ¹³×Óº¯Êı
-    uint16_t Cycle;       // ÈÎÎñÖÜÆÚ
-    uint16_t Timer;       // ¼ÆÊıÆ÷
-    uint8_t  Ready;       // ÈÎÎñ¾ÍĞ÷×´Ì¬
-} TaskUnti_t;             // ÈÎÎñµ¥Ôª¶¨Òå
+    void (*Hook)(void);   // ä»»åŠ¡é’©å­å‡½æ•°
+    uint16_t Cycle;       // ä»»åŠ¡å‘¨æœŸ
+    uint16_t Timer;       // è®¡æ•°å™¨
+    uint8_t  Ready;       // ä»»åŠ¡å°±ç»ªçŠ¶æ€
+} TaskUnti_t;             // ä»»åŠ¡å•å…ƒå®šä¹‰
 
-/***************** ±äÁ¿ÉùÃ÷ *****************/
+/***************** å˜é‡å£°æ˜ *****************/
 
-RCC_ClocksTypeDef RCC_Clocks;   // ÏµÍ³Ê±ÖÓÆµÂÊ
+RCC_ClocksTypeDef RCC_Clocks;   // ç³»ç»Ÿæ—¶é’Ÿé¢‘ç‡
 uint32_t          SysTick_Count = 0;
 uint8_t           test_out      = 0;
 uint8_t           test_in       = 0;
@@ -47,68 +47,68 @@ uint8_t           test_in       = 0;
 // SWD_STA  SWD_Res;
 uint32_t FlashSize = 0;
 uint32_t Data[5];
-uint8_t  SWD_Res = 0;   // SWD²Ù×÷½á¹û
+uint8_t  SWD_Res = 0;   // SWDæ“ä½œç»“æœ
 uint8_t  Buffer[1024];
 uint32_t Flash_Page_Size = 1024;
 FATFS    Fs;
 
-/***************** º¯ÊıÉùÃ÷ *****************/
+/***************** å‡½æ•°å£°æ˜ *****************/
 
-void Task_Process(void);      // ÈÎÎñ´¦Àíº¯Êı
-void TaskNull(void);          // ¿ÕÈÎÎñ
-void Delay(uint32_t delay);   // ÑÓÊ±º¯Êı
+void Task_Process(void);      // ä»»åŠ¡å¤„ç†å‡½æ•°
+void TaskNull(void);          // ç©ºä»»åŠ¡
+void Delay(uint32_t delay);   // å»¶æ—¶å‡½æ•°
 
-/***************** ÈÎÎñ¶¨Òå *****************/
+/***************** ä»»åŠ¡å®šä¹‰ *****************/
 
 TaskUnti_t TaskList[] = {
-    /* ÈÎÎñ¹³×Ó£¬Ö´ĞĞÖÜÆÚ */
+    /* ä»»åŠ¡é’©å­ï¼Œæ‰§è¡Œå‘¨æœŸ */
     {TaskNull, 10},
-    {LED_Task, 50},   // LEDÈÎÎñ£¬Ã¿50msÖ´ĞĞÒ»´Î
-    {Key_Task, 10},   // °´¼üÈÎÎñ£¬Ã¿10msÖ´ĞĞÒ»´Î
+    {LED_Task, 50},   // LEDä»»åŠ¡ï¼Œæ¯50msæ‰§è¡Œä¸€æ¬¡
+    {Key_Task, 10},   // æŒ‰é”®ä»»åŠ¡ï¼Œæ¯10msæ‰§è¡Œä¸€æ¬¡
 
-    // ÔÚÉÏÃæÌí¼ÓÈÎÎñ¡£¡£¡£¡£
+    // åœ¨ä¸Šé¢æ·»åŠ ä»»åŠ¡ã€‚ã€‚ã€‚ã€‚
 };
 
-/***************** Ö÷º¯Êı *****************/
+/***************** ä¸»å‡½æ•° *****************/
 
 /**
- * @brief  Ö÷º¯Êı
+ * @brief  ä¸»å‡½æ•°
  * @param  None
  * @retval None
  */
 int main(void) {
-    RCC_GetClocksFreq(&RCC_Clocks);                       // »ñÈ¡ÏµÍ³Ê±ÖÓÆµÂÊ
-    SystemCoreClockUpdate();                              // ¸üĞÂÏµÍ³Ê±ÖÓÆµÂÊ
-    SysTick_Config(RCC_Clocks.SYSCLK_Frequency / 1000);   // ÅäÖÃSysTick¶¨Ê±Æ÷£¬Ã¿1msÖĞ¶ÏÒ»´Î
+    RCC_GetClocksFreq(&RCC_Clocks);                       // è·å–ç³»ç»Ÿæ—¶é’Ÿé¢‘ç‡
+    SystemCoreClockUpdate();                              // æ›´æ–°ç³»ç»Ÿæ—¶é’Ÿé¢‘ç‡
+    SysTick_Config(RCC_Clocks.SYSCLK_Frequency / 1000);   // é…ç½®SysTickå®šæ—¶å™¨ï¼Œæ¯1msä¸­æ–­ä¸€æ¬¡
 
-    /* Ê±ÖÓ³õÊ¼»¯ */
+    /* æ—¶é’Ÿåˆå§‹åŒ– */
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-    /* ÍâÉè³õÊ¼»¯ */
-    LED_Init();      // ³õÊ¼»¯LED
-    Key_Init();      // ³õÊ¼»¯°´¼ü
-    W25QXX_Init();   // ³õÊ¼»¯SPI Flash
-    Buzzer_Init();   // ³õÊ¼»¯·äÃùÆ÷
+    /* å¤–è®¾åˆå§‹åŒ– */
+    LED_Init();      // åˆå§‹åŒ–LED
+    Key_Init();      // åˆå§‹åŒ–æŒ‰é”®
+    W25QXX_Init();   // åˆå§‹åŒ–SPI Flash
+    Buzzer_Init();   // åˆå§‹åŒ–èœ‚é¸£å™¨
 
-    /* ³õÊ¼»¯JSON */
+    /* åˆå§‹åŒ–JSON */
     cJSON_Hooks hooks = {
         pvPortMalloc,
         vPortFree,
     };
     cJSON_InitHooks(&hooks);
 
-    BurnerConfig();   // ³õÊ¼»¯ÉÕÂ¼ÅäÖÃ
+    BurnerConfig();   // åˆå§‹åŒ–çƒ§å½•é…ç½®
 
     Set_System();
     Set_USBClock();
     USB_Interrupts_Config();
     USB_Init();
 
-    SWD_Res = swd_init_debug();   // ³õÊ¼»¯SWDµ÷ÊÔ½Ó¿Ú
-    // ÏÂÔØ±à³ÌËã·¨µ½Ä¿±êMCUµÄSRAM£¬²¢³õÊ¼»¯
+    SWD_Res = swd_init_debug();   // åˆå§‹åŒ–SWDè°ƒè¯•æ¥å£
+    // ä¸‹è½½ç¼–ç¨‹ç®—æ³•åˆ°ç›®æ ‡MCUçš„SRAMï¼Œå¹¶åˆå§‹åŒ–
     SWD_Res = swd_read_memory(0x1FFFF7E0, (uint8_t*) &FlashSize, 2);
     if (SWD_Res) {
-        asm("nop");   // Èç¹û³õÊ¼»¯³É¹¦£¬Ö´ĞĞ¿Õ²Ù×÷
+        asm("nop");   // å¦‚æœåˆå§‹åŒ–æˆåŠŸï¼Œæ‰§è¡Œç©ºæ“ä½œ
     }
 
     FRESULT res;
@@ -125,72 +125,72 @@ int main(void) {
     // SWD_Res = SWD_Target_ByteRW();
     // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[2]);
 
-    //----------------------²âÊÔ´úÂëÇø---------------------------
+    //----------------------æµ‹è¯•ä»£ç åŒº---------------------------
     // while (1) {
     //     SWD_Target_RegisterWrite(0x4001100C, 0x00002000);
     //     Delay(1000);
     //     SWD_Target_RegisterWrite(0x4001100C, 0x00000000);
     //     Delay(1000);
-    //     // ²âÊÔ´úÂë
+    //     // æµ‹è¯•ä»£ç 
     // }
 
-    /* ½øĞĞÈÎÎñ´¦Àí */
+    /* è¿›è¡Œä»»åŠ¡å¤„ç† */
     Task_Process();
     while (1) {
     }
 }
 
-/***************** ÈÎÎñµ÷¶È¹¦ÄÜ *****************/
+/***************** ä»»åŠ¡è°ƒåº¦åŠŸèƒ½ *****************/
 
 /**
- * @brief  ÈÎÎñµ÷¶Èº¯Êı
- * @note   µÎ´ğ¶¨Ê±Æ÷ÖĞ¶Ï
+ * @brief  ä»»åŠ¡è°ƒåº¦å‡½æ•°
+ * @note   æ»´ç­”å®šæ—¶å™¨ä¸­æ–­
  * @retval None
  */
 void Task_Remarks(void) {
-    uint16_t task_max = ArraySize(TaskList);   // ÈÎÎñ×ÜÊı
+    uint16_t task_max = ArraySize(TaskList);   // ä»»åŠ¡æ€»æ•°
 
-    for (uint8_t i = 0; i < task_max; i++) {   // Öğ¸öÈÎÎñÊ±¼ä´¦Àí
-        if (TaskList[i].Cycle == 0) {          // Èç¹ûÖÜÆÚÎª0
-            continue;                          // Ìø¹ı¸ÃÈÎÎñ
+    for (uint8_t i = 0; i < task_max; i++) {   // é€ä¸ªä»»åŠ¡æ—¶é—´å¤„ç†
+        if (TaskList[i].Cycle == 0) {          // å¦‚æœå‘¨æœŸä¸º0
+            continue;                          // è·³è¿‡è¯¥ä»»åŠ¡
         }
-        if (TaskList[i].Timer > 0) {   // Èç¹û¼ÆÊ±Æ÷´óÓÚ0
-            TaskList[i].Timer--;       // ¼ÆÊ±Æ÷µİ¼õ
+        if (TaskList[i].Timer > 0) {   // å¦‚æœè®¡æ—¶å™¨å¤§äº0
+            TaskList[i].Timer--;       // è®¡æ—¶å™¨é€’å‡
         }
-        if (TaskList[i].Timer == 0) {                // Èç¹û¼ÆÊ±Æ÷µ½0
-            TaskList[i].Timer = TaskList[i].Cycle;   // ÖØĞÂÉèÖÃ¼ÆÊ±Æ÷
-            TaskList[i].Ready = 1;                   // ÉèÖÃÈÎÎñ¾ÍĞ÷±êÖ¾
+        if (TaskList[i].Timer == 0) {                // å¦‚æœè®¡æ—¶å™¨åˆ°0
+            TaskList[i].Timer = TaskList[i].Cycle;   // é‡æ–°è®¾ç½®è®¡æ—¶å™¨
+            TaskList[i].Ready = 1;                   // è®¾ç½®ä»»åŠ¡å°±ç»ªæ ‡å¿—
         }
     }
     SysTick_Count = SysTick_Count + 1;
 }
 
 /**
- * @brief  ÈÎÎñ´¦Àíº¯Êı
- * @note   Ö÷Ñ­»·
+ * @brief  ä»»åŠ¡å¤„ç†å‡½æ•°
+ * @note   ä¸»å¾ªç¯
  * @retval None
  */
 void Task_Process(void) {
-    uint16_t task_max = ArraySize(TaskList);   // ÈÎÎñ×ÜÊı
+    uint16_t task_max = ArraySize(TaskList);   // ä»»åŠ¡æ€»æ•°
 
-    for (uint16_t i = 0; i < task_max; i++) {   // ³õÊ¼»¯ÈÎÎñÁĞ±í
-        TaskList[i].Ready = 0;                  // Çå³ı¾ÍĞ÷±êÖ¾
-        TaskList[i].Timer = i + 1;              // ÉèÖÃ¼ÆÊ±Æ÷³õÊ¼Öµ
+    for (uint16_t i = 0; i < task_max; i++) {   // åˆå§‹åŒ–ä»»åŠ¡åˆ—è¡¨
+        TaskList[i].Ready = 0;                  // æ¸…é™¤å°±ç»ªæ ‡å¿—
+        TaskList[i].Timer = i + 1;              // è®¾ç½®è®¡æ—¶å™¨åˆå§‹å€¼
     }
 
     while (task_max) {
-        for (uint16_t i = 0; i < task_max; i++) {   // ±éÀúÈÎÎñÁĞ±í
-            if ((TaskList[i].Ready != 0) ||         // Èç¹ûÈÎÎñ¾ÍĞ÷
-                (TaskList[i].Cycle == 0)) {         // »òÕßÖÜÆÚÎª0
-                TaskList[i].Hook();                 // Ö´ĞĞÈÎÎñ¹³×Óº¯Êı
-                TaskList[i].Ready = 0;              // Çå³ı¾ÍĞ÷±êÖ¾
+        for (uint16_t i = 0; i < task_max; i++) {   // éå†ä»»åŠ¡åˆ—è¡¨
+            if ((TaskList[i].Ready != 0) ||         // å¦‚æœä»»åŠ¡å°±ç»ª
+                (TaskList[i].Cycle == 0)) {         // æˆ–è€…å‘¨æœŸä¸º0
+                TaskList[i].Hook();                 // æ‰§è¡Œä»»åŠ¡é’©å­å‡½æ•°
+                TaskList[i].Ready = 0;              // æ¸…é™¤å°±ç»ªæ ‡å¿—
             }
         }
     }
 }
 
 /**
- * @brief  ¿ÕÈÎÎñ
+ * @brief  ç©ºä»»åŠ¡
  * @note
  * @retval None
  */
@@ -198,13 +198,13 @@ void TaskNull(void) {
     return;
 }
 
-/***************** ÑÓÊ±¹¦ÄÜ *****************/
-uint32_t DelayTimer = 0;   // ÑÓÊ±¼ÆÊıÆ÷
+/***************** å»¶æ—¶åŠŸèƒ½ *****************/
+uint32_t DelayTimer = 0;   // å»¶æ—¶è®¡æ•°å™¨
 
 /**
- * @brief  ½øĞĞºÁÃë¼¶ÑÓÊ±
+ * @brief  è¿›è¡Œæ¯«ç§’çº§å»¶æ—¶
  * @note
- * @param  delay: ÑÓÊ±µÄºÁÃëÊı
+ * @param  delay: å»¶æ—¶çš„æ¯«ç§’æ•°
  * @retval None
  */
 void Delay(uint32_t delay) {

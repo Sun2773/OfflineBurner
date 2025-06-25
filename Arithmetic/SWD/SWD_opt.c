@@ -1,6 +1,6 @@
 /**
  * @file    SWD_opt.c
- * @brief   Í¨¹ıSWDĞ­Òé¶ÔMCUµÄFLASH±à³Ì
+ * @brief   é€šè¿‡SWDåè®®å¯¹MCUçš„FLASHç¼–ç¨‹
  */
 #include "SWD_opt.h"
 #include "swd_host.h"
@@ -12,7 +12,7 @@ error_t target_opt_init(void) {
         return ERROR_RESET;
     }
 
-    // ÏÂÔØ±à³ÌËã·¨µ½Ä¿±êMCUµÄSRAM£¬²¢³õÊ¼»¯
+    // ä¸‹è½½ç¼–ç¨‹ç®—æ³•åˆ°ç›®æ ‡MCUçš„SRAMï¼Œå¹¶åˆå§‹åŒ–
     if (0 == swd_write_memory(flash_opt.algo_start, (uint8_t*) flash_opt.algo_blob, flash_opt.algo_size)) {
         return ERROR_ALGO_DL;
     }

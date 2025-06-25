@@ -3,13 +3,13 @@
 
 #include "stm32f10x.h"
 
-#define Flash_Path  "0:"              // FlashÂ·¾¶
-#define Config_Path "0:config.json"   // ÅäÖÃÎÄ¼şÂ·¾¶
+#define Flash_Path  "0:"              // Flashè·¯å¾„
+#define Config_Path "0:config.json"   // é…ç½®æ–‡ä»¶è·¯å¾„
 
-#define CONFIG_BUFFER_SIZE 1024   // ÅäÖÃ»º³åÇø´óĞ¡
+#define CONFIG_BUFFER_SIZE 1024   // é…ç½®ç¼“å†²åŒºå¤§å°
 
-#define FLASH_CONFIG_ADDRESS  0x00000000   // ÅäÖÃ±£´æµØÖ·
-#define FLASH_PROGRAM_ADDRESS 0x00001000   // ³ÌĞò±£´æµØÖ·
+#define FLASH_CONFIG_ADDRESS  0x00000000   // é…ç½®ä¿å­˜åœ°å€
+#define FLASH_PROGRAM_ADDRESS 0x00001000   // ç¨‹åºä¿å­˜åœ°å€
 
 
 void BurnerConfig(void);

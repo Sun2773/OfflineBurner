@@ -4,14 +4,14 @@
 #include "stm32f4xx.h"
 
 typedef enum {
-    BEEP_Stop,                  // Í£Ö¹
-    BEEP_VeryShort,             // ³¬¶ÌÃùÒ»´Î    50ms
-    BEEP_Short,                 // ¶ÌÃùÒ»´Î      100ms
-    BEEP_Medium,                // ÖĞÃùÒ»´Î      500ms
-    BEEP_Long,                  // ³¤ÃùÒ»´Î      1s
-    BEEP_DoubleShort,           // Ë«¶ÌÃùÒ»´Î
-    BEEP_DoubleShortContinue,   // Ë«¶ÌÃù³ÖĞø
-    BEEP_Alarm,                 // ±¨¾¯Òô³ÖĞø
+    BEEP_Stop,                  // åœæ­¢
+    BEEP_VeryShort,             // è¶…çŸ­é¸£ä¸€æ¬¡    50ms
+    BEEP_Short,                 // çŸ­é¸£ä¸€æ¬¡      100ms
+    BEEP_Medium,                // ä¸­é¸£ä¸€æ¬¡      500ms
+    BEEP_Long,                  // é•¿é¸£ä¸€æ¬¡      1s
+    BEEP_DoubleShort,           // åŒçŸ­é¸£ä¸€æ¬¡
+    BEEP_DoubleShortContinue,   // åŒçŸ­é¸£æŒç»­
+    BEEP_Alarm,                 // æŠ¥è­¦éŸ³æŒç»­
     BEEP_WarningTone_1,
     BEEP_WarningTone_2,
     BEEP_WarningTone_3,
