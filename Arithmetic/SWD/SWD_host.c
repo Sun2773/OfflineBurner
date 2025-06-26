@@ -8,8 +8,6 @@
 #include "DAP_config.h"
 #include "debug_cm.h"
 
-extern uint32_t Flash_Page_Size;
-
 #define NVIC_Addr (0xe000e000)
 #define DBG_Addr  (0xe000edf0)
 
@@ -439,12 +437,7 @@ uint8_t swd_read_memory(uint32_t address, uint8_t* data, uint32_t size) {
 
     // Read word aligned blocks
     while (size > 3) {
-        // Limit to auto increment page size
-        n = Flash_Page_Size - (address & (Flash_Page_Size - 1));
-
-        if (size < n) {
-            n = size & 0xFFFFFFFC;   // Only count complete words remaining
-        }
+        n = size & 0xFFFFFFFC;   // Only count complete words remaining
 
         if (!swd_read_block(address, data, n)) {
             return 0;
@@ -487,12 +480,7 @@ uint8_t swd_write_memory(uint32_t address, uint8_t* data, uint32_t size) {
 
     // Write word aligned blocks
     while (size > 3) {
-        // Limit to auto increment page size
-        n = Flash_Page_Size - (address & (Flash_Page_Size - 1));
-
-        if (size < n) {
-            n = size & 0xFFFFFFFC;   // Only count complete words remaining
-        }
+        n = size & 0xFFFFFFFC;   // Only count complete words remaining
 
         if (!swd_write_block(address, data, n)) {
             return 0;

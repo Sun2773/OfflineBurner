@@ -1087,6 +1087,9 @@
         <group>
             <name>algo</name>
             <file>
+                <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.h</name>
             </file>
             <file>

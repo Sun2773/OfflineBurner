@@ -70,4 +70,6 @@ const program_target_t _stm32f10x_opt_ = {
     sizeof(flash_code),   // 算法代码大小
     flash_code,           // 算法代码数据指针
     0x00000010,           // 编程缓冲区大小
+    0x00000000,           // 扇区信息指针
+    0x00000000,           // 扇区数量
 };

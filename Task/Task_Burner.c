@@ -1,6 +1,7 @@
 #include "Task_Burner.h"
 
 #include "BurnerConfig.h"
+#include "DAP.h"
 #include "SPI_Flash.h"
 #include "SWD_flash.h"
 #include "SWD_host.h"
@@ -20,68 +21,19 @@ static void Burner_Detection(void) {
     } else {
         BurnerCtrl.ChipIdcode = 0;
         BurnerCtrl.Online     = swd_init_debug();
+        if (BurnerCtrl.Online != 0) {
+            swd_read_memory(0xE000ED00, (void*) &BurnerCtrl.CPUID, 4);                                // 读取CPUID寄存器
+            swd_read_memory(0xE0042000, (void*) &BurnerCtrl.DBGMCU_IDCODE, 4);                        // 读取DBGMCU IDCODE寄存器
+            BurnerCtrl.FlashBlob = FlashBlob_GetForId(BurnerCtrl.DEV_ID & 0xFFF);                     // 获取Flash编程算法
+            swd_read_memory(BurnerCtrl.FlashBlob->FlashSizeAddr, (void*) &BurnerCtrl.FlashSize, 2);   // 读取Flash大小
+        } else {
+            BurnerCtrl.CPUID         = 0;
+            BurnerCtrl.DBGMCU_IDCODE = 0;
+            BurnerCtrl.FlashBlob     = NULL;
+            BurnerCtrl.FlashSize     = 0;
+        }
     }
 }
-
-// static void Burner_Exe(void) {
-//     uint8_t res = 0;
-
-//     if (BurnerCtrl.Start == 0) {
-//         return;
-//     }
-//     if (BurnerCtrl.Buffer == NULL) {
-//         BurnerCtrl.Buffer = pvPortMalloc(CONFIG_BUFFER_SIZE);
-//     }
-//     if (BurnerCtrl.Buffer == NULL) {
-//         return;   // 内存分配失败
-//     }
-//     /* 初始化目标 */
-//     if (swd_init_debug() == 0) {
-//         return;
-//     }
-//     /* 初始化目标闪存 */
-//     if (target_opt_init() != ERROR_SUCCESS) {
-//         return;
-//     }
-//     /* 初始化Flash */
-//     if (target_flash_init(0x08000000) != ERROR_SUCCESS) {
-//         return;
-//     }
-//     /* 擦除全片 */
-//     if (target_opt_erase_chip() != ERROR_SUCCESS) {
-//         return;
-//     }
-
-//     uint32_t file_size   = BurnerConfigInfo.FileSize;      // 文件大小
-//     uint32_t file_finish = 0;                              // 已完成大小
-//     uint32_t rw_addr     = BurnerConfigInfo.FileAddress;   // 读写地址
-//     uint32_t rw_cnt      = 0;                              // 读写计数
-
-//     /* 开始复制文件 */
-//     while (file_size - file_finish) {
-//         if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
-//             /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
-//             rw_cnt = CONFIG_BUFFER_SIZE;
-//         } else {
-//             /* 剩余字节数大于0小于缓存,读取剩余字节数 */
-//             rw_cnt = (file_size - file_finish);
-//         }
-//         /* 读取文件 */
-//         rw_addr = FLASH_PROGRAM_ADDRESS + file_finish;   // 写入地址
-//         SPI_FLASH_Read(BurnerCtrl.Buffer, rw_addr, rw_cnt);
-//         if (target_flash_program_page(BURNER_TARGET_ADDRESS + file_finish,
-//                                       BurnerCtrl.Buffer,
-//                                       rw_cnt) != ERROR_SUCCESS) {
-//             break;
-//         }
-//         /* 计数 */
-//         file_finish += rw_cnt;
-//         LED_OnOff(RUN);
-//     }
-//     if (swd_init_debug()) {
-//         swd_set_target_reset(0);   // 复位运行
-//     }
-// }
 
 static void Burner_Exe(void) {
     if (BurnerCtrl.Start != 1) {

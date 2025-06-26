@@ -12,8 +12,8 @@
 #include "led.h"
 
 #include "BurnerConfig.h"
-#include "Task_Key.h"
 #include "Task_Burner.h"
+#include "Task_Key.h"
 
 #include "hw_config.h"
 #include "usb_desc.h"
@@ -38,26 +38,13 @@ typedef struct {
 /***************** 变量声明 *****************/
 
 RCC_ClocksTypeDef RCC_Clocks;   // 系统时钟频率
-uint32_t          SysTick_Count = 0;
-uint8_t           test_out      = 0;
-uint8_t           test_in       = 0;
-
-// SWD_TargetInfo TargetInfo;
-
-// 0x1BA01477
-// SWD_STA  SWD_Res;
-uint32_t FlashSize = 0;
-uint32_t Data[5];
-uint8_t  SWD_Res = 0;   // SWD操作结果
-uint8_t  Buffer[1024];
-uint32_t Flash_Page_Size = 1024;
-FATFS    Fs;
 
 /***************** 函数声明 *****************/
 
-void Task_Process(void);      // 任务处理函数
-void TaskNull(void);          // 空任务
-void Delay(uint32_t delay);   // 延时函数
+void     Task_Process(void);      // 任务处理函数
+void     TaskNull(void);          // 空任务
+void     Delay(uint32_t delay);   // 延时函数
+uint32_t SysTick_Get(void);       // 获取系统滴答计数值
 
 /***************** 任务定义 *****************/
 
@@ -106,36 +93,6 @@ int main(void) {
     USB_Interrupts_Config();
     USB_Init();
 
-    SWD_Res = swd_init_debug();   // 初始化SWD调试接口
-    // 下载编程算法到目标MCU的SRAM，并初始化
-    SWD_Res = swd_read_memory(0x1FFFF7E0, (uint8_t*) &FlashSize, 2);
-    if (SWD_Res) {
-        asm("nop");   // 如果初始化成功，执行空操作
-    }
-
-    FRESULT res;
-
-    // SWD_Init();
-    //
-    // SWD_Res = SWD_Target_Init(&TargetInfo);
-    // // SWD_Target_Reset();
-    // SWD_Res = SWD_Target_RegisterRead(0x1FFFF7E0, &FlashSize);
-    // SWD_Res = SWD_Target_WordRW();
-    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[0]);
-    // SWD_Res = SWD_Target_HalfWordRW();
-    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[1]);
-    // SWD_Res = SWD_Target_ByteRW();
-    // SWD_Res = SWD_Target_RegisterRead(0x08000000, &Data[2]);
-
-    //----------------------测试代码区---------------------------
-    // while (1) {
-    //     SWD_Target_RegisterWrite(0x4001100C, 0x00002000);
-    //     Delay(1000);
-    //     SWD_Target_RegisterWrite(0x4001100C, 0x00000000);
-    //     Delay(1000);
-    //     // 测试代码
-    // }
-
     /* 进行任务处理 */
     Task_Process();
     while (1) {
@@ -164,7 +121,6 @@ void Task_Remarks(void) {
             TaskList[i].Ready = 1;                   // 设置任务就绪标志
         }
     }
-    SysTick_Count = SysTick_Count + 1;
 }
 
 /**
@@ -201,7 +157,8 @@ void TaskNull(void) {
 }
 
 /***************** 延时功能 *****************/
-uint32_t DelayTimer = 0;   // 延时计数器
+uint32_t DelayTimer    = 0;   // 延时计数器
+uint32_t SysTick_Count = 0;   // 系统滴答计数器
 
 /**
  * @brief  进行毫秒级延时
@@ -213,6 +170,15 @@ void Delay(uint32_t delay) {
     DelayTimer = delay;
     while (DelayTimer) {
     }
+}
+
+/**
+ * @brief  获取系统滴答计数值
+ * @note
+ * @retval 当前的SysTick计数值
+ */
+uint32_t SysTick_Get(void) {
+    return SysTick_Count;   // 返回当前的SysTick计数值
 }
 
 #ifdef USE_FULL_ASSERT

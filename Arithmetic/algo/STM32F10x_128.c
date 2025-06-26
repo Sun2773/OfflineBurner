@@ -47,6 +47,10 @@ static const uint32_t flash_code[] = {
     // clang-format on
 };
 
+sector_info_t sector_info[] = {
+    {0x0800, 0x000000},   //
+};
+
 const program_target_t _stm32f10x_flash_ = {
     0x20000005,   // Init
     0x20000037,   // UnInit
@@ -63,4 +67,7 @@ const program_target_t _stm32f10x_flash_ = {
     sizeof(flash_code),   // 算法代码大小
     flash_code,           // 算法代码数据指针
     0x00000400,           // 编程缓冲区大小
+
+    sector_info,                                    // 扇区信息指针
+    sizeof(sector_info) / sizeof(sector_info[0]),   // 扇区数量
 };

@@ -120,7 +120,10 @@ void DebugMon_Handler(void) {
 // {
 // }
 
-void Task_Remarks(void);
+extern uint32_t DelayTimer;      // 延时计数器
+extern uint32_t SysTick_Count;   // 系统滴答计数器
+
+extern void Task_Remarks(void);   // 任务处理函数声明
 
 /**
  * @brief  This function handles SysTick Handler.
@@ -128,7 +131,11 @@ void Task_Remarks(void);
  * @retval None
  */
 void SysTick_Handler(void) {
-    Task_Remarks();   // 任务处理
+    if (DelayTimer) {
+        DelayTimer--;   // 延时计数器递减
+    }
+    SysTick_Count = SysTick_Count + 1;   // 系统滴答计数器递增
+    Task_Remarks();                      // 任务处理
 }
 
 /*******************************************************************************
