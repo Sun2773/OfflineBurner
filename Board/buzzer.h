@@ -2,6 +2,7 @@
 #define __BUZZER_H__
 
 #include "stm32f10x.h"
+#include "Tool.h"
 
 #define BUZZER_RCCCLOCK RCC_AHB1Periph_GPIOB
 #define BUZZER_PORT     GPIOB

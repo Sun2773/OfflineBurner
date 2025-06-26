@@ -58,7 +58,6 @@ void BurnerConfig(void) {
     if (f_res != FR_OK) {
         goto ex;
     }
-
     do {
         DIR f_dp = {0};   // 目录对象
         /* 打开目录 */
@@ -100,7 +99,8 @@ void BurnerConfig(void) {
         uint32_t rw_addr     = 0;              // 读写地址
         uint32_t data_crc32  = 0;              // 数据校验码
         uint32_t file_crc32  = 0;              // 文件校验码
-
+        LED_Off(RUN);
+        LED_Off(ERR);
         /* 开始复制文件 */
         while (file_size - file_finish) {
             if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
@@ -121,12 +121,14 @@ void BurnerConfig(void) {
             if ((rw_addr % W25QXX_BLOCK_SIZE) == 0) {
                 /* 如果写入地址是块大小的整数倍，擦除块 */
                 SPI_FLASH_Erase(rw_addr);
+                LED_OnOff(ERR);
             }
             SPI_FLASH_Write(str_buf, rw_addr, r_cnt);
             /* 计数 */
             file_finish += r_cnt;
             LED_OnOff(RUN);
         }
+        LED_Off(ERR);
         /* 重新赋值 */
         file_size   = file_finish;
         file_finish = 0;
@@ -162,7 +164,8 @@ void BurnerConfig(void) {
         } else {
         }
     } while (0);
-
+    LED_Off(RUN);
+    LED_Off(ERR);
     do {
         if ((f_res = f_stat(Config_Path, file_info)) == FR_OK) {
             config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;

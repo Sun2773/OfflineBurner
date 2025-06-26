@@ -12,6 +12,7 @@
 #include "led.h"
 
 #include "BurnerConfig.h"
+#include "Task_Beep.h"
 #include "Task_Burner.h"
 #include "Task_Key.h"
 
@@ -51,15 +52,16 @@ uint32_t SysTick_Get(void);       // 获取系统滴答计数值
 TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
     {TaskNull, 10},
-    {LED_Task, 50},   // LED任务，每50ms执行一次
-    {Key_Task, 10},   // 按键任务，每10ms执行一次
-    {Burner_Task, 50},
+    {LED_Task, 50},      // LED任务，每50ms执行一次
+    {Key_Task, 10},      // 按键任务，每10ms执行一次
+    {Burner_Task, 50},   // 烧录任务，每50ms执行一次
+    {Beep_Task, 10},     // 蜂鸣器任务，每10ms执行一次
 
     // 在上面添加任务。。。。
 };
 
 /***************** 主函数 *****************/
-
+uint8_t Test_Buffer[1024];
 /**
  * @brief  主函数
  * @param  None
@@ -92,7 +94,6 @@ int main(void) {
     Set_USBClock();
     USB_Interrupts_Config();
     USB_Init();
-
     /* 进行任务处理 */
     Task_Process();
     while (1) {

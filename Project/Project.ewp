@@ -1070,6 +1070,12 @@
     <group>
         <name>.Task</name>
         <file>
+            <name>$PROJ_DIR$\..\Task\Task_Beep.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_Beep.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\Task\Task_Burner.c</name>
         </file>
         <file>

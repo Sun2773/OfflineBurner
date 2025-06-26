@@ -22,7 +22,7 @@ typedef struct {
     };
     uint16_t FlashSize;   // Flash大小(Kb)
     uint8_t* Buffer;
-
+    uint16_t Error;
     FlashBlobList_t* FlashBlob;   // 当前Flash编程算法
 } BurnerCtrl_t;
 

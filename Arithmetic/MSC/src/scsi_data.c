@@ -71,10 +71,16 @@ uint8_t Standard_Inquiry_Data[] =
     0x00,
     0x00,
     /* Vendor Identification */
-    'S', 'T', 'M', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
     /* Product Identification */
-    'S', 'D', ' ', 'F', 'l', 'a', 's', 'h', ' ',
-    'D', 'i', 's', 'k', ' ', ' ', ' ',
+    0xCD, 0xD1, // 脱
+    0xBB, 0xFA, // 机
+    0xB1, 0xE0, // 编
+    0xB3, 0xCC, // 程
+    0xC6, 0xF7, // 器
+    ' ', ' ',
+    ' ', ' ',
+    ' ', ' ',
     /* Product Revision Level */
     '1', '.', '0', ' '
   };
