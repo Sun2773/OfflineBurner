@@ -150,7 +150,8 @@
         "dap.h": "c",
         "burnerconfig.h": "c",
         "cjson.h": "c",
-        "swd_opt.h": "c"
+        "swd_opt.h": "c",
+        "flash_blob.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"
