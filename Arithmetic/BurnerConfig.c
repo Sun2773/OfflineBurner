@@ -1,6 +1,7 @@
 #include "BurnerConfig.h"
 
 #include <stdlib.h>
+#include "FlashLayout.h"
 #include "SPI_Flash.h"
 #include "Version.h"
 #include "cJSON.h"
@@ -11,7 +12,8 @@
 #include "string.h"
 
 BurnerConfigInfo_t BurnerConfigInfo = {
-    .FilePath = "",
+    .FilePath   = "",
+    .AutoBurner = 1,
 };
 
 void BurnerConfig(void) {
@@ -22,15 +24,18 @@ void BurnerConfig(void) {
     char*    str_buf     = NULL;    // 字符串缓冲区
     UINT     r_cnt       = 0;       // 读取结果
     uint32_t config_flag = 0;       // 配置标志
+    uint32_t crc         = 0;       // CRC校验码
     /* 读取Flash配置 */
     SPI_FLASH_Read(&BurnerConfigInfo,
-                   FLASH_CONFIG_ADDRESS,
+                   SPI_FLASH_CONFIG_ADDRESS,
                    sizeof(BurnerConfigInfo));
-    config_flag = BurnerConfigInfo.Flag;   // 获取配置标志
-    /* 如果配置标志为0xFFFFFFFF，表示没有配置 */
-    if (config_flag == 0xFFFFFFFF) {
+    /* 检查CRC32校验 */
+    crc = CRC32_Update(crc, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
+    if (crc != BurnerConfigInfo.CRC32) {
+        /* CRC校验失败，清空配置 */
         memset(&BurnerConfigInfo, 0, sizeof(BurnerConfigInfo));
     }
+
     if ((fs = pvPortMalloc(sizeof(FATFS))) == NULL) {
         goto ex;
     }
@@ -58,6 +63,86 @@ void BurnerConfig(void) {
     if (f_res != FR_OK) {
         goto ex;
     }
+
+    do {
+        DIR f_dp = {0};   // 目录对象
+        /* 打开固件目录 */
+        if ((f_res = f_opendir(&f_dp, Firmware_Path)) != FR_OK) {
+            break;
+        }
+        /* 寻找固件文件 */
+        while (1) {
+            /* 读取文件 */
+            f_readdir(&f_dp, file_info);
+            /* 无文件结束 */
+            if (*file_info->fname == '\0') {
+                break;
+            }
+            /* 排除文件夹 */
+            if ((file_info->fattrib & AM_DIR) != 0) {
+                continue;
+            }
+            /* 判断是否为固件文件 */
+            if (((memcmp(strrchr(file_info->fname, '.'), ".bin", 4) == 0) ||
+                 (memcmp(strrchr(file_info->fname, '.'), ".BIN", 4) == 0))) {
+                break;
+            }
+        }
+
+        /* 如果没有找到固件文件 */
+        if (*file_info->fname == '\0') {
+            break;
+        }
+        strcpy(str_buf, Firmware_Path);      // 复制固件路径
+        strcat(str_buf, "/");                // 追加斜杠
+        strcat(str_buf, file_info->fname);   // 追加文件名
+        /* 打开固件文件 */
+        if ((f_res = f_open(file, str_buf, FA_READ)) != FR_OK) {
+            break;
+        }
+        uint32_t file_size   = f_size(file);   // 文件大小
+        uint32_t file_finish = 0;              // 已完成大小
+        uint32_t rw_addr     = 0;              // 读写地址
+        LED_Off(RUN);
+        LED_Off(ERR);
+        /* 开始复制文件 */
+        while (file_size - file_finish) {
+            if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
+                /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
+                r_cnt = CONFIG_BUFFER_SIZE;
+            } else {
+                /* 剩余字节数大于0小于缓存,读取剩余字节数 */
+                r_cnt = (file_size - file_finish);
+            }
+            /* 读取文件 */
+            if (f_read(file, str_buf, r_cnt, &r_cnt) != FR_OK) {
+                break;
+            }
+            rw_addr = SPI_FLASH_FIRMWARE_ADDRESS + file_finish;   // 写入地址
+            if ((rw_addr % W25QXX_BLOCK_SIZE) == 0) {
+                /* 如果写入地址是块大小的整数倍，擦除块 */
+                SPI_FLASH_Erase(rw_addr);
+            }
+            SPI_FLASH_Write(str_buf, rw_addr, r_cnt);
+            /* 计数 */
+            file_finish += r_cnt;
+            LED_OnOff(RUN);
+            LED_OnOff(ERR);
+        }
+        /* 删除文件 */
+        f_res = f_del(Firmware_Path);
+        BKP_WriteBackupRegister(BKP_DR1, SPI_FLASH_FIRMWARE_ADDRESS >> 16);      //
+        BKP_WriteBackupRegister(BKP_DR2, SPI_FLASH_FIRMWARE_ADDRESS & 0xFFFF);   //
+        BKP_WriteBackupRegister(BKP_DR3, file_finish >> 16);                     //
+        BKP_WriteBackupRegister(BKP_DR4, file_finish & 0xFFFF);                  //
+        LED_Off(RUN);
+        LED_Off(ERR);
+        NVIC_SystemReset();   // 重启系统
+    } while (0);
+
+    LED_Off(RUN);
+    LED_Off(ERR);
+
     do {
         DIR f_dp = {0};   // 目录对象
         /* 打开目录 */
@@ -117,7 +202,7 @@ void BurnerConfig(void) {
 
             /* 计算文件校验码 */
             file_crc32 = CRC32_Update(file_crc32, str_buf, r_cnt);
-            rw_addr    = FLASH_PROGRAM_ADDRESS + file_finish;   // 写入地址
+            rw_addr    = SPI_FLASH_PROGRAM_ADDRESS + file_finish;   // 写入地址
             if ((rw_addr % W25QXX_BLOCK_SIZE) == 0) {
                 /* 如果写入地址是块大小的整数倍，擦除块 */
                 SPI_FLASH_Erase(rw_addr);
@@ -144,7 +229,7 @@ void BurnerConfig(void) {
                 /* 读取剩余字节数 */
                 r_cnt = (file_size - file_finish);
             }
-            rw_addr = FLASH_PROGRAM_ADDRESS + file_finish;   // 读取地址
+            rw_addr = SPI_FLASH_PROGRAM_ADDRESS + file_finish;   // 读取地址
             /* 读取数据 */
             SPI_FLASH_Read(str_buf, rw_addr, r_cnt);
             /* 计算数据校验码 */
@@ -155,10 +240,10 @@ void BurnerConfig(void) {
         }
         /* 校验数据 */
         if (data_crc32 == file_crc32) {
-            BurnerConfigInfo.FileAddress = FLASH_PROGRAM_ADDRESS;   // 获取文件地址
-            BurnerConfigInfo.FileSize    = file_finish;             // 获取文件大小
-            BurnerConfigInfo.FileCrc     = file_crc32;              // 更新文件CRC32校验码
-            BurnerConfigInfo.Flag        = 0;                       // 更新配置标志
+            BurnerConfigInfo.FileAddress = SPI_FLASH_PROGRAM_ADDRESS;   // 获取文件地址
+            BurnerConfigInfo.FileSize    = file_finish;                 // 获取文件大小
+            BurnerConfigInfo.FileCrc     = file_crc32;                  // 更新文件CRC32校验码
+            BurnerConfigInfo.Flag        = 0;                           // 更新配置标志
             /* 删除文件 */
             f_res = f_unlink(BurnerConfigInfo.FilePath);
         } else {
@@ -195,6 +280,19 @@ void BurnerConfig(void) {
             } else {
                 cJSON_AddStringToObject(root, "file", BurnerConfigInfo.FilePath);
             }
+            if ((item = cJSON_GetObjectItem(root, "autoBurn")) != NULL) {
+                if (cJSON_IsTrue(item)) {
+                    BurnerConfigInfo.AutoBurner = 1;
+                } else {
+                    BurnerConfigInfo.AutoBurner = 0;
+                }
+            } else {
+                if (BurnerConfigInfo.AutoBurner) {
+                    cJSON_AddTrueToObject(root, "autoBurn");
+                } else {
+                    cJSON_AddFalseToObject(root, "autoBurn");
+                }
+            }
             if ((item = cJSON_GetObjectItem(root, "version")) != NULL) {
                 cJSON_SetValuestring(item, SYSTEM_VERSION);
             } else {
@@ -215,9 +313,9 @@ void BurnerConfig(void) {
     } while (0);
     if (config_flag != BurnerConfigInfo.Flag) {
         BurnerConfigInfo.Flag = config_flag;
-        SPI_FLASH_Erase(FLASH_CONFIG_ADDRESS);   // 擦除Flash配置地址
+        SPI_FLASH_Erase(SPI_FLASH_CONFIG_ADDRESS);   // 擦除Flash配置地址
         SPI_FLASH_Write(&BurnerConfigInfo,
-                        FLASH_CONFIG_ADDRESS,
+                        SPI_FLASH_CONFIG_ADDRESS,
                         sizeof(BurnerConfigInfo));   // 写入Flash配置
     }
 ex:

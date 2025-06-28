@@ -15,10 +15,11 @@ from typing import Tuple, Optional
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJ_DIR = os.path.dirname(CURRENT_PATH)
 OUTPUT_DIR = ""
+BOOTLOADER_PATH = "Bootloader/Burner-Boot.bin"
 OBJCOPY_EXE_PATH = os.path.join(CURRENT_PATH, 'arm-none-eabi-objcopy.exe')
 PROJECT_KEY = "PROJECT_NAME "
 VERSION_KEY = "SYSTEM_VERSION "
-BIN_OFFSET = 0x8000
+BIN_OFFSET = 0x2000
 FILE_SIZE_OFFSET = 0x01C4
 
 def has_git_changes() -> bool:
@@ -260,13 +261,15 @@ def main():
         # 生成文件路径
         elf_file_path = os.path.join(TARGET_DIR, f'{TARGET_BNAME}.out')
     
-        if CONFIG_NAME == 'Debug':
+        if CONFIG_NAME == 'Bootloader':
+            file_suffix = f'-Boot'
+        elif CONFIG_NAME == 'Debug':
             file_suffix = f'-{version}-Alpha'
         else:
             file_suffix = f'-{version}'
         
-        bin_file_path = os.path.join(OUTPUT_DIR, f'{project}{file_suffix}.bin')
-        out_file_path = os.path.join(OUTPUT_DIR, f'{project}{file_suffix}.out')
+        bin_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}.bin')
+        out_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}.out')
 
         # 检查是否需要处理文件
         needs_processing = (
@@ -277,13 +280,40 @@ def main():
 
         if needs_processing:
             print("Starting firmware file processing...")
-            clear_directory(os.path.join(OUTPUT_DIR))
+            clear_directory(os.path.join(OUTPUT_DIR, CONFIG_NAME))
             
             if not copy_file(elf_file_path, out_file_path):
                 sys.exit(1)
                 
             if not run_objcopy(OBJCOPY_EXE_PATH, out_file_path, bin_file_path):
                 sys.exit(1)
+
+            if CONFIG_NAME == "Bootloader":
+                # Bootloader 文件处理
+                BOOTLOADER_PATH = os.path.join(CONFIG_NAME, f'{project}{file_suffix}.bin').replace('\\', '/')
+                # 将新生成的文件路径保存到本脚本文件
+                path = os.path.abspath(__file__)
+                with open(path, 'r+', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    for i, line in enumerate(lines):
+                        if 'BOOTLOADER_PATH = ' in line:
+                            lines[i] = f'BOOTLOADER_PATH = "{BOOTLOADER_PATH}"\n'
+                            break
+                    f.seek(0)
+                    f.writelines(lines)
+                    f.truncate()
+                print(f"Bootloder Update: {BOOTLOADER_PATH}")
+            else:
+                # 应用程序文件处理，合并 bootloader 和 bin 文件
+                BOOTLOADER_PATH = os.path.join(OUTPUT_DIR, BOOTLOADER_PATH)
+                target_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}+boot.bin')
+                if os.path.exists(BOOTLOADER_PATH):
+                    if not merge_files(BOOTLOADER_PATH, bin_file_path, target_file_path, BIN_OFFSET):
+                        sys.exit(1)
+                    print(f"Bootloader merged with application: {os.path.basename(target_file_path)}")
+                else:
+                    print(f"Bootloader file does not exist: {BOOTLOADER_PATH}")
+                pass
 
         else:
             print("Skipping file processing")

@@ -4,6 +4,7 @@
 #include "Tool.h"
 #include "heap.h"
 #include "stdio.h"
+#include "FlashLayout.h"
 
 #include "Key.h"
 #include "SPI_Flash.h"
@@ -61,13 +62,15 @@ TaskUnti_t TaskList[] = {
 };
 
 /***************** 主函数 *****************/
-uint8_t Test_Buffer[1024];
+
 /**
  * @brief  主函数
  * @param  None
  * @retval None
  */
 int main(void) {
+    /* 设置中断向量表指向 */
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, CHIP_FIRMWARE_ADDRESS);
     RCC_GetClocksFreq(&RCC_Clocks);                       // 获取系统时钟频率
     SystemCoreClockUpdate();                              // 更新系统时钟频率
     SysTick_Config(RCC_Clocks.SYSCLK_Frequency / 1000);   // 配置SysTick定时器，每1ms中断一次

@@ -1,5 +1,6 @@
-Debug
-Release
+Project/Debug
+Project/Release
+Project/Bootloader
 settings
 *.dep
 *.jdebug.user
