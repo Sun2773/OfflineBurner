@@ -24,7 +24,7 @@ def extract_project_and_version(src_file: str) -> Tuple[Optional[str], Optional[
     project = None
     version = None
     try:
-        with open(src_file, 'r', encoding='gb2312') as file:
+        with open(src_file, 'r', encoding='utf-8') as file:
             for line in file:
                 if project is None and PROJECT_KEY in line: 
                     project = line.split('"')[1]

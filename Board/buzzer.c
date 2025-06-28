@@ -1,5 +1,7 @@
 #include "buzzer.h"
 
+static uint16_t Beep_Timer = 0;
+
 // BUZZER IO初始化
 void Buzzer_Init(void) {
     GPIO_InitTypeDef        GPIO_InitStructure;
@@ -22,7 +24,7 @@ void Buzzer_Init(void) {
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);                 // 根据Struct中指定的参数初始化TIMx的时间基数单位
 
     TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_PWM1;                   // 选择定时器模式:TIM脉冲宽度调制模式2
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable;            // 比较输出使能
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable;           // 比较输出使能
     TIM_OCInitStructure.TIM_Pulse       = (uint16_t) ((TIM3->ARR) * 0.8f);   // 设置待装入捕获比较寄存器的脉冲值
     TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;               // 输出极性:TIM输出比较极性高
     TIM_OC4Init(TIM3, &TIM_OCInitStructure);                                 // 根据TIM_OCInitStruct中指定的参数初始化外设TIMx
@@ -31,4 +33,22 @@ void Buzzer_Init(void) {
     TIM_OC4PreloadConfig(TIM3, TIM_OCPreload_Enable);   // CH3预装载使能
     TIM_ARRPreloadConfig(TIM3, ENABLE);                 // 使能TIMx在ARR上的预装载寄存器
     TIM_Cmd(TIM3, ENABLE);                              // 使能TIM4
+}
+
+/**
+ * @brief  蜂鸣器任务
+ * @note   10ms周期执行
+ * @retval None
+ */
+void Beep_Task(void) {
+    if (Beep_Timer > 0) {
+        Beep_On();
+        Beep_Timer--;
+    } else {
+        Beep_Off();
+    }
+}
+
+void Beep(uint16_t delay) {
+    Beep_Timer = delay;
 }

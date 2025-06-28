@@ -51,6 +51,7 @@
 #include "mass_mal.h"
 #include "SPI_Flash.h"
 #include "stdio.h"
+#include "FlashLayout.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -76,14 +77,11 @@ uint16_t MAL_Init(uint8_t lun)
 
     switch (lun) {
         case 0: {
-            /* ´æ´¢Æ÷³õÊ¼»¯ */
-            W25QXX_Init();
-            
-            Mass_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // FlashÈÝÁ¿
-            Mass_Memory_Offset[0] = Mass_Memory_Size[0] / 2;                    // FlashÆ«ÒÆµØÖ·
-            Mass_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // ¿é´óÐ¡
-            Mass_Block_Count[0]   = Mass_Memory_Size[0] / Mass_Block_Size[0];   // ¿éÊýÁ¿
-            
+            Mass_Memory_Size[0]   = W25QXX_ReadCapacity() - SPI_FLASH_FILE_SYSTEM_ADDRESS;
+            Mass_Memory_Offset[0] = SPI_FLASH_FILE_SYSTEM_ADDRESS;
+            Mass_Block_Size[0]    = W25QXX_BLOCK_SIZE;
+            Mass_Block_Count[0]   = Mass_Memory_Size[0] / Mass_Block_Size[0];
+
             if (Mass_Memory_Size[0] != 0x0000) {
                 stat = MAL_OK;
             }
@@ -136,7 +134,6 @@ uint16_t MAL_Read(uint8_t lun, uint32_t Memory_Offset, uint32_t *Readbuff, uint1
     switch (lun) {
         case 0: {
             Memory_Offset += Mass_Memory_Offset[0];
-            /* ´æ´¢Æ÷¶Á */
             W25QXX_Read((uint8_t*) Readbuff,
                         Memory_Offset,
                         Transfer_Length);

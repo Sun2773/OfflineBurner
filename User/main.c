@@ -1,19 +1,22 @@
 
 #include "stm32f10x.h"
 
+#include "FlashLayout.h"
 #include "Tool.h"
 #include "heap.h"
 #include "stdio.h"
-#include "FlashLayout.h"
 
+#include "DAP.h"
+#include "DAP_config.h"
 #include "Key.h"
 #include "SPI_Flash.h"
+#include "SWD_host.h"
 #include "buzzer.h"
 #include "cJSON.h"
+#include "ff.h"
 #include "led.h"
 
 #include "BurnerConfig.h"
-#include "Task_Beep.h"
 #include "Task_Burner.h"
 #include "Task_Key.h"
 
@@ -21,12 +24,6 @@
 #include "usb_desc.h"
 #include "usb_lib.h"
 #include "usb_pwr.h"
-
-#include "DAP.h"
-#include "DAP_config.h"
-#include "SWD_host.h"
-
-#include "ff.h" /* Declarations of FatFs API */
 
 /***************** 类型声明 *****************/
 
@@ -53,10 +50,9 @@ uint32_t SysTick_Get(void);       // 获取系统滴答计数值
 TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
     {TaskNull, 10},
-    {LED_Task, 50},      // LED任务，每50ms执行一次
-    {Key_Task, 10},     // 按键任务，每10ms执行一次
-    {Burner_Task, 100}, // 烧录任务，每100ms执行一次
-    // {Beep_Task, 10},     // 蜂鸣器任务，每10ms执行一次
+    {LED_Task, 500},      // LED任务，每500ms执行一次
+    {Key_Task, 10},       // 按键任务，每10ms执行一次
+    {Burner_Task, 100},   // 烧录任务，每100ms执行一次
 
     // 在上面添加任务。。。。
 };

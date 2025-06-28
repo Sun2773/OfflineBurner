@@ -1,8 +1,8 @@
 #ifndef __BUZZER_H__
 #define __BUZZER_H__
 
-#include "stm32f10x.h"
 #include "Tool.h"
+#include "stm32f10x.h"
 
 #define BUZZER_RCCCLOCK RCC_AHB1Periph_GPIOB
 #define BUZZER_PORT     GPIOB
@@ -26,6 +26,8 @@ typedef enum {
 
 } BEEP_MODE;
 
-void Buzzer_Init(void);   // 初始化
+void Buzzer_Init(void);      // 初始化
+void Beep_Task(void);        // 蜂鸣器任务
+void Beep(uint16_t delay);   // 蜂鸣器延时
 
 #endif

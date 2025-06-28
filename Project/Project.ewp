@@ -2136,12 +2136,6 @@
     <group>
         <name>.Task</name>
         <file>
-            <name>$PROJ_DIR$\..\Task\Task_Beep.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\Task\Task_Beep.h</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\Task\Task_Burner.c</name>
         </file>
         <file>
@@ -2267,12 +2261,6 @@
         <group>
             <name>SWD</name>
             <file>
-                <name>$PROJ_DIR$\..\Arithmetic\SWD\error.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Arithmetic\SWD\error.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_flash.c</name>
             </file>
             <file>
@@ -2283,12 +2271,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_host.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Arithmetic\SWD\SWD_opt.h</name>
             </file>
         </group>
         <file>

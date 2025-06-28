@@ -7,10 +7,17 @@
 
 #define BURNER_TARGET_ADDRESS  0x08000000     // 烧录目标地址
 #define BURNER_AUTO_START_TIME (1000 / 100)   // 烧录目标地址
+#define BURNER_AUTO_END_TIME   (500 / 100)    // 烧录目标地址
+
+#define BURNER_STATE_IDLE    0   // 空闲状态
+#define BURNER_STATE_START   1   // 启动烧录
+#define BURNER_STATE_RUNNING 2   // 烧录中状态
+#define BURNER_STATE_FINISH  3   // 烧录完成状态
+#define BURNER_STATE_READY   4   // 准备烧录状态
 
 typedef struct {
     uint8_t  Online;       // 在线状态
-    uint8_t  Start;        // 启动状态
+    uint8_t  State;        // 工作状态
     uint32_t ChipIdcode;   // 芯片ID
     uint32_t CPUID;        //
     union {
@@ -32,5 +39,7 @@ typedef struct {
 extern BurnerCtrl_t BurnerCtrl;
 
 void Burner_Task(void);
+void Burner_Detection(void);
+void Burner_Exe(void);
 
 #endif   // __TASK_BURNER_H__

@@ -14,6 +14,9 @@
 BurnerConfigInfo_t BurnerConfigInfo = {
     .FilePath   = "",
     .AutoBurner = 1,
+    .ChipErase  = 0,
+    .ChipLock   = 0,
+    .AutoRun    = 1,
 };
 
 void BurnerConfig(void) {
@@ -25,16 +28,6 @@ void BurnerConfig(void) {
     UINT     r_cnt       = 0;       // 读取结果
     uint32_t config_flag = 0;       // 配置标志
     uint32_t crc         = 0;       // CRC校验码
-    /* 读取Flash配置 */
-    SPI_FLASH_Read(&BurnerConfigInfo,
-                   SPI_FLASH_CONFIG_ADDRESS,
-                   sizeof(BurnerConfigInfo));
-    /* 检查CRC32校验 */
-    crc = CRC32_Update(crc, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
-    if (crc != BurnerConfigInfo.CRC32) {
-        /* CRC校验失败，清空配置 */
-        memset(&BurnerConfigInfo, 0, sizeof(BurnerConfigInfo));
-    }
 
     if ((fs = pvPortMalloc(sizeof(FATFS))) == NULL) {
         goto ex;
@@ -48,6 +41,19 @@ void BurnerConfig(void) {
     if ((str_buf = pvPortMalloc(CONFIG_BUFFER_SIZE)) == NULL) {
         goto ex;
     }
+
+    /********************************* 读取系统配置 *********************************/
+    SPI_FLASH_Read(str_buf,
+                   SPI_FLASH_CONFIG_ADDRESS,
+                   sizeof(BurnerConfigInfo_t));
+    /* 检查CRC32校验 */
+    crc = CRC32_Update(0, str_buf, sizeof(BurnerConfigInfo_t) - 4);
+    if (crc == ((BurnerConfigInfo_t*) str_buf)->CRC32) {
+        /* CRC校验失败，清空配置 */
+        memcpy(&BurnerConfigInfo, str_buf, sizeof(BurnerConfigInfo_t));
+    }
+
+    /********************************* 挂载文件系统 *********************************/
     /* 挂载文件体统 */
     f_res = f_mount(fs, Flash_Path, 1);
     /* 没有文件系统 */
@@ -64,6 +70,7 @@ void BurnerConfig(void) {
         goto ex;
     }
 
+    /********************************* 检查是否需要固件升级 *********************************/
     do {
         DIR f_dp = {0};   // 目录对象
         /* 打开固件目录 */
@@ -140,9 +147,7 @@ void BurnerConfig(void) {
         NVIC_SystemReset();   // 重启系统
     } while (0);
 
-    LED_Off(RUN);
-    LED_Off(ERR);
-
+    /********************************* 检查是否需要加载程序 *********************************/
     do {
         DIR f_dp = {0};   // 目录对象
         /* 打开目录 */
@@ -213,6 +218,7 @@ void BurnerConfig(void) {
             file_finish += r_cnt;
             LED_OnOff(RUN);
         }
+        LED_Off(RUN);
         LED_Off(ERR);
         /* 重新赋值 */
         file_size   = file_finish;
@@ -251,6 +257,8 @@ void BurnerConfig(void) {
     } while (0);
     LED_Off(RUN);
     LED_Off(ERR);
+
+    /********************************* 检查配置文件 *********************************/
     do {
         if ((f_res = f_stat(Config_Path, file_info)) == FR_OK) {
             config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
@@ -293,17 +301,57 @@ void BurnerConfig(void) {
                     cJSON_AddFalseToObject(root, "autoBurn");
                 }
             }
+            if ((item = cJSON_GetObjectItem(root, "chipErase")) != NULL) {
+                if (cJSON_IsTrue(item)) {
+                    BurnerConfigInfo.ChipErase = 1;
+                } else {
+                    BurnerConfigInfo.ChipErase = 0;
+                }
+            } else {
+                if (BurnerConfigInfo.ChipErase) {
+                    cJSON_AddTrueToObject(root, "chipErase");
+                } else {
+                    cJSON_AddFalseToObject(root, "chipErase");
+                }
+            }
+            if ((item = cJSON_GetObjectItem(root, "chipLock")) != NULL) {
+                if (cJSON_IsTrue(item)) {
+                    BurnerConfigInfo.ChipLock = 1;
+                } else {
+                    BurnerConfigInfo.ChipLock = 0;
+                }
+            } else {
+                if (BurnerConfigInfo.ChipLock) {
+                    cJSON_AddTrueToObject(root, "chipLock");
+                } else {
+                    cJSON_AddFalseToObject(root, "chipLock");
+                }
+            }
+            if ((item = cJSON_GetObjectItem(root, "autoRun")) != NULL) {
+                if (cJSON_IsTrue(item)) {
+                    BurnerConfigInfo.AutoRun = 1;
+                } else {
+                    BurnerConfigInfo.AutoRun = 0;
+                }
+            } else {
+                if (BurnerConfigInfo.AutoRun) {
+                    cJSON_AddTrueToObject(root, "autoRun");
+                } else {
+                    cJSON_AddFalseToObject(root, "autoRun");
+                }
+            }
             if ((item = cJSON_GetObjectItem(root, "version")) != NULL) {
                 cJSON_SetValuestring(item, SYSTEM_VERSION);
             } else {
                 cJSON_AddStringToObject(root, "version", SYSTEM_VERSION);
             }
-            str_buf = cJSON_PrintUnformatted(root);   // 将JSON对象转换为字符串
-            cJSON_Delete(root);                       // 删除JSON对象
+            char* json = cJSON_PrintUnformatted(root);   // 将JSON对象转换为字符串
+            cJSON_Delete(root);                          // 删除JSON对象
 
-            f_res = f_lseek(file, 0);   // 将文件指针移动到文件开头
-            f_res = f_write(file, str_buf, strlen(str_buf), &r_cnt);
-            f_res = f_truncate(file);   // 截断文件到当前大小
+            f_res = f_lseek(file, 0);
+            f_res = f_write(file, json, strlen(json), &r_cnt);
+            f_res = f_truncate(file);
+            vPortFree(json);
 
             f_close(file);
 
@@ -311,19 +359,23 @@ void BurnerConfig(void) {
             config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
         }
     } while (0);
+
+    /********************************* 更新配置 *********************************/
     if (config_flag != BurnerConfigInfo.Flag) {
-        BurnerConfigInfo.Flag = config_flag;
-        SPI_FLASH_Erase(SPI_FLASH_CONFIG_ADDRESS);   // 擦除Flash配置地址
+        BurnerConfigInfo.Flag  = config_flag;
+        BurnerConfigInfo.CRC32 = CRC32_Update(0, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
+
+        SPI_FLASH_Erase(SPI_FLASH_CONFIG_ADDRESS);
         SPI_FLASH_Write(&BurnerConfigInfo,
                         SPI_FLASH_CONFIG_ADDRESS,
-                        sizeof(BurnerConfigInfo));   // 写入Flash配置
+                        sizeof(BurnerConfigInfo));
     }
 ex:
     if (file != NULL) {
         f_close(file);
         vPortFree(file);
     }
-    /*取消挂载*/
+    /* 取消挂载 */
     f_res = f_mount(0, "0:", 1);
 
     if (fs != NULL) {

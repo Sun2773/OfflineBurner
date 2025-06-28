@@ -50,7 +50,7 @@ void Key_Task(void) {
  * @retval 1: 事件处理成功, 0: 事件处理失败
  */
 static uint8_t Key_ClickEvent(uint32_t key) {
-    BurnerCtrl.Start = 1;
+    BurnerCtrl.State = BURNER_STATE_START;
     return 1;
 }
 

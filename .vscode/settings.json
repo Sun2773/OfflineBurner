@@ -154,7 +154,8 @@
         "flash_blob.h": "c",
         "swd_host.h": "c",
         "task_burner.h": "c",
-        "task_beep.h": "c"
+        "task_beep.h": "c",
+        "usb_lib.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"

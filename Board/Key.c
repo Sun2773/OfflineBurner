@@ -36,7 +36,7 @@ void Key_Init(void) {
  */
 uint32_t Key_Get(void) {
     uint32_t key = 0;
-    for (uint8_t i = 0; i < 1; i++) {
+    for (uint8_t i = 0; i < ArraySize(Key_Gpio); i++) {
         uint8_t val = !(Key_Gpio[i].GPIOx->IDR & Key_Gpio[i].GPIO_Pin);
         key |= val << i;
     }

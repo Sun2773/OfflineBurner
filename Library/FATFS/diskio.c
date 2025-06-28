@@ -10,6 +10,7 @@
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
 #include "SPI_Flash.h"
+#include "FlashLayout.h"
 
 /* Definitions of physical drive number for each drive */
 #define	DEV_SPI_FLASH	0	/* Example: Map SPI Flash to physical drive 0 */
@@ -59,10 +60,10 @@ DSTATUS disk_initialize (
             /* 存储器初始化 */
             W25QXX_Init();
 
-            Fat_Memory_Size[0]   = W25QXX_ReadCapacity() / 2;                  // Flash容量
-            Fat_Memory_Offset[0] = Fat_Memory_Size[0] / 2;                    // Flash偏移地址
-            Fat_Block_Size[0]    = W25QXX_BLOCK_SIZE;                          // 块大小
-            Fat_Block_Count[0]   = Fat_Memory_Size[0] / Fat_Block_Size[0];   // 块数量
+            Fat_Memory_Size[0]   = W25QXX_ReadCapacity() - SPI_FLASH_FILE_SYSTEM_ADDRESS;   // Flash容量
+            Fat_Memory_Offset[0] = SPI_FLASH_FILE_SYSTEM_ADDRESS;                           // Flash偏移地址
+            Fat_Block_Size[0]    = W25QXX_BLOCK_SIZE;                                       // 块大小
+            Fat_Block_Count[0]   = Fat_Memory_Size[0] / Fat_Block_Size[0];                  // 块数量
 
             stat = disk_status(pdrv);
         }
