@@ -5,7 +5,8 @@
 #include "stdlib.h"
 #include "stm32f10x.h"
 
-#define BURNER_TARGET_ADDRESS 0x08000000   // 烧录目标地址
+#define BURNER_TARGET_ADDRESS  0x08000000     // 烧录目标地址
+#define BURNER_AUTO_START_TIME (1000 / 100)   // 烧录目标地址
 
 typedef struct {
     uint8_t  Online;       // 在线状态
@@ -20,10 +21,12 @@ typedef struct {
             uint16_t REV_ID : 16;   // 版本ID
         };
     };
-    uint16_t FlashSize;   // Flash大小(Kb)
-    uint8_t* Buffer;
-    uint16_t Error;
-    FlashBlobList_t* FlashBlob;   // 当前Flash编程算法
+    uint16_t         FlashSize;    // Flash大小(Kb)
+    uint8_t*         Buffer;       // 烧录数据缓冲区
+    uint16_t         Error;        // 错误码
+    int16_t          StartTimer;   // 启动计时器
+    int16_t          EndTimer;     // 结束计时器
+    FlashBlobList_t* FlashBlob;    // 当前Flash编程算法
 } BurnerCtrl_t;
 
 extern BurnerCtrl_t BurnerCtrl;

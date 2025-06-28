@@ -16,29 +16,38 @@ extern uint32_t SysTick_Get(void);   // 获取系统滴答计数值
 BurnerCtrl_t BurnerCtrl;
 
 static void Burner_Detection(void) {
+    /* 已经开始烧录，不进行 */
     if (BurnerCtrl.Start == 1) {
         return;
     }
     if (BurnerCtrl.Online != 0) {
         BurnerCtrl.Online = swd_read_idcode(&BurnerCtrl.ChipIdcode);
-        if (BurnerCtrl.Start == 0) {
-            BurnerCtrl.Start = 1;
-        }
+
     } else {
         BurnerCtrl.ChipIdcode = 0;
         BurnerCtrl.Online     = swd_init_debug();
         if (BurnerCtrl.Online != 0) {
             swd_read_memory(0xE000ED00, (void*) &BurnerCtrl.CPUID, 4);                                // 读取CPUID寄存器
             swd_read_memory(0xE0042000, (void*) &BurnerCtrl.DBGMCU_IDCODE, 4);                        // 读取DBGMCU IDCODE寄存器
-            BurnerCtrl.FlashBlob = FlashBlob_GetForId(BurnerCtrl.DEV_ID & 0xFFF);                     // 获取Flash编程算法
+            BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.DEV_ID & 0xFFF, 0);                       // 获取Flash编程算法
             swd_read_memory(BurnerCtrl.FlashBlob->FlashSizeAddr, (void*) &BurnerCtrl.FlashSize, 2);   // 读取Flash大小
+            BurnerCtrl.FlashBlob  = FlashBlob_Get(BurnerCtrl.DEV_ID & 0xFFF, BurnerCtrl.FlashSize);   // 获取Flash编程算法
+            BurnerCtrl.StartTimer = BURNER_AUTO_START_TIME;
+            Beep(100);
         } else {
             BurnerCtrl.CPUID         = 0;
             BurnerCtrl.DBGMCU_IDCODE = 0;
             BurnerCtrl.FlashBlob     = NULL;
             BurnerCtrl.FlashSize     = 0;
             BurnerCtrl.Start         = 0;
+            BurnerCtrl.StartTimer    = -1;
         }
+    }
+    if (BurnerCtrl.StartTimer > 0) {
+        BurnerCtrl.StartTimer--;
+    } else if (BurnerCtrl.StartTimer == 0) {
+        BurnerCtrl.Start      = 1;
+        BurnerCtrl.StartTimer = -1;
     }
 }
 
@@ -55,7 +64,7 @@ static void Burner_Exe(void) {
     if (BurnerCtrl.Buffer == NULL) {
         return;   // 内存分配失败
     }
-
+    Beep(150);
     uint32_t file_size   = BurnerConfigInfo.FileSize;      // 文件大小
     uint32_t file_finish = 0;                              // 已完成大小
     uint32_t rw_addr     = BurnerConfigInfo.FileAddress;   // 读写地址
@@ -111,9 +120,9 @@ static void Burner_Exe(void) {
     target_flash_uninit();
 exit:
     if (BurnerCtrl.Error == 0) {
-        Beep(15);
+        Beep(300);
     } else {
-        Beep(100);
+        Beep(1000);
         LED_On(ERR);
     }
     BurnerCtrl.Start = 3;

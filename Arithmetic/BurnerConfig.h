@@ -17,6 +17,7 @@ typedef struct {
     uint32_t FileSize;        // 文件大小
     uint32_t FileCrc;         // 文件CRC32校验码
     char     FilePath[128];   // 文件路径
+    uint32_t CRC32;           // CRC32校验码
 } BurnerConfigInfo_t;
 
 extern BurnerConfigInfo_t BurnerConfigInfo;

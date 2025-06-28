@@ -34,12 +34,12 @@ typedef struct {
     const uint16_t DevId;           // 设备ID (12位)
     const char*    Name;            // 设备名称
     const uint32_t FlashSizeAddr;   // Flash大小寄存器地址
+    const uint16_t FlashSize[2];    // Flash大小范围
 
     const program_target_t* prog_flash;   // Flash编程算法
     const program_target_t* prog_opt;     // 选项字编程算法
 } FlashBlobList_t;
 
-/* 根据设备ID获取对应的Flash编程算法 */
-FlashBlobList_t* FlashBlob_GetForId(uint16_t id);
+FlashBlobList_t* FlashBlob_Get(uint16_t id, uint16_t flash_size);
 
 #endif

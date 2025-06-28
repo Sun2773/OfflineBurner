@@ -53,9 +53,9 @@ TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
     {TaskNull, 10},
     {LED_Task, 50},      // LED任务，每50ms执行一次
-    {Key_Task, 10},      // 按键任务，每10ms执行一次
-    {Burner_Task, 50},   // 烧录任务，每50ms执行一次
-    {Beep_Task, 10},     // 蜂鸣器任务，每10ms执行一次
+    {Key_Task, 10},     // 按键任务，每10ms执行一次
+    {Burner_Task, 100}, // 烧录任务，每100ms执行一次
+    // {Beep_Task, 10},     // 蜂鸣器任务，每10ms执行一次
 
     // 在上面添加任务。。。。
 };
@@ -122,6 +122,7 @@ void Task_Remarks(void) {
             TaskList[i].Ready = 1;                   // 设置任务就绪标志
         }
     }
+    Beep_Task();
 }
 
 /**

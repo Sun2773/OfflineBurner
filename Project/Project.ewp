@@ -1092,17 +1092,38 @@
         <name>Arithmetic</name>
         <group>
             <name>algo</name>
+            <group>
+                <name>STM32F1</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F1\STM32F10x_1024.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F1\STM32F10x_128.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F1\STM32F10x_512.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F1\STM32F10x_OPT.c</name>
+                </file>
+            </group>
+            <group>
+                <name>STM32F4</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F40xxx_41xxx_OPT.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F4xx_1024.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F4xx_512.c</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F10x_128.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F10x_OPT.c</name>
             </file>
         </group>
         <group>
