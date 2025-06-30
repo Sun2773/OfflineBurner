@@ -63,7 +63,7 @@ def main():
             sys.exit(1)
         # 去掉version字符串中的非数字字符
         version = ''.join(filter(str.isdigit, version))
-        with open(VERSION_FILE_PATH, "r+") as f:
+        with open(VERSION_FILE_PATH, "r+", encoding='utf-8') as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if 'VersionNumber' in line:

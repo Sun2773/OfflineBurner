@@ -52,6 +52,7 @@
 #include "SPI_Flash.h"
 #include "stdio.h"
 #include "FlashLayout.h"
+#include "led.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -103,6 +104,7 @@ uint16_t MAL_Write(uint8_t lun, uint32_t Memory_Offset, uint32_t *Writebuff, uin
 
     switch (lun) {
         case 0: {
+            LED_On(ERR);
             Memory_Offset += Mass_Memory_Offset[0];
             while (Transfer_Length) {
                 W25QXX_EraseSector(Memory_Offset);
@@ -113,6 +115,7 @@ uint16_t MAL_Write(uint8_t lun, uint32_t Memory_Offset, uint32_t *Writebuff, uin
                 Writebuff += Mass_Block_Size[0] / 4;
                 Transfer_Length -= Mass_Block_Size[0];
             }
+            LED_Off(ERR);
             stat = MAL_OK;
         } break;
     }
@@ -133,10 +136,12 @@ uint16_t MAL_Read(uint8_t lun, uint32_t Memory_Offset, uint32_t *Readbuff, uint1
 
     switch (lun) {
         case 0: {
+            LED_On(ERR);
             Memory_Offset += Mass_Memory_Offset[0];
             W25QXX_Read((uint8_t*) Readbuff,
                         Memory_Offset,
                         Transfer_Length);
+            LED_Off(ERR);
             stat = MAL_OK;
         } break;
     }

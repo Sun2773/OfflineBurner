@@ -13,6 +13,11 @@ extern uint32_t SysTick_Get(void);   // 获取系统滴答计数值
 
 BurnerCtrl_t BurnerCtrl;
 
+/**
+ * @brief  检测目标
+ * @note   
+ * @retval None
+ */
 void Burner_Detection(void) {
     if (BurnerCtrl.Online != 0) {
         BurnerCtrl.Online = swd_read_idcode(&BurnerCtrl.ChipIdcode);
@@ -42,7 +47,12 @@ void Burner_Detection(void) {
                 } else {
                     BurnerCtrl.State = BURNER_STATE_READY;
                     if (BurnerConfigInfo.AutoBurner == 0) {
-                        Beep(500);
+                        if (BurnerCtrl.FlashBlob != NULL) {
+                            // Beep(300);
+                        } else {
+                            LED_On(ERR);
+                            Beep(1500);
+                        }
                     }
                 }
             } else {
@@ -71,8 +81,22 @@ void Burner_Detection(void) {
     }
 }
 
+/**
+ * @brief  执行烧录
+ * @note   
+ * @retval None
+ */
 void Burner_Exe(void) {
     if (BurnerCtrl.State != BURNER_STATE_START) {
+        return;
+    }
+    if (BurnerCtrl.FlashBlob == NULL ||
+        BurnerConfigInfo.FileSize == 0 ||
+        BurnerConfigInfo.FileAddress == 0) {
+        BurnerCtrl.Error = 9;
+        LED_On(ERR);
+        Beep(1500);
+        BurnerCtrl.State = BURNER_STATE_FINISH;
         return;
     }
     BurnerCtrl.State = BURNER_STATE_RUNNING;
@@ -82,7 +106,7 @@ void Burner_Exe(void) {
         BurnerCtrl.Buffer = pvPortMalloc(CONFIG_BUFFER_SIZE);
     }
     if (BurnerCtrl.Buffer == NULL) {
-        return;   // 内存分配失败
+        return;
     }
     Beep(150);
     uint32_t file_size   = BurnerConfigInfo.FileSize;      // 文件大小
@@ -161,6 +185,11 @@ exit:
     BurnerCtrl.State    = BURNER_STATE_FINISH;
 }
 
+/**
+ * @brief  编程烧录任务
+ * @note   100ms执行一次
+ * @retval None
+ */
 void Burner_Task(void) {
     Burner_Detection();
     Burner_Exe();

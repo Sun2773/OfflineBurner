@@ -263,8 +263,17 @@ void BurnerConfig(void) {
         if ((f_res = f_stat(Config_Path, file_info)) == FR_OK) {
             config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
         }
+        if (f_res == FR_NO_FILE) {
+            /* 如果配置文件不存在，创建一个默认配置 */
+            BurnerConfigInfo.AutoBurner = CONFIG_DEFAULT_AUTO_BURNER;
+            BurnerConfigInfo.ChipErase  = CONFIG_DEFAULT_CHIP_ERASE;
+            BurnerConfigInfo.ChipLock   = CONFIG_DEFAULT_CHIP_LOCK;
+            BurnerConfigInfo.AutoRun    = CONFIG_DEFAULT_AUTO_RUN;
+        }
         /* 配置文件发生变化，读取配置文件 */
-        if (config_flag != BurnerConfigInfo.Flag || f_res == FR_NO_FILE) {
+        if ((config_flag != BurnerConfigInfo.Flag) ||
+            (f_res == FR_NO_FILE) ||
+            (strcmp(BurnerConfigInfo.Version, SYSTEM_VERSION) != 0)) {
             if ((f_res = f_open(file, Config_Path, FA_READ | FA_WRITE | FA_OPEN_ALWAYS)) != FR_OK) {
                 goto ex;
             }
@@ -362,7 +371,8 @@ void BurnerConfig(void) {
 
     /********************************* 更新配置 *********************************/
     if (config_flag != BurnerConfigInfo.Flag) {
-        BurnerConfigInfo.Flag  = config_flag;
+        BurnerConfigInfo.Flag = config_flag;
+        strcpy(BurnerConfigInfo.Version, SYSTEM_VERSION);
         BurnerConfigInfo.CRC32 = CRC32_Update(0, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
 
         SPI_FLASH_Erase(SPI_FLASH_CONFIG_ADDRESS);
