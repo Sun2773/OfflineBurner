@@ -16,19 +16,27 @@
 #define BURNER_STATE_READY   4   // 准备烧录状态
 
 typedef struct {
-    uint8_t  Online;       // 在线状态
-    uint8_t  State;        // 工作状态
-    uint32_t ChipIdcode;   // 芯片ID
-    uint32_t CPUID;        //
-    union {
-        uint32_t DBGMCU_IDCODE;   // 调试MCU IDCODE寄存器
-        struct {
-            uint16_t DEV_ID : 12;   // 设备ID
-            uint16_t        : 4;    // 保留位
-            uint16_t REV_ID : 16;   // 版本ID
+    uint8_t Online;   // 在线状态
+    uint8_t State;    // 工作状态
+    struct {
+        uint32_t ChipIdcode;   // 芯片ID
+        uint32_t CPUID;        //
+        union {
+            uint32_t DBGMCU_IDCODE;   // 调试MCU IDCODE寄存器
+            struct {
+                uint16_t DEV_ID : 12;   // 设备ID
+                uint16_t        : 4;    // 保留位
+                uint16_t REV_ID : 16;   // 版本ID
+            };
         };
-    };
-    uint16_t         FlashSize;    // Flash大小(Kb)
+        uint32_t OptionByte[4];   // 选项字寄存器
+        uint16_t FlashSize;       // Flash大小(Kb)
+
+        uint32_t ProgramSize;   // 程序大小
+        uint32_t FinishSize;    // 已完成大小
+        uint16_t FinishRate;    // 完成率
+        uint32_t FinishTime;    // 完成时间
+    } Info;
     uint8_t*         Buffer;       // 烧录数据缓冲区
     uint16_t         Error;        // 错误码
     int16_t          StartTimer;   // 启动计时器

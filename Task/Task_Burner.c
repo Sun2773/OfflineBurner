@@ -15,27 +15,23 @@ BurnerCtrl_t BurnerCtrl;
 
 /**
  * @brief  检测目标
- * @note   
+ * @note
  * @retval None
  */
 void Burner_Detection(void) {
     if (BurnerCtrl.Online != 0) {
-        BurnerCtrl.Online = swd_read_idcode(&BurnerCtrl.ChipIdcode);
+        BurnerCtrl.Online = swd_read_idcode(&BurnerCtrl.Info.ChipIdcode);
     } else {
         BurnerCtrl.Online = swd_init_debug();
 
         if (BurnerCtrl.Online != 0) {
-            swd_read_memory(0xE000ED00, (void*) &BurnerCtrl.CPUID, 4);                                // 读取CPUID寄存器
-            swd_read_memory(0xE0042000, (void*) &BurnerCtrl.DBGMCU_IDCODE, 4);                        // 读取DBGMCU IDCODE寄存器
-            BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.DEV_ID & 0xFFF, 0);                       // 获取Flash编程算法
-            swd_read_memory(BurnerCtrl.FlashBlob->FlashSizeAddr, (void*) &BurnerCtrl.FlashSize, 2);   // 读取Flash大小
-            BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.DEV_ID & 0xFFF, BurnerCtrl.FlashSize);    // 获取Flash编程算法
+            // swd_read_memory(0xE000ED00, (void*) &BurnerCtrl.Info.CPUID, 4);   // 读取CPUID寄存器
         } else {
-            BurnerCtrl.CPUID         = 0;
-            BurnerCtrl.DBGMCU_IDCODE = 0;
-            BurnerCtrl.FlashBlob     = NULL;
-            BurnerCtrl.FlashSize     = 0;
-            BurnerCtrl.ChipIdcode    = 0;
+            BurnerCtrl.Info.CPUID         = 0;
+            BurnerCtrl.Info.DBGMCU_IDCODE = 0;
+            BurnerCtrl.FlashBlob          = NULL;
+            BurnerCtrl.Info.FlashSize     = 0;
+            BurnerCtrl.Info.ChipIdcode    = 0;
         }
     }
 
@@ -47,12 +43,7 @@ void Burner_Detection(void) {
                 } else {
                     BurnerCtrl.State = BURNER_STATE_READY;
                     if (BurnerConfigInfo.AutoBurner == 0) {
-                        if (BurnerCtrl.FlashBlob != NULL) {
-                            // Beep(300);
-                        } else {
-                            LED_On(ERR);
-                            Beep(1500);
-                        }
+                        Beep(300);
                     }
                 }
             } else {
@@ -83,97 +74,130 @@ void Burner_Detection(void) {
 
 /**
  * @brief  执行烧录
- * @note   
+ * @note
  * @retval None
  */
 void Burner_Exe(void) {
+    /* 等待开始命令 */
     if (BurnerCtrl.State != BURNER_STATE_START) {
         return;
     }
-    if (BurnerCtrl.FlashBlob == NULL ||
-        BurnerConfigInfo.FileSize == 0 ||
-        BurnerConfigInfo.FileAddress == 0) {
-        BurnerCtrl.Error = 9;
-        LED_On(ERR);
-        Beep(1500);
-        BurnerCtrl.State = BURNER_STATE_FINISH;
-        return;
-    }
-    BurnerCtrl.State = BURNER_STATE_RUNNING;
-    BurnerCtrl.Error = 0;
+
     LED_Off(ERR);
+    /* 分配缓存 */
     if (BurnerCtrl.Buffer == NULL) {
         BurnerCtrl.Buffer = pvPortMalloc(CONFIG_BUFFER_SIZE);
     }
     if (BurnerCtrl.Buffer == NULL) {
         return;
     }
+    /* 蜂鸣器短鸣 */
     Beep(150);
-    uint32_t file_size   = BurnerConfigInfo.FileSize;      // 文件大小
-    uint32_t file_finish = 0;                              // 已完成大小
-    uint32_t rw_addr     = BurnerConfigInfo.FileAddress;   // 读写地址
-    uint32_t rw_cnt      = 0;                              // 读写计数
+    BurnerCtrl.Info.ProgramSize = BurnerConfigInfo.FileSize;   // 文件大小
+    BurnerCtrl.Info.FinishSize  = 0;                           // 已完成大小
+    BurnerCtrl.Info.FinishRate  = 0;                           // 已完成大小
+    BurnerCtrl.Info.FinishTime  = 0;                           // 完成时间
+    uint32_t tick               = SysTick_Get();               // 获取当前系统滴答计数值
+    BurnerCtrl.State            = BURNER_STATE_RUNNING;
+    BurnerCtrl.Error            = 0;
 
+    /* 初始化接口 */
     if (swd_init_debug() == 0) {
         BurnerCtrl.Error = 1;   // SWD初始化失败
         goto exit;              // 初始化失败
     }
+    /* 读取DBGMCU IDCODE寄存器 */
+    swd_read_memory(0xE0042000, (void*) &BurnerCtrl.Info.DBGMCU_IDCODE, 4);
+    /* 初步匹配编程算法 */
+    BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.Info.DEV_ID & 0xFFF, 0);
+    /* 初始化选项字节编程算法 */
     if (target_flash_init(BurnerCtrl.FlashBlob->prog_opt, 0) != ERROR_SUCCESS) {
         BurnerCtrl.Error = 2;   // 选项字初始化失败
         goto exit;              // 初始化失败
     }
+    /* 复位选项字节 */
     if (target_flash_erase_chip() != ERROR_SUCCESS) {
         BurnerCtrl.Error = 3;   // 选项字擦除失败
         goto exit;              // 擦除失败
     }
+    /* 反初始化选项字节编程算法 */
     target_flash_uninit();
+    /* 等待响应 */
+    for (uint16_t i = 0; i < 1000; i++) {
+        /* 初始化接口 */
+        if (swd_init_debug() == 0) {
+            continue;
+        }
+        /* 获取Flash大小 */
+        if (swd_read_memory(BurnerCtrl.FlashBlob->FlashSizeAddr, (void*) &BurnerCtrl.Info.FlashSize, 2) != 0) {   // 读取Flash大小
+            break;
+        }
+    }
+    /* 重新匹配编程算法 */
+    BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.Info.DEV_ID & 0xFFF, BurnerCtrl.Info.FlashSize);   // 获取Flash编程算法
+    /* 算法错误 */
+    if (BurnerCtrl.FlashBlob == NULL ||
+        BurnerConfigInfo.FileSize == 0 ||
+        BurnerConfigInfo.FileAddress == 0) {
+        BurnerCtrl.Error = 5;
+        goto exit;
+    }
 
-    if (swd_init_debug() == 0) {
-        BurnerCtrl.Error = 4;   // SWD初始化失败
-        goto exit;              // 初始化失败
-    }
+    /* 初始化Flash编程算法 */
     if (target_flash_init(BurnerCtrl.FlashBlob->prog_flash, 0x08000000) != ERROR_SUCCESS) {
-        BurnerCtrl.Error = 5;   // Flash初始化失败
+        BurnerCtrl.Error = 6;   // Flash初始化失败
         goto exit;              // 初始化失败
     }
+    /* 若配置了擦除全片则擦除全片 */
     if (BurnerConfigInfo.ChipErase != 0) {
         if (target_flash_erase_chip() != ERROR_SUCCESS) {
-            BurnerCtrl.Error = 6;   // Flash擦除失败
+            BurnerCtrl.Error = 7;   // Flash擦除失败
             goto exit;              // 擦除失败
         }
     }
-    while (file_size - file_finish) {
-        if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
+    /* 对Flash进行编程 */
+    while (BurnerCtrl.Info.ProgramSize - BurnerCtrl.Info.FinishSize) {
+        uint32_t rw_cnt = 0;   // 读写计数
+        uint32_t f_addr = BurnerConfigInfo.FileAddress;
+        uint32_t t_addr = BURNER_TARGET_ADDRESS;
+        if ((BurnerCtrl.Info.ProgramSize - BurnerCtrl.Info.FinishSize) > CONFIG_BUFFER_SIZE) {
             /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
             rw_cnt = CONFIG_BUFFER_SIZE;
         } else {
             /* 剩余字节数大于0小于缓存,读取剩余字节数 */
-            rw_cnt = (file_size - file_finish);
+            rw_cnt = (BurnerCtrl.Info.ProgramSize - BurnerCtrl.Info.FinishSize);
         }
-        SPI_FLASH_Read(BurnerCtrl.Buffer, rw_addr + file_finish, CONFIG_BUFFER_SIZE);
+        f_addr += BurnerCtrl.Info.FinishSize;   // Flash读取地址
+        t_addr += BurnerCtrl.Info.FinishSize;   // Flash写入地址
+        SPI_FLASH_Read(BurnerCtrl.Buffer, f_addr, rw_cnt);
+        /* 若未配置擦除全片，到达扇区起始地址，擦除扇区 */
         if ((BurnerConfigInfo.ChipErase == 0) &&
-            (target_flash_sector_integer(BURNER_TARGET_ADDRESS + file_finish) != 0)) {
-            if (target_flash_erase_sector(BURNER_TARGET_ADDRESS + file_finish) != ERROR_SUCCESS) {
-                BurnerCtrl.Error = 7;   // Flash擦除失败
+            (target_flash_sector_integer(t_addr) != 0)) {
+            LED_On(RUN);
+            if (target_flash_erase_sector(t_addr) != ERROR_SUCCESS) {
+                BurnerCtrl.Error = 8;   // Flash擦除失败
                 break;                  // 擦除失败
             }
+            LED_Off(RUN);
         }
-        if (target_flash_program_page(BURNER_TARGET_ADDRESS + file_finish,
-                                      BurnerCtrl.Buffer,
-                                      rw_cnt) != ERROR_SUCCESS) {
-            BurnerCtrl.Error = 8;   // Flash编程失败
+        /* 对Flash进行编程 */
+        if (target_flash_program_page(t_addr, BurnerCtrl.Buffer, rw_cnt) != ERROR_SUCCESS) {
+            BurnerCtrl.Error = 9;   // Flash编程失败
             break;
         }
-        file_finish += rw_cnt;
+        BurnerCtrl.Info.FinishSize += rw_cnt;
+        BurnerCtrl.Info.FinishRate = BurnerCtrl.Info.FinishSize * 1000 / BurnerCtrl.Info.ProgramSize;
         LED_OnOff(RUN);
     }
+    target_flash_uninit();
+
+    /* 编程完成，若配置了重启运行，则复位目标 */
     if (BurnerConfigInfo.AutoRun != 0) {
         if (swd_init_debug()) {
             swd_set_target_reset(0);   // 复位运行
         }
     }
 
-    target_flash_uninit();
 exit:
     if (BurnerCtrl.Error == 0) {
         Beep(300);
@@ -181,8 +205,9 @@ exit:
         Beep(2000);
         LED_On(ERR);
     }
-    BurnerCtrl.EndTimer = BURNER_AUTO_END_TIME;
-    BurnerCtrl.State    = BURNER_STATE_FINISH;
+    BurnerCtrl.EndTimer        = BURNER_AUTO_END_TIME;
+    BurnerCtrl.State           = BURNER_STATE_FINISH;
+    BurnerCtrl.Info.FinishTime = SysTick_Get() - tick;   // 计算完成时间
 }
 
 /**

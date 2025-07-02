@@ -16,11 +16,11 @@ error_t target_flash_init(const program_target_t* prog, uint32_t flash_start) {
     }
 
     // 下载编程算法到目标MCU的SRAM，并初始化
-    if (0 == swd_write_memory(prog->algo_start, (uint8_t*) prog->algo_blob, prog->algo_size)) {
+    if (0 == swd_write_memory(FlashBlob->algo_start, (uint8_t*) FlashBlob->algo_blob, FlashBlob->algo_size)) {
         return ERROR_ALGO_DL;
     }
 
-    if (0 == swd_flash_syscall_exec(&prog->sys_call_s, prog->init, flash_start, 0, 0, 0)) {
+    if (0 == swd_flash_syscall_exec(&FlashBlob->sys_call_s, FlashBlob->init, flash_start, 0, 0, 0)) {
         return ERROR_INIT;
     }
 
@@ -104,20 +104,21 @@ error_t target_flash_erase_chip(void) {
 }
 
 uint8_t target_flash_sector_integer(uint32_t addr) {
-    if (FlashBlob == NULL) {
+    if (FlashBlob == NULL || FlashBlob->sector_info_count == 0) {
         return 0;
     }
     addr &= 0x07FFFFFF;
-
-    for (uint32_t i = 0; i < FlashBlob->sector_info_count; i++) {
-        if (addr >= FlashBlob->sector_info[i].AddrSector) {
-            addr -= FlashBlob->sector_info[i].AddrSector;
-            if ((addr % FlashBlob->sector_info[i].szSector) == 0) {
-                return 1;
-            } else {
-                return 0;
-            }
+    uint8_t index = 0;
+    while (index < FlashBlob->sector_info_count - 1) {
+        if (addr >= FlashBlob->sector_info[index].AddrSector &&
+            addr < FlashBlob->sector_info[index + 1].AddrSector) {
+            break;
         }
+        index++;
+    }
+    addr -= FlashBlob->sector_info[index].AddrSector;
+    if ((addr % FlashBlob->sector_info[index].szSector) == 0) {
+        return 1;
     }
     return 0;
 }
