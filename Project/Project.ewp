@@ -3423,9 +3423,6 @@
             <group>
                 <name>Config</name>
                 <file>
-                    <name>$PROJ_DIR$\..\Library\CMSIS-DAP\Config\DAP_config.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\Library\CMSIS-DAP\Config\DAP_config.h</name>
                 </file>
             </group>

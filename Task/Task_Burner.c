@@ -10,6 +10,7 @@
 #include "led.h"
 
 extern uint32_t SysTick_Get(void);   // 获取系统滴答计数值
+extern void     Delay(uint32_t);     // 获取系统滴答计数值
 
 BurnerCtrl_t BurnerCtrl;
 
@@ -123,9 +124,13 @@ void Burner_Exe(void) {
     /* 反初始化选项字节编程算法 */
     target_flash_uninit();
     /* 等待响应 */
-    for (uint16_t i = 0; i < 0x3FFF; i++) {
+    for (uint16_t i = 0; i < 100; i++) {
+        Delay(10);
         /* 初始化接口 */
         if (swd_init_debug() == 0) {
+            continue;
+        }
+        if (0 == swd_set_target_state_hw(RESET_PROGRAM)) {
             continue;
         }
         /* 获取Flash大小 */

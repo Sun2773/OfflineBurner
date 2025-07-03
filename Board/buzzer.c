@@ -17,7 +17,7 @@ void Buzzer_Init(void) {
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;   // IO口速度为2MHz
     GPIO_Init(GPIOB, &GPIO_InitStructure);              // 根据设定参数初始化GPIO
 
-    TIM_TimeBaseStructure.TIM_Period        = 400 - 1;              // 设置在下一个更新事件装入活动的自动重装载寄存器周期的值
+    TIM_TimeBaseStructure.TIM_Period        = 200 - 1;              // 设置在下一个更新事件装入活动的自动重装载寄存器周期的值
     TIM_TimeBaseStructure.TIM_Prescaler     = 72 - 1;               // 设置用来作为TIMx时钟频率除数的预分频值
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;                    // 设置时钟分割:TDTS = Tck_tim
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;   // TIM向上计数模式
@@ -25,7 +25,7 @@ void Buzzer_Init(void) {
 
     TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_PWM1;                   // 选择定时器模式:TIM脉冲宽度调制模式2
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Disable;           // 比较输出使能
-    TIM_OCInitStructure.TIM_Pulse       = (uint16_t) ((TIM3->ARR) * 0.8f);   // 设置待装入捕获比较寄存器的脉冲值
+    TIM_OCInitStructure.TIM_Pulse       = (uint16_t) ((TIM3->ARR) * 0.5f);   // 设置待装入捕获比较寄存器的脉冲值
     TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;               // 输出极性:TIM输出比较极性高
     TIM_OC4Init(TIM3, &TIM_OCInitStructure);                                 // 根据TIM_OCInitStruct中指定的参数初始化外设TIMx
 

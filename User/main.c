@@ -158,8 +158,8 @@ void TaskNull(void) {
 }
 
 /***************** 延时功能 *****************/
-uint32_t DelayTimer    = 0;   // 延时计数器
-uint32_t SysTick_Count = 0;   // 系统滴答计数器
+__IO uint32_t DelayTimer    = 0;   // 延时计数器
+__IO uint32_t SysTick_Count = 0;   // 系统滴答计数器
 
 /**
  * @brief  进行毫秒级延时

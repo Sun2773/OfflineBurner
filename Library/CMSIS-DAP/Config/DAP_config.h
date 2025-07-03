@@ -30,7 +30,6 @@
 
 #include <stdint.h>
 
-extern void vResetTarget(uint8_t bit);
 //**************************************************************************************************
 /**
 \defgroup DAP_Config_Debug_gr CMSIS-DAP Debug Unit Information
@@ -377,10 +376,6 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
   SWD_nRESET_PORT->CRH GPIO_MODE_CLR(SWD_nRESET_BIT - 8);
   SWD_nRESET_PORT->CRH GPIO_MODE_OUT(SWD_nRESET_BIT - 8);
 #endif
-
-  // SWD_nRESET_OUT(0U);
-  // Delayms(100);
-  // SWD_nRESET_OUT(1U);
 }
 
 /** Disable JTAG/SWD I/O Pins.
@@ -567,7 +562,8 @@ __STATIC_FORCEINLINE uint32_t PIN_nRESET_IN  (void) {
            - 1: release device hardware reset.
 */
 __STATIC_FORCEINLINE void     PIN_nRESET_OUT (uint32_t bit) {
-  vResetTarget(bit);
+  if (bit & 0x1) GPIO_OUTPUT_L(nRESET);
+  else           GPIO_OUTPUT_H(nRESET);
 }
 
 ///@}
