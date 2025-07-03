@@ -6,6 +6,7 @@
 #define Flash_Path    "0:"              // Flash路径
 #define Config_Path   "0:config.json"   // 配置文件路径
 #define Firmware_Path "0:firmware"      // 固件文件路径
+#define Readme_Path   "0:readme.txt"    // 说明文件路径
 
 #define CONFIG_BUFFER_SIZE 1024   // 配置缓冲区大小
 

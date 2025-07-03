@@ -123,7 +123,7 @@ void Burner_Exe(void) {
     /* 反初始化选项字节编程算法 */
     target_flash_uninit();
     /* 等待响应 */
-    for (uint16_t i = 0; i < 1000; i++) {
+    for (uint16_t i = 0; i < 0x3FFF; i++) {
         /* 初始化接口 */
         if (swd_init_debug() == 0) {
             continue;

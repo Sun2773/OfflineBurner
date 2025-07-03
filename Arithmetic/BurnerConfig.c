@@ -11,6 +11,8 @@
 #include "led.h"
 #include "string.h"
 
+#include "ConfigReadme.h"
+
 BurnerConfigInfo_t BurnerConfigInfo = {
     .FilePath   = "",
     .AutoBurner = 1,
@@ -368,6 +370,17 @@ void BurnerConfig(void) {
             config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
         }
     } while (0);
+
+    /********************************* 检查说明文件 *********************************/
+    if ((f_res = f_stat(Readme_Path, file_info)) != FR_OK) {
+        if ((f_res = f_open(file, Readme_Path, FA_WRITE | FA_CREATE_ALWAYS)) != FR_OK) {
+            goto ex;
+        }
+        if ((f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &r_cnt)) != FR_OK) {
+            goto ex;
+        }
+        f_close(file);
+    }
 
     /********************************* 更新配置 *********************************/
     if (config_flag != BurnerConfigInfo.Flag) {

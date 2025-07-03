@@ -58,7 +58,7 @@ DSTATUS disk_initialize (
     switch (pdrv) {
         case DEV_SPI_FLASH: {
             /* 存储器初始化 */
-            W25QXX_Init();
+            // W25QXX_Init();
 
             Fat_Memory_Size[0]   = W25QXX_ReadCapacity() - SPI_FLASH_FILE_SYSTEM_ADDRESS;   // Flash容量
             Fat_Memory_Offset[0] = SPI_FLASH_FILE_SYSTEM_ADDRESS;                           // Flash偏移地址
