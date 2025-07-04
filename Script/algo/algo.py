@@ -1,249 +1,227 @@
+# -*- coding: utf-8 -*-
 """
-FLM Flash Algorithm Converter
-
-将ARM的FLM（Flash Load Module）文件转换为C语言格式的flash blob文件。
-提取Flash编程算法代码、设备信息和扇区配置。
-
-作者: GitHub Copilot
-日期: 2025-06-27
+FLM到C文件转换工具
+用于将IAR/Keil的FLM（Flash Load Module）文件转换为C语言格式的flash blob文件
 """
 
-import sys
 import struct
 import os
+import sys
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 
-# 常量定义
-SRAM_BASE = 0x20000000
-PROG_BUFFER_ADDR = 0x20000400
-STATIC_DATA_ADDR = 0x20000C00
-STACK_ADDR = 0x20001000
-PROG_BUFFER_SIZE = 0x00000400
-ALGO_START_MARKER = 0xE00ABE00
-ALGO_END_MARKER = 0x00000000
-
-def parse_functions(elf, section_info):
-    """解析ELF文件中的函数符号"""
-    functions = []
-    
-    for section in elf.iter_sections():
-        if not isinstance(section, SymbolTableSection):
-            continue
-            
-        for symbol in section.iter_symbols():
-            if symbol['st_info']['type'] != 'STT_FUNC':
-                continue
-                
-            func_info = {
-                'name': symbol.name,
-                'addr': symbol['st_value'],
-                'size': symbol['st_size'],
-                'section': _find_symbol_section(symbol, section_info)
-            }
-            
-            if func_info['section']:
-                functions.append(func_info)
-    
-    return sorted(functions, key=lambda x: x['addr'])
-
-def parse_variables(elf, section_info):
-    """解析ELF文件中的全局变量符号"""
-    variables = []
-    
-    for section in elf.iter_sections():
-        if not isinstance(section, SymbolTableSection):
-            continue
-            
-        for symbol in section.iter_symbols():
-            # 检查是否是对象符号或有大小的NOTYPE符号
-            symbol_type = symbol['st_info']['type']
-            if not (symbol_type == 'STT_OBJECT' or 
-                   (symbol_type == 'STT_NOTYPE' and symbol['st_size'] > 0)):
-                continue
-                
-            var_info = {
-                'name': symbol.name,
-                'addr': symbol['st_value'],
-                'size': symbol['st_size'],
-                'type': symbol_type,
-                'section': _find_symbol_section(symbol, section_info),
-                'data': None
-            }
-            
-            if var_info['section'] and var_info['name']:
-                var_info['data'] = _extract_variable_data(var_info, section_info)
-                variables.append(var_info)
-    
-    return sorted(variables, key=lambda x: x['addr'])
+# 内存布局配置
+ALGO_START_MARKER = 0xE00ABE00  # 算法开始标记
+ALGO_END_MARKER   = 0x00000000  # 算法结束标记
+PROG_BUFFER_SIZE  = 0x00000400  # 1K编程缓冲区
+STATIC_DATA_SIZE  = 0x00000400  # 1K字节静态数据区
 
 def parse_flm(flm_path):
-    """解析FLM文件，提取所有必要的段和符号信息"""
-    with open(flm_path, 'rb') as f:
-        elf = ELFFile(f)
-        
-        # 提取所需的段
-        sections = {'PrgCode': None, 'PrgData': None, 'DevDscr': None}
-        section_info = {}
-        
-        for section in elf.iter_sections():
-            sec_name = section.name.strip()
-            if sec_name in sections:
-                sections[sec_name] = section.data()
-                section_info[sec_name] = {
-                    'offset': section['sh_offset'],
-                    'addr': section['sh_addr'],
-                    'size': section['sh_size'],
-                    'data': section.data()
-                }
-        
-        # 检查是否所有必需的段都存在
-        if None in sections.values():
-            print("Error: Missing required sections in FLM file!")
-            return None, None, None, None
-        
-        # 解析符号信息
-        functions = parse_functions(elf, section_info)
-        variables = parse_variables(elf, section_info)
-        
-        return sections, section_info, functions, variables
-
-def print_analysis_results(functions, variables):
-    """打印解析结果"""
-    if functions:
-        print(f"Found {len(functions)} functions:")
-        for func in functions:
-            print(f"  {func['name']} @ 0x{func['addr']:08X} in {func['section']} (size: {func['size']} bytes)")
-    else:
-        print("No functions found!")
-    
-    if variables:
-        print(f"Found {len(variables)} variables:")
-        for var in variables:
-            data_preview = _format_data_preview(var['data'], var['size'])
-            print(f"  {var['name']} @ 0x{var['addr']:08X} in {var['section']} (size: {var['size']} bytes){data_preview}")
-    else:
-        print("No variables found!")
-
-def parse_flash_device(variables):
-    """解析FlashDevice结构体，提取设备信息和扇区配置"""
-    # 查找FlashDevice变量
-    flash_device = None
-    for var in variables:
-        if 'FlashDevice' in var['name'] or var['name'] == 'FlashDevice':
-            flash_device = var
-            break
-    
-    if not flash_device or not flash_device['data']:
-        print("Warning: FlashDevice structure not found")
-        return []
-    
-    data = flash_device['data']
-    if len(data) < 160:
-        print("Warning: FlashDevice structure too small")
-        return []
+    """解析FLM文件，返回各段信息、函数信息和变量信息"""
+    if not os.path.exists(flm_path):
+        return False, None, None, None, None
     
     try:
-        # 解析FlashDevice基本信息
-        dev_name = data[2:130].rstrip(b'\x00').decode('ascii', errors='ignore')
-        dev_type = struct.unpack('<H', data[130:132])[0]
-        dev_addr = struct.unpack('<I', data[132:136])[0]
-        sz_dev = struct.unpack('<I', data[136:140])[0]
-        sz_page = struct.unpack('<I', data[140:144])[0]
-        
-        print(f"FlashDevice Info:")
-        print(f"  Name: {dev_name}")
-        print(f"  Type: {dev_type}, Address: 0x{dev_addr:08X}")
-        print(f"  Size: {sz_dev} bytes, Page: {sz_page} bytes")
-        
-        # 解析扇区信息（从偏移160开始）
-        sectors_data = data[160:]
-        sector_info = []
-        
-        for offset in range(0, len(sectors_data), 8):
-            if offset + 8 > len(sectors_data):
-                break
-                
-            sz_sector = struct.unpack('<I', sectors_data[offset:offset+4])[0]
-            addr_sector = struct.unpack('<I', sectors_data[offset+4:offset+8])[0]
+        with open(flm_path, 'rb') as f:
+            elffile = ELFFile(f)
             
-            # 检查结束标记
-            if sz_sector == 0xFFFFFFFF and addr_sector == 0xFFFFFFFF:
-                break
-                
-            if sz_sector > 0:
-                sector_info.append({'size': sz_sector, 'addr': addr_sector})
-        
-        print(f"Found {len(sector_info)} sectors:")
-        for i, sector in enumerate(sector_info):
-            print(f"  Sector {i}: 0x{sector['size']:04X} bytes @ 0x{sector['addr']:06X}")
+            # 提取所有段
+            sections = {}
+            section_info = {}
             
-        return sector_info
-        
+            for section in elffile.iter_sections():
+                sec_name = section.name
+                if sec_name.startswith(('.text', '.data', '.rodata')) or sec_name in ['PrgCode', 'PrgData', 'DevDscr']:
+                    sections[sec_name] = section.data()
+                    section_info[sec_name] = {
+                        'addr': section['sh_addr'],
+                        'size': section['sh_size'],
+                        'data': section.data()
+                    }
+            
+            # 特别处理PrgCode段
+            if 'PrgCode' not in sections:
+                for sec_name in sections:
+                    if sec_name.startswith('.text'):
+                        sections['PrgCode'] = sections[sec_name]
+                        section_info['PrgCode'] = section_info[sec_name]
+                        break
+                else:
+                    # 如果没有找到.text段，使用第一个段
+                    if sections:
+                        first_sec = list(sections.keys())[0]
+                        sections['PrgCode'] = sections[first_sec]
+                        section_info['PrgCode'] = section_info[first_sec]
+                    else:
+                        print("Warning: No suitable sections found for PrgCode")
+                        sections['PrgCode'] = b''
+                        section_info['PrgCode'] = {'addr': 0, 'size': 0, 'data': b''}
+            
+            # 提取函数信息
+            functions = []
+            function_map = {}
+            
+            for section in elffile.iter_sections():
+                if isinstance(section, SymbolTableSection):
+                    for symbol in section.iter_symbols():
+                        if symbol['st_info']['type'] == 'STT_FUNC' and symbol['st_size'] > 0:
+                            func_info = {
+                                'name': symbol.name,
+                                'addr': symbol['st_value'],
+                                'size': symbol['st_size'],
+                                'section': _find_symbol_section(symbol, section_info)
+                            }
+                            functions.append(func_info)
+                            function_map[symbol.name] = func_info
+            
+            # 提取变量信息
+            variables = []
+            variable_map = {}
+            
+            for section in elffile.iter_sections():
+                if isinstance(section, SymbolTableSection):
+                    for symbol in section.iter_symbols():
+                        if symbol['st_info']['type'] == 'STT_OBJECT' and symbol['st_size'] > 0:
+                            var_info = {
+                                'name': symbol.name,
+                                'addr': symbol['st_value'],
+                                'size': symbol['st_size'],
+                                'section': _find_symbol_section(symbol, section_info)
+                            }
+                            # 提取变量数据
+                            var_data = _extract_variable_data(var_info, section_info)
+                            var_info['data'] = var_data
+                            variables.append(var_info)
+                            variable_map[symbol.name] = var_info
+            
+            return True, sections, section_info, function_map, variable_map
+            
     except Exception as e:
-        print(f"Error parsing FlashDevice: {e}")
-        return []
+        print(f"Error parsing FLM file {flm_path}: {e}")
+        return False, None, None, None, None
 
-def calculate_function_addresses(functions):
-    """计算函数的运行时地址"""
-    func_addrs = {
-        'Init': None, 'UnInit': None, 'EraseChip': None,
-        'EraseSector': None, 'ProgramPage': None
-    }
+def print_analysis_results(functions, variables):
+    """输出分析结果"""
+    print("\n=== Functions Found ===")
+    for func in functions.values():
+        print(f"  {func['name']:20} @ 0x{func['addr']:08X} (size: {func['size']:4d} bytes)")
     
-    for func in functions:
-        if func['name'] in func_addrs:
-            # 运行时地址 = SRAM基址 + 4字节偏移（标记） + 函数偏移 + 1（Thumb模式）
-            runtime_addr = SRAM_BASE + 4 + func['addr']
-            func_addrs[func['name']] = runtime_addr | 1
+    print(f"\n=== Variables Found ({len(variables)} total) ===")
+    for var in variables.values():
+        data_preview = _format_data_preview(var.get('data'), var['size'])
+        print(f"  {var['name']:20} @ 0x{var['addr']:08X} (size: {var['size']:4d} bytes){data_preview}")
+
+def parse_flash_device(variables):
+    """解析FlashDevice变量以获取扇区信息"""
+    if 'FlashDevice' not in variables:
+        print("Warning: FlashDevice variable not found!")
+        return []
+    
+    device = variables['FlashDevice']
+    data = device.get('data')
+    
+    if not data or len(data) < 160:
+        print("Warning: FlashDevice data insufficient!")
+        return []
+    
+    # 解析FlashDevice结构
+    # 结构体布局：
+    # 0-2: Version (2 bytes)
+    # 2-130: DevName (128 bytes)
+    # 130-132: DevType (2 bytes)
+    # 132-136: DevAdr (4 bytes)
+    # 136-140: szDev (4 bytes)
+    # 140-144: szPage (4 bytes)
+    # 144-148: Res (4 bytes)
+    # 148-149: valEmpty (1 byte)
+    # 149-152: padding (3 bytes)
+    # 152-156: toProg (4 bytes)
+    # 156-160: toErase (4 bytes)
+    # 160+: sectors (8 bytes each: size+addr)
+    
+    sectors = []
+    sector_offset = 160  # 扇区信息从160字节开始
+    
+    while sector_offset + 8 <= len(data):
+        size_bytes = data[sector_offset:sector_offset+4]
+        addr_bytes = data[sector_offset+4:sector_offset+8]
+        
+        if len(size_bytes) < 4 or len(addr_bytes) < 4:
+            break
+            
+        size = struct.unpack('<I', size_bytes)[0]
+        addr = struct.unpack('<I', addr_bytes)[0]
+        
+        if size == 0xFFFFFFFF and addr == 0xFFFFFFFF:
+            break
+        
+        # 只添加有效的扇区（size > 0）
+        if size > 0:
+            sectors.append({
+                'size': size,
+                'addr': addr
+            })
+        
+        sector_offset += 8
+    
+    return sectors
+
+def calculate_memory_layout(code_size):
+    """计算动态内存布局"""
+    # 代码段对齐到4字节
+    aligned_code_size = (code_size + 3) & ~3
+    
+    # 算法代码起始地址
+    algo_start = 0x20000000
+    
+    # 算法代码结束地址（包含起始和结束标记）
+    algo_end = algo_start + 4 + aligned_code_size + 4
+    
+    # 编程缓冲区地址：从算法代码结束后开始，1K对齐
+    prog_buffer_addr = (algo_end + 1023) & ~1023
+    
+    # 静态数据区：紧跟编程缓冲区
+    static_data_addr = prog_buffer_addr + PROG_BUFFER_SIZE
+    
+    # 栈地址：紧跟静态数据区
+    stack_addr = static_data_addr + STATIC_DATA_SIZE
+    
+    return {
+        'algo_start': algo_start,
+        'algo_end': algo_end,
+        'prog_buffer_addr': prog_buffer_addr,
+        'static_data_addr': static_data_addr,
+        'stack_addr': stack_addr,
+        'code_size': aligned_code_size
+    }
+
+def calculate_function_addresses(functions, memory_layout):
+    """计算函数在内存中的地址"""
+    func_addrs = {}
+    
+    # 查找关键函数
+    for func_name, func_info in functions.items():
+        if func_info['section'] == 'PrgCode' or func_info['section'] and func_info['section'].startswith('.text'):
+            # 函数在代码段中的相对地址
+            relative_addr = func_info['addr']
+            # 计算在内存中的绝对地址（+4是因为有开始标记）
+            absolute_addr = memory_layout['algo_start'] + 4 + relative_addr
+            func_addrs[func_name] = absolute_addr
     
     return func_addrs
 
-def generate_sram_layout_comment(chip_name):
-    """生成SRAM布局注释"""
-    return f'''/*
- * {chip_name} SRAM布局 (基址0x{SRAM_BASE:08X}):
- *
- * 0x{SRAM_BASE:08X} ┌─────────────────┐
- *            │ Flash Algorithm │  <- algo_start (算法代码)
- *            │    Code         │
- * 0x{PROG_BUFFER_ADDR:08X} ├─────────────────┤
- *            │ Program Buffer  │  <- program_buffer (数据缓冲区)
- *            │  (1024 bytes)   │
- * 0x{PROG_BUFFER_ADDR + PROG_BUFFER_SIZE:08X} ├─────────────────┤
- *            │                 │
- *            │   Free Space    │
- *            │                 │
- * 0x{STATIC_DATA_ADDR:08X} ├─────────────────┤
- *            │  Static Data    │  <- static_base (全局/静态变量)
- *            │     Area        │
- * 0x{STACK_ADDR:08X} ├─────────────────┤
- *            │     Stack       │  <- stack_pointer (栈空间)
- *            │   (grows down)  │
- *            └─────────────────┘
- */
+def load_template(template_file):
+    """加载模板文件"""
+    try:
+        with open(template_file, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"Error: Template file '{template_file}' not found!")
+        sys.exit(1)
 
-'''
-    
-def generate_function_comments(functions):
-    """生成函数信息注释"""
-    if not functions:
-        return "// Flash programming algorithm code\n"
-        
-    lines = ["// Flash programming algorithm code", "// Functions:"]
-    for func in functions:
-        rel_offset = func['addr'] + 4  # 加4因为有标记
-        lines.append(f'//   {func["name"]:12} @ +0x{rel_offset:04X} (size: {func["size"]} bytes)')
-    
-    return '\n'.join(lines) + '\n'
-
-def generate_flash_code_array(prgcode_data):
-    """生成flash_code数组"""
-    lines = [
-        "static const uint32_t flash_code[] = {",
-        "    // clang-format off",
-        f"    0x{ALGO_START_MARKER:08X},                                      // +0x0000"
-    ]
+def generate_flash_code_data(prgcode_data):
+    """生成flash_code数组的数据部分"""
+    lines = []
     
     # 按16字节一行输出代码
     for i in range(0, len(prgcode_data), 16):
@@ -287,82 +265,164 @@ def generate_flash_code_array(prgcode_data):
             spaces_needed = max(1, 53 - len(code_part))
             lines[-1] = code_part + ' ' * spaces_needed + '// ' + comment_part
     
-    lines.extend(["    // clang-format on", "};", ""])
     return '\n'.join(lines)
 
-def generate_sector_info_array(sector_list):
-    """生成sector_info数组"""
-    lines = ["// Flash sector information", "static const sector_info_t sector_info[] = {"]
-    
+def generate_sector_info_data(sector_list):
+    """生成sector_info数组的数据部分"""
+    lines = []
     for sector in sector_list:
         lines.append(f'    {{0x{sector["size"]:04X}, 0x{sector["addr"]:06X}}},')
-    
-    lines.extend(["};", ""])
     return '\n'.join(lines)
 
-def generate_program_target(chip_name, func_addrs):
-    """生成program_target_t结构"""
-    lines = [
-        "// Flash programming target configuration",
-        f"const program_target_t _{chip_name.lower()}_ = {{"
-    ]
-    
-    # 函数地址
-    func_names = ['Init', 'UnInit', 'EraseChip', 'EraseSector', 'ProgramPage']
-    for name in func_names:
-        addr = func_addrs.get(name) or SRAM_BASE + 1
-        lines.append(f"    0x{addr:08X},   // {name}")
-        if func_addrs.get(name) is None:
-            print(f"Warning: Function '{name}' not found, using default address 0x{addr:08X}")
-    
-    # 寄存器设置
-    lines.extend([
-        "    {",
-        f"        0x{SRAM_BASE + 1:08X},   // BKPT : 断点地址 (算法起始+1，Thumb模式)",
-        f"        0x{STATIC_DATA_ADDR:08X},   // RSB  : 静态数据基址",
-        f"        0x{STACK_ADDR:08X},   // RSP  : 栈指针地址",
-        "    },",
-    ])
-    
-    # 其他参数
-    lines.extend([
-        f"    0x{PROG_BUFFER_ADDR:08X},           // 编程缓冲区地址",
-        f"    0x{SRAM_BASE:08X},           // 算法代码起始地址",
-        "    sizeof(flash_code),   // 算法代码大小",
-        "    flash_code,           // 算法代码数据指针",
-        f"    0x{PROG_BUFFER_SIZE:08X},           // 编程缓冲区大小",
-        "",
-        "    sector_info,                                    // 扇区信息指针",
-        "    sizeof(sector_info) / sizeof(sector_info[0]),   // 扇区数量",
-        "};"
-    ])
+def generate_function_comments_data(functions):
+    """生成函数注释数据"""
+    if not functions:
+        return ""
+        
+    lines = []
+    for func in functions.values():
+        rel_offset = func['addr'] + 4  # 加4因为有标记
+        lines.append(f'//   {func["name"]:12} @ +0x{rel_offset:04X} (size: {func["size"]} bytes)')
     
     return '\n'.join(lines)
 
-def generate_flash_blob_c(sections, section_info, functions, variables, output_file, chip_name):
-    """生成Flash blob C文件"""
+def generate_flash_blob_c_from_template(sections, section_info, functions, variables, output_file, chip_name):
+    """使用模板生成Flash blob C文件"""
+    # 计算动态内存布局
+    memory_layout = calculate_memory_layout(len(sections['PrgCode']))
+    
     # 解析扇区信息
     sector_list = parse_flash_device(variables)
     
     # 计算函数地址
-    func_addrs = calculate_function_addresses(functions)
+    func_addrs = calculate_function_addresses(functions, memory_layout)
     
-    # 生成C文件内容
-    content_parts = [
-        '#include "flash_blob.h"\n',
-        generate_sram_layout_comment(chip_name),
-        generate_function_comments(functions),
-        generate_flash_code_array(sections['PrgCode']),
-        generate_sector_info_array(sector_list),
-        generate_program_target(chip_name, func_addrs)
-    ]
+    # 加载模板文件
+    template_file = 'flash_blob.tmpl'
+    template_content = load_template(template_file)
+    
+    # 准备模板变量
+    template_vars = {
+        'chip_name': chip_name,
+        'chip_name_lower': chip_name.lower(),
+        'algo_start': memory_layout['algo_start'],
+        'prog_buffer_addr': memory_layout['prog_buffer_addr'],
+        'static_data_addr': memory_layout['static_data_addr'],
+        'stack_addr': memory_layout['stack_addr'],
+        'algo_start_marker': ALGO_START_MARKER,
+        'prog_buffer_size': PROG_BUFFER_SIZE,
+        'function_comments': generate_function_comments_data(functions),
+        'flash_code_data': generate_flash_code_data(sections['PrgCode']),
+        'sector_info_data': generate_sector_info_data(sector_list),
+        'init_addr': func_addrs.get('Init') or memory_layout['algo_start'] + 1,
+        'uninit_addr': func_addrs.get('UnInit') or memory_layout['algo_start'] + 1,
+        'erase_chip_addr': func_addrs.get('EraseChip') or memory_layout['algo_start'] + 1,
+        'erase_sector_addr': func_addrs.get('EraseSector') or memory_layout['algo_start'] + 1,
+        'program_page_addr': func_addrs.get('ProgramPage') or memory_layout['algo_start'] + 1,
+        'bkpt_addr': memory_layout['algo_start'] + 1,
+        'rsb_addr': memory_layout['static_data_addr'],
+        'rsp_addr': memory_layout['stack_addr'],
+    }
+    
+    # 替换模板变量
+    try:
+        content = template_content.format(**template_vars)
+    except KeyError as e:
+        print(f"Error: Missing template variable {e}")
+        return False
     
     # 写入文件
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(content_parts))
+        f.write(content)
     
     print(f"Generated flash blob file: {output_file}")
+    print(f"Memory layout:")
+    print(f"  Algorithm code: 0x{memory_layout['algo_start']:08X} - 0x{memory_layout['algo_end']:08X} ({memory_layout['code_size']+8} bytes)")
+    print(f"  Program buffer: 0x{memory_layout['prog_buffer_addr']:08X} - 0x{memory_layout['prog_buffer_addr'] + PROG_BUFFER_SIZE:08X} ({PROG_BUFFER_SIZE} bytes)")
+    print(f"  Static data:    0x{memory_layout['static_data_addr']:08X} - 0x{memory_layout['static_data_addr'] + STATIC_DATA_SIZE:08X} ({STATIC_DATA_SIZE} bytes)")
+    print(f"  Stack pointer:  0x{memory_layout['stack_addr']:08X}")
+    
+    # 检查是否有未找到的函数
+    for name in ['Init', 'UnInit', 'EraseChip', 'EraseSector', 'ProgramPage']:
+        if func_addrs.get(name) is None:
+            print(f"Warning: Function '{name}' not found, using default address 0x{memory_layout['algo_start'] + 1:08X}")
+    
     return True
+
+def process_single_flm(flm_path):
+    """处理单个FLM文件"""
+    chip_name = os.path.splitext(flm_path)[0]
+    output_c_file = f"{chip_name}.c"
+    
+    print(f"\nProcessing FLM file: {flm_path}")
+    print(f"Output file: {output_c_file}")
+    
+    result = parse_flm(flm_path)
+    if not result[0]:
+        print(f"✗ Failed to parse {flm_path}!")
+        return False
+    
+    sections, section_info, functions, variables = result[1:]
+    
+    # 打印分析结果
+    print_analysis_results(functions, variables)
+    
+    # 生成C文件
+    if generate_flash_blob_c_from_template(sections, section_info, functions, variables, output_c_file, chip_name):
+        print(f"✓ {flm_path} converted successfully!")
+        return True
+    else:
+        print(f"✗ Failed to convert {flm_path}!")
+        return False
+
+def get_user_file_selection(flm_files):
+    """获取用户的文件选择"""
+    if len(flm_files) == 1:
+        return False, flm_files
+    
+    print("Available FLM files:")
+    for i, flm in enumerate(flm_files):
+        print(f"  {i+1}.\t{flm}")
+    print(f"  {len(flm_files)+1}.\tProcess all files")
+    
+    try:
+        choice = int(input("Select FLM file (number): ")) - 1
+        if choice == len(flm_files):
+            return True, flm_files  # 处理所有文件
+        elif 0 <= choice < len(flm_files):
+            return False, [flm_files[choice]]  # 处理单个文件
+        else:
+            print("Invalid choice, using first file")
+            return False, [flm_files[0]]
+    except ValueError:
+        print("Invalid input, using first file")
+        return False, [flm_files[0]]
+
+def main():
+    """主程序入口"""
+    # 检查可用的FLM文件
+    flm_files = [f for f in os.listdir('.') if f.endswith('.FLM')]
+    
+    if not flm_files:
+        print("No FLM files found in current directory!")
+        sys.exit(1)
+    
+    # 获取用户选择
+    process_all, files_to_process = get_user_file_selection(flm_files)
+    
+    # 处理选定的文件
+    success_count = 0
+    for flm_path in files_to_process:
+        if process_single_flm(flm_path):
+            success_count += 1
+    
+    # 输出处理结果
+    if process_all:
+        print(f"\nCompleted processing {len(files_to_process)} files! ({success_count} successful)")
+    else:
+        print(f"\nProcessing completed! ({success_count}/{len(files_to_process)} successful)")
+
+# 辅助函数
 def _find_symbol_section(symbol, section_info):
     """查找符号所属的段"""
     addr = symbol['st_value']
@@ -404,79 +464,6 @@ def _format_data_preview(data, size):
         return f" = [{hex_str}...]"
     
     return ""
-
-def get_user_file_selection(flm_files):
-    """获取用户的文件选择"""
-    if len(flm_files) == 1:
-        return False, flm_files
-    
-    print("Available FLM files:")
-    for i, flm in enumerate(flm_files):
-        print(f"  {i+1}.\t{flm}")
-    print(f"  {len(flm_files)+1}.\tProcess all files")
-    
-    try:
-        choice = int(input("Select FLM file (number): ")) - 1
-        if choice == len(flm_files):
-            return True, flm_files  # 处理所有文件
-        elif 0 <= choice < len(flm_files):
-            return False, [flm_files[choice]]  # 处理单个文件
-        else:
-            print("Invalid choice, using first file")
-            return False, [flm_files[0]]
-    except ValueError:
-        print("Invalid input, using first file")
-        return False, [flm_files[0]]
-
-def process_single_flm(flm_path):
-    """处理单个FLM文件"""
-    chip_name = os.path.splitext(flm_path)[0]
-    output_c_file = f"{chip_name}.c"
-    
-    print(f"\nProcessing FLM file: {flm_path}")
-    print(f"Output file: {output_c_file}")
-    
-    result = parse_flm(flm_path)
-    if not result[0]:
-        print(f"✗ Failed to parse {flm_path}!")
-        return False
-    
-    sections, section_info, functions, variables = result
-    
-    # 打印分析结果
-    print_analysis_results(functions, variables)
-    
-    # 生成C文件
-    if generate_flash_blob_c(sections, section_info, functions, variables, output_c_file, chip_name):
-        print(f"✓ {flm_path} converted successfully!")
-        return True
-    else:
-        print(f"✗ Failed to convert {flm_path}!")
-        return False
-
-def main():
-    """主程序入口"""
-    # 检查可用的FLM文件
-    flm_files = [f for f in os.listdir('.') if f.endswith('.FLM')]
-    
-    if not flm_files:
-        print("No FLM files found in current directory!")
-        sys.exit(1)
-    
-    # 获取用户选择
-    process_all, files_to_process = get_user_file_selection(flm_files)
-    
-    # 处理选定的文件
-    success_count = 0
-    for flm_path in files_to_process:
-        if process_single_flm(flm_path):
-            success_count += 1
-    
-    # 输出处理结果
-    if process_all:
-        print(f"\nCompleted processing {len(files_to_process)} files! ({success_count} successful)")
-    else:
-        print(f"\nProcessing completed! ({success_count}/{len(files_to_process)} successful)")
 
 if __name__ == "__main__":
     main()

@@ -10,18 +10,15 @@
  *            │ Program Buffer  │  <- program_buffer (数据缓冲区)
  *            │  (1024 bytes)   │
  * 0x20000800 ├─────────────────┤
- *            │                 │
- *            │   Free Space    │
- *            │                 │
- * 0x20000C00 ├─────────────────┤
  *            │  Static Data    │  <- static_base (全局/静态变量)
  *            │     Area        │
- * 0x20001000 ├─────────────────┤
+ * 0x20000C00 ├─────────────────┤
  *            │     Stack       │  <- stack_pointer (栈空间)
  *            │   (grows down)  │
- *            └─────────────────┘
+ *            │                 │
+ *            │ ............... │
+ *
  */
-
 
 // Flash programming algorithm code
 // Functions:
@@ -71,8 +68,8 @@ const program_target_t _stm32f0xx_256_2k_ = {
     0x200000C7,   // ProgramPage
     {
         0x20000001,   // BKPT : 断点地址 (算法起始+1，Thumb模式)
-        0x20000C00,   // RSB  : 静态数据基址
-        0x20001000,   // RSP  : 栈指针地址
+        0x20000800,   // RSB  : 静态数据基址
+        0x20000C00,   // RSP  : 栈指针地址
     },
     0x20000400,           // 编程缓冲区地址
     0x20000000,           // 算法代码起始地址
