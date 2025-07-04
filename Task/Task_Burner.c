@@ -44,7 +44,7 @@ void Burner_Detection(void) {
                 } else {
                     BurnerCtrl.State = BURNER_STATE_READY;
                     if (BurnerConfigInfo.AutoBurner == 0) {
-                        Beep(300);
+                        Beep(50);
                     }
                 }
             } else {
@@ -101,6 +101,7 @@ void Burner_Exe(void) {
     uint32_t tick               = SysTick_Get();               // 获取当前系统滴答计数值
     BurnerCtrl.State            = BURNER_STATE_RUNNING;
     BurnerCtrl.Error            = 0;
+    uint8_t res = 0;
 
     /* 初始化接口 */
     if (swd_init_debug() == 0) {
@@ -108,9 +109,18 @@ void Burner_Exe(void) {
         goto exit;              // 初始化失败
     }
     /* 读取DBGMCU IDCODE寄存器 */
-    swd_read_memory(0xE0042000, (void*) &BurnerCtrl.Info.DBGMCU_IDCODE, 4);
+    res = swd_read_memory(0xE0042000, (void*) &BurnerCtrl.Info.DBGMCU_IDCODE, 4);
+    if(BurnerCtrl.Info.DEV_ID == 0){
+        res = swd_read_memory(0x40015800, (void*) &BurnerCtrl.Info.DBGMCU_IDCODE, 4);
+    }
+    if(BurnerCtrl.Info.DEV_ID == 0){
+        goto exit;              // 初始化失败
+    }
     /* 初步匹配编程算法 */
     BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.Info.DEV_ID & 0xFFF, 0);
+    if(BurnerCtrl.FlashBlob == NULL){
+        goto exit;              // 初始化失败
+    }
     /* 初始化选项字节编程算法 */
     if (target_flash_init(BurnerCtrl.FlashBlob->prog_opt, 0) != ERROR_SUCCESS) {
         BurnerCtrl.Error = 2;   // 选项字初始化失败

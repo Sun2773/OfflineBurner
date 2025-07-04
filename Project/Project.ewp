@@ -3220,6 +3220,18 @@
         <group>
             <name>algo</name>
             <group>
+                <name>STM32F0</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F0\STM32F0xx_256_2K.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F0\STM32F0xx_64.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F0\STM32F0xx_OPT.c</name>
+                </file>
+            </group>
+            <group>
                 <name>STM32F1</name>
                 <file>
                     <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F1\STM32F10x_1024.c</name>

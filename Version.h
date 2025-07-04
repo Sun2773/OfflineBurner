@@ -11,7 +11,7 @@
  */
 
 #define PROJECT_NAME   "Burner"   // 工程名称
-#define SYSTEM_VERSION "0.03"     // 系统版本
+#define SYSTEM_VERSION "0.04"     // 系统版本
 #define DEVICE_TYPE    ""         // 设备型号
 #ifdef DEBUG                      // 调试版本尾缀
 #define SYSTEM_VERSION_SUFFIX "-Alpha"

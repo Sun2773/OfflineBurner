@@ -1,6 +1,10 @@
 #include "flash_blob.h"
 #include "stdlib.h"
 
+extern const program_target_t _stm32f0xx_opt_;
+extern const program_target_t _stm32f0xx_64_;
+extern const program_target_t _stm32f0xx_256_2k_;
+
 extern const program_target_t _stm32f10x_opt_;
 extern const program_target_t _stm32f10x_128_;
 extern const program_target_t _stm32f10x_512_;
@@ -10,6 +14,51 @@ extern const program_target_t _stm32f4xx_512_;
 extern const program_target_t _stm32f4xx_1024_;
 
 const FlashBlobList_t FlashBlobList[] = {
+    {
+        /* STM32F03x */
+        .DevId         = 0x444,              // 设备ID
+        .Name          = "STM32F03x",        // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,         // Flash大小寄存器地址
+        .FlashSize     = {16, 64},           // Flash大小范围
+        .prog_flash    = &_stm32f0xx_64_,    // Flash编程算法
+        .prog_opt      = &_stm32f0xx_opt_,   // 选项字编程算法
+    },
+    {
+        /* STM32F04x */
+        .DevId         = 0x445,              // 设备ID
+        .Name          = "STM32F04x",        // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,         // Flash大小寄存器地址
+        .FlashSize     = {16, 64},           // Flash大小范围
+        .prog_flash    = &_stm32f0xx_64_,    // Flash编程算法
+        .prog_opt      = &_stm32f0xx_opt_,   // 选项字编程算法
+    },
+    {
+        /* STM32F05x */
+        .DevId         = 0x440,              // 设备ID
+        .Name          = "STM32F05x",        // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,         // Flash大小寄存器地址
+        .FlashSize     = {16, 64},           // Flash大小范围
+        .prog_flash    = &_stm32f0xx_64_,    // Flash编程算法
+        .prog_opt      = &_stm32f0xx_opt_,   // 选项字编程算法
+    },
+    {
+        /* STM32F07x */
+        .DevId         = 0x448,                 // 设备ID
+        .Name          = "STM32F07x",           // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,            // Flash大小寄存器地址
+        .FlashSize     = {64, 256},             // Flash大小范围
+        .prog_flash    = &_stm32f0xx_256_2k_,   // Flash编程算法
+        .prog_opt      = &_stm32f0xx_opt_,      // 选项字编程算法
+    },
+    {
+        /* STM32F09x */
+        .DevId         = 0x442,                 // 设备ID
+        .Name          = "STM32F09x",           // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,            // Flash大小寄存器地址
+        .FlashSize     = {64, 256},             // Flash大小范围
+        .prog_flash    = &_stm32f0xx_256_2k_,   // Flash编程算法
+        .prog_opt      = &_stm32f0xx_opt_,      // 选项字编程算法
+    },
     {
         /* STM32F10x_LD: 小容量产品 16K~32K */
         .DevId         = 0x412,              // 设备ID
