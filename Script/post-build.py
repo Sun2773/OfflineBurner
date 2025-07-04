@@ -219,13 +219,13 @@ def merge_files(bootloader_path: str, bin_path: str, target_path: str, bin_offse
                 f_target.write(bin_data)
                 bin_size = len(bin_data)
             
-            # 写入bootloader大小信息
-            f_target.seek(FILE_SIZE_OFFSET)
-            f_target.write(boot_size.to_bytes(4, byteorder='little'))
+            # # 写入bootloader大小信息
+            # f_target.seek(FILE_SIZE_OFFSET)
+            # f_target.write(boot_size.to_bytes(4, byteorder='little'))
             
-            # 写入应用程序大小信息
-            f_target.seek(bin_offset + FILE_SIZE_OFFSET)
-            f_target.write(bin_size.to_bytes(4, byteorder='little'))
+            # # 写入应用程序大小信息
+            # f_target.seek(bin_offset + FILE_SIZE_OFFSET)
+            # f_target.write(bin_size.to_bytes(4, byteorder='little'))
         
         total_size = os.stat(target_path).st_size
         print(f'File merge completed: {os.path.basename(target_path)} ({total_size} bytes)')
