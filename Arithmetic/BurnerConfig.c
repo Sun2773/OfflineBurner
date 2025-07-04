@@ -22,14 +22,13 @@ BurnerConfigInfo_t BurnerConfigInfo = {
 };
 
 void BurnerConfig(void) {
-    FATFS*   fs          = NULL;    // 文件系统对象
-    FIL*     file        = NULL;    // 文件对象
-    FILINFO* file_info   = NULL;    // 文件信息对象
-    FRESULT  f_res       = FR_OK;   // FATFS操作结果
-    char*    str_buf     = NULL;    // 字符串缓冲区
-    UINT     r_cnt       = 0;       // 读取结果
-    uint32_t config_flag = 0;       // 配置标志
-    uint32_t crc         = 0;       // CRC校验码
+    FATFS*   fs        = NULL;    // 文件系统对象
+    FIL*     file      = NULL;    // 文件对象
+    FILINFO* file_info = NULL;    // 文件信息对象
+    FRESULT  f_res     = FR_OK;   // FATFS操作结果
+    char*    str_buf   = NULL;    // 字符串缓冲区
+    UINT     r_cnt     = 0;       // 读取结果
+    uint32_t crc       = 0;       // CRC校验码
 
     if ((fs = pvPortMalloc(sizeof(FATFS))) == NULL) {
         goto ex;
@@ -42,17 +41,6 @@ void BurnerConfig(void) {
     }
     if ((str_buf = pvPortMalloc(CONFIG_BUFFER_SIZE)) == NULL) {
         goto ex;
-    }
-
-    /********************************* 读取系统配置 *********************************/
-    SPI_FLASH_Read(str_buf,
-                   SPI_FLASH_CONFIG_ADDRESS,
-                   sizeof(BurnerConfigInfo_t));
-    /* 检查CRC32校验 */
-    crc = CRC32_Update(0, str_buf, sizeof(BurnerConfigInfo_t) - 4);
-    if (crc == ((BurnerConfigInfo_t*) str_buf)->CRC32) {
-        /* CRC校验失败，清空配置 */
-        memcpy(&BurnerConfigInfo, str_buf, sizeof(BurnerConfigInfo_t));
     }
 
     /********************************* 挂载文件系统 *********************************/
@@ -148,6 +136,17 @@ void BurnerConfig(void) {
         LED_Off(ERR);
         NVIC_SystemReset();   // 重启系统
     } while (0);
+
+    /********************************* 读取系统配置 *********************************/
+    SPI_FLASH_Read(str_buf,
+                   SPI_FLASH_CONFIG_ADDRESS,
+                   sizeof(BurnerConfigInfo_t));
+    /* 检查CRC32校验 */
+    crc = CRC32_Update(0, str_buf, sizeof(BurnerConfigInfo_t) - 4);
+    if (crc == ((BurnerConfigInfo_t*) str_buf)->CRC32) {
+        /* CRC校验成功，使用配置 */
+        memcpy(&BurnerConfigInfo, str_buf, sizeof(BurnerConfigInfo_t));
+    }
 
     /********************************* 检查是否需要加载程序 *********************************/
     do {
@@ -251,7 +250,6 @@ void BurnerConfig(void) {
             BurnerConfigInfo.FileAddress = SPI_FLASH_PROGRAM_ADDRESS;   // 获取文件地址
             BurnerConfigInfo.FileSize    = file_finish;                 // 获取文件大小
             BurnerConfigInfo.FileCrc     = file_crc32;                  // 更新文件CRC32校验码
-            BurnerConfigInfo.Flag        = 0;                           // 更新配置标志
             /* 删除文件 */
             f_res = f_unlink(BurnerConfigInfo.FilePath);
         } else {
@@ -261,138 +259,96 @@ void BurnerConfig(void) {
     LED_Off(ERR);
 
     /********************************* 检查配置文件 *********************************/
-    do {
-        if ((f_res = f_stat(Config_Path, file_info)) == FR_OK) {
-            config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
+    {
+        if ((f_res = f_open(file, Config_Path, FA_READ | FA_WRITE | FA_OPEN_ALWAYS)) != FR_OK) {
+            goto ex;
         }
-        if (f_res == FR_NO_FILE) {
-            /* 如果配置文件不存在，创建一个默认配置 */
-            BurnerConfigInfo.AutoBurner = CONFIG_DEFAULT_AUTO_BURNER;
-            BurnerConfigInfo.ChipErase  = CONFIG_DEFAULT_CHIP_ERASE;
-            BurnerConfigInfo.ChipLock   = CONFIG_DEFAULT_CHIP_LOCK;
-            BurnerConfigInfo.AutoRun    = CONFIG_DEFAULT_AUTO_RUN;
+        // 如果文件不存在，创建一个默认配置
+        uint32_t file_size = f_size(file);
+
+        if ((file_size != 0) && (file_size < CONFIG_BUFFER_SIZE)) {
+            f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &r_cnt);
         }
-        /* 配置文件发生变化，读取配置文件 */
-        if ((config_flag != BurnerConfigInfo.Flag) ||
-            (f_res == FR_NO_FILE) ||
-            (strcmp(BurnerConfigInfo.Version, SYSTEM_VERSION) != 0)) {
-            if ((f_res = f_open(file, Config_Path, FA_READ | FA_WRITE | FA_OPEN_ALWAYS)) != FR_OK) {
-                goto ex;
-            }
-            // 如果文件不存在，创建一个默认配置
-            uint32_t file_size = f_size(file);
+        crc = CRC32_Update(0, str_buf, r_cnt);   // 计算CRC32校验码
 
-            if ((file_size != 0) && (file_size < CONFIG_BUFFER_SIZE)) {
-                f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &r_cnt);
-            }
+        cJSON* root = NULL;   // JSON根对象
+        cJSON* item = NULL;   // JSON项
 
-            cJSON* root = NULL;   // JSON根对象
-            cJSON* item = NULL;   // JSON项
+        root = cJSON_ParseWithLength(str_buf, r_cnt);   // 解析JSON字符串
+        if (root == NULL) {
+            root = cJSON_CreateObject();   // 创建一个新的JSON对象
+        }
+        /* 保存烧录文件名 */
+        if ((item = cJSON_GetObjectItem(root, "file")) != NULL) {
+            cJSON_SetValuestring(item, BurnerConfigInfo.FilePath);
+        } else {
+            cJSON_AddStringToObject(root, "file", BurnerConfigInfo.FilePath);
+        }
 
-            root = cJSON_ParseWithLength(str_buf, r_cnt);   // 解析JSON字符串
-            if (root == NULL) {
-                root = cJSON_CreateObject();   // 创建一个新的JSON对象
-            }
+/* 处理对象中的数据变量 */
+#define CONFIG_OBJECT_INT(father, name, class, variable, default) \
+    {                                                             \
+        if ((item = cJSON_GetObjectItem(father, name)) != NULL) { \
+            if (cJSON_IsNumber(item)) {                           \
+                variable = (class) cJSON_GetNumberValue(item);    \
+            } else {                                              \
+                cJSON_DeleteItemFromObject(father, name);         \
+                cJSON_AddNumberToObject(father, name, default);   \
+                variable = default;                               \
+            }                                                     \
+        } else {                                                  \
+            cJSON_AddNumberToObject(father, name, default);       \
+            variable = default;                                   \
+        }                                                         \
+    }
+        /* 更新配置项 */
+        CONFIG_OBJECT_INT(root, "autoBurn", uint8_t, BurnerConfigInfo.AutoBurner, CONFIG_DEFAULT_AUTO_BURNER);
+        CONFIG_OBJECT_INT(root, "chipErase", uint8_t, BurnerConfigInfo.ChipErase, CONFIG_DEFAULT_CHIP_ERASE);
+        CONFIG_OBJECT_INT(root, "chipLock", uint8_t, BurnerConfigInfo.ChipLock, CONFIG_DEFAULT_CHIP_LOCK);
+        CONFIG_OBJECT_INT(root, "autoRun", uint8_t, BurnerConfigInfo.AutoRun, CONFIG_DEFAULT_AUTO_RUN);
+        /* 更新版本信息 */
+        if ((item = cJSON_GetObjectItem(root, "version")) != NULL) {
+            cJSON_SetValuestring(item, SYSTEM_VERSION);
+        } else {
+            cJSON_AddStringToObject(root, "version", SYSTEM_VERSION);
+        }
 
-            if ((item = cJSON_GetObjectItem(root, "file")) != NULL) {
-                cJSON_SetValuestring(item, BurnerConfigInfo.FilePath);
-            } else {
-                cJSON_AddStringToObject(root, "file", BurnerConfigInfo.FilePath);
-            }
-            if ((item = cJSON_GetObjectItem(root, "autoBurn")) != NULL) {
-                if (cJSON_IsTrue(item)) {
-                    BurnerConfigInfo.AutoBurner = 1;
-                } else {
-                    BurnerConfigInfo.AutoBurner = 0;
-                }
-            } else {
-                if (BurnerConfigInfo.AutoBurner) {
-                    cJSON_AddTrueToObject(root, "autoBurn");
-                } else {
-                    cJSON_AddFalseToObject(root, "autoBurn");
-                }
-            }
-            if ((item = cJSON_GetObjectItem(root, "chipErase")) != NULL) {
-                if (cJSON_IsTrue(item)) {
-                    BurnerConfigInfo.ChipErase = 1;
-                } else {
-                    BurnerConfigInfo.ChipErase = 0;
-                }
-            } else {
-                if (BurnerConfigInfo.ChipErase) {
-                    cJSON_AddTrueToObject(root, "chipErase");
-                } else {
-                    cJSON_AddFalseToObject(root, "chipErase");
-                }
-            }
-            if ((item = cJSON_GetObjectItem(root, "chipLock")) != NULL) {
-                if (cJSON_IsTrue(item)) {
-                    BurnerConfigInfo.ChipLock = 1;
-                } else {
-                    BurnerConfigInfo.ChipLock = 0;
-                }
-            } else {
-                if (BurnerConfigInfo.ChipLock) {
-                    cJSON_AddTrueToObject(root, "chipLock");
-                } else {
-                    cJSON_AddFalseToObject(root, "chipLock");
-                }
-            }
-            if ((item = cJSON_GetObjectItem(root, "autoRun")) != NULL) {
-                if (cJSON_IsTrue(item)) {
-                    BurnerConfigInfo.AutoRun = 1;
-                } else {
-                    BurnerConfigInfo.AutoRun = 0;
-                }
-            } else {
-                if (BurnerConfigInfo.AutoRun) {
-                    cJSON_AddTrueToObject(root, "autoRun");
-                } else {
-                    cJSON_AddFalseToObject(root, "autoRun");
-                }
-            }
-            if ((item = cJSON_GetObjectItem(root, "version")) != NULL) {
-                cJSON_SetValuestring(item, SYSTEM_VERSION);
-            } else {
-                cJSON_AddStringToObject(root, "version", SYSTEM_VERSION);
-            }
-            char* json = cJSON_PrintUnformatted(root);   // 将JSON对象转换为字符串
-            cJSON_Delete(root);                          // 删除JSON对象
-
+        char* json = cJSON_PrintUnformatted(root);   // 将JSON对象转换为字符串
+        if (crc != CRC32_Update(0, json, strlen(json))) {
             f_res = f_lseek(file, 0);
             f_res = f_write(file, json, strlen(json), &r_cnt);
             f_res = f_truncate(file);
-            vPortFree(json);
-
-            f_close(file);
-
-            f_res       = f_stat(Config_Path, file_info);
-            config_flag = ((uint32_t) (file_info->fdate) << 16) | file_info->ftime;
         }
-    } while (0);
-
-    /********************************* 检查说明文件 *********************************/
-    if ((f_res = f_stat(Readme_Path, file_info)) != FR_OK) {
-        if ((f_res = f_open(file, Readme_Path, FA_WRITE | FA_CREATE_ALWAYS)) != FR_OK) {
-            goto ex;
-        }
-        if ((f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &r_cnt)) != FR_OK) {
-            goto ex;
-        }
+        cJSON_Delete(root);
+        vPortFree(json);
         f_close(file);
     }
 
     /********************************* 更新配置 *********************************/
-    if (config_flag != BurnerConfigInfo.Flag) {
-        BurnerConfigInfo.Flag = config_flag;
-        strcpy(BurnerConfigInfo.Version, SYSTEM_VERSION);
-        BurnerConfigInfo.CRC32 = CRC32_Update(0, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
-
+    crc = CRC32_Update(0, &BurnerConfigInfo, sizeof(BurnerConfigInfo) - 4);
+    if (crc != BurnerConfigInfo.CRC32) {
+        BurnerConfigInfo.CRC32 = crc;
         SPI_FLASH_Erase(SPI_FLASH_CONFIG_ADDRESS);
         SPI_FLASH_Write(&BurnerConfigInfo,
                         SPI_FLASH_CONFIG_ADDRESS,
                         sizeof(BurnerConfigInfo));
     }
+
+    /********************************* 检查说明文件 *********************************/
+    if ((f_res = f_open(file, Readme_Path, FA_WRITE | FA_READ | FA_OPEN_ALWAYS)) != FR_OK) {
+        goto ex;
+    }
+    if ((f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &r_cnt)) != FR_OK) {
+        goto ex;
+    }
+    crc = CRC32_Update(0, str_buf, r_cnt);   // 计算CRC32校验码
+    if (crc != CRC32_Update(0, (void*) ConfigReadme, strlen(ConfigReadme))) {
+        f_res = f_lseek(file, 0);
+        f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &r_cnt);
+        f_res = f_truncate(file);
+    }
+    f_close(file);
+
 ex:
     if (file != NULL) {
         f_close(file);

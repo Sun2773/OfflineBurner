@@ -16,12 +16,10 @@
 #define CONFIG_DEFAULT_AUTO_RUN    1   // 自动运行
 
 typedef struct {
-    uint32_t Flag;             // Flash大小
     uint32_t FileAddress;      // 文件地址
     uint32_t FileSize;         // 文件大小
     uint32_t FileCrc;          // 文件CRC32校验码
     char     FilePath[128];    // 文件路径
-    char     Version[32];      // 版本信息
     uint32_t AutoBurner : 1;   // 自动烧录标志
     uint32_t ChipErase  : 1;   // 擦除全片
     uint32_t ChipLock   : 1;   // 锁定Flash
