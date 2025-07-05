@@ -6,12 +6,13 @@
 #include "Version.h"
 #include "cJSON.h"
 #include "crc.h"
-#include "ff.h"
 #include "heap.h"
 #include "led.h"
 #include "string.h"
 
 #include "ConfigReadme.h"
+
+static uint8_t HEX2DEC(char* hex, uint32_t* dec);
 
 BurnerConfigInfo_t BurnerConfigInfo = {
     .FilePath   = "",
@@ -27,7 +28,7 @@ void BurnerConfig(void) {
     FILINFO* file_info = NULL;    // 文件信息对象
     FRESULT  f_res     = FR_OK;   // FATFS操作结果
     char*    str_buf   = NULL;    // 字符串缓冲区
-    UINT     r_cnt     = 0;       // 读取结果
+    UINT     rw_cnt    = 0;       // 读取结果
     uint32_t crc       = 0;       // CRC校验码
 
     if ((fs = pvPortMalloc(sizeof(FATFS))) == NULL) {
@@ -106,13 +107,13 @@ void BurnerConfig(void) {
         while (file_size - file_finish) {
             if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
                 /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
-                r_cnt = CONFIG_BUFFER_SIZE;
+                rw_cnt = CONFIG_BUFFER_SIZE;
             } else {
                 /* 剩余字节数大于0小于缓存,读取剩余字节数 */
-                r_cnt = (file_size - file_finish);
+                rw_cnt = (file_size - file_finish);
             }
             /* 读取文件 */
-            if (f_read(file, str_buf, r_cnt, &r_cnt) != FR_OK) {
+            if (f_read(file, str_buf, rw_cnt, &rw_cnt) != FR_OK) {
                 break;
             }
             rw_addr = SPI_FLASH_FIRMWARE_ADDRESS + file_finish;   // 写入地址
@@ -120,9 +121,9 @@ void BurnerConfig(void) {
                 /* 如果写入地址是块大小的整数倍，擦除块 */
                 SPI_FLASH_Erase(rw_addr);
             }
-            SPI_FLASH_Write(str_buf, rw_addr, r_cnt);
+            SPI_FLASH_Write(str_buf, rw_addr, rw_cnt);
             /* 计数 */
-            file_finish += r_cnt;
+            file_finish += rw_cnt;
             LED_OnOff(RUN);
             LED_OnOff(ERR);
         }
@@ -196,27 +197,27 @@ void BurnerConfig(void) {
         while (file_size - file_finish) {
             if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
                 /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
-                r_cnt = CONFIG_BUFFER_SIZE;
+                rw_cnt = CONFIG_BUFFER_SIZE;
             } else {
                 /* 剩余字节数大于0小于缓存,读取剩余字节数 */
-                r_cnt = (file_size - file_finish);
+                rw_cnt = (file_size - file_finish);
             }
             /* 读取文件 */
-            if (f_read(file, str_buf, r_cnt, &r_cnt) != FR_OK) {
+            if (f_read(file, str_buf, rw_cnt, &rw_cnt) != FR_OK) {
                 break;
             }
 
             /* 计算文件校验码 */
-            file_crc32 = CRC32_Update(file_crc32, str_buf, r_cnt);
+            file_crc32 = CRC32_Update(file_crc32, str_buf, rw_cnt);
             rw_addr    = SPI_FLASH_PROGRAM_ADDRESS + file_finish;   // 写入地址
             if ((rw_addr % W25QXX_BLOCK_SIZE) == 0) {
                 /* 如果写入地址是块大小的整数倍，擦除块 */
                 SPI_FLASH_Erase(rw_addr);
                 LED_OnOff(ERR);
             }
-            SPI_FLASH_Write(str_buf, rw_addr, r_cnt);
+            SPI_FLASH_Write(str_buf, rw_addr, rw_cnt);
             /* 计数 */
-            file_finish += r_cnt;
+            file_finish += rw_cnt;
             LED_OnOff(RUN);
         }
         LED_Off(RUN);
@@ -229,20 +230,20 @@ void BurnerConfig(void) {
             /* 检查剩余字节数,若剩余字节大于缓存 */
             if ((file_size - file_finish) > CONFIG_BUFFER_SIZE) {
                 /* 读取缓存大小文件 */
-                r_cnt = CONFIG_BUFFER_SIZE;
+                rw_cnt = CONFIG_BUFFER_SIZE;
             }
             /* 剩余字节数大于0小于缓存 */
             else {
                 /* 读取剩余字节数 */
-                r_cnt = (file_size - file_finish);
+                rw_cnt = (file_size - file_finish);
             }
             rw_addr = SPI_FLASH_PROGRAM_ADDRESS + file_finish;   // 读取地址
             /* 读取数据 */
-            SPI_FLASH_Read(str_buf, rw_addr, r_cnt);
+            SPI_FLASH_Read(str_buf, rw_addr, rw_cnt);
             /* 计算数据校验码 */
-            data_crc32 = CRC32_Update(data_crc32, str_buf, r_cnt);
+            data_crc32 = CRC32_Update(data_crc32, str_buf, rw_cnt);
             /* 计数 */
-            file_finish += r_cnt;
+            file_finish += rw_cnt;
             LED_OnOff(RUN);
         }
         /* 校验数据 */
@@ -267,14 +268,14 @@ void BurnerConfig(void) {
         uint32_t file_size = f_size(file);
 
         if ((file_size != 0) && (file_size < CONFIG_BUFFER_SIZE)) {
-            f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &r_cnt);
+            f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &rw_cnt);
         }
-        crc = CRC32_Update(0, str_buf, r_cnt);   // 计算CRC32校验码
+        crc = CRC32_Update(0, str_buf, rw_cnt);   // 计算CRC32校验码
 
         cJSON* root = NULL;   // JSON根对象
         cJSON* item = NULL;   // JSON项
 
-        root = cJSON_ParseWithLength(str_buf, r_cnt);   // 解析JSON字符串
+        root = cJSON_ParseWithLength(str_buf, rw_cnt);   // 解析JSON字符串
         if (root == NULL) {
             root = cJSON_CreateObject();   // 创建一个新的JSON对象
         }
@@ -306,6 +307,23 @@ void BurnerConfig(void) {
         CONFIG_OBJECT_INT(root, "chipErase", uint8_t, BurnerConfigInfo.ChipErase, CONFIG_DEFAULT_CHIP_ERASE);
         CONFIG_OBJECT_INT(root, "chipLock", uint8_t, BurnerConfigInfo.ChipLock, CONFIG_DEFAULT_CHIP_LOCK);
         CONFIG_OBJECT_INT(root, "autoRun", uint8_t, BurnerConfigInfo.AutoRun, CONFIG_DEFAULT_AUTO_RUN);
+        /* 烧录地址 */
+        if ((item = cJSON_GetObjectItem(root, "flashAddr")) != NULL) {
+            if (cJSON_IsString(item)) {
+                char* flash_addr = cJSON_GetStringValue(item);
+                if (HEX2DEC(flash_addr, &BurnerConfigInfo.FlashAddress) == 0) {
+                    cJSON_SetValuestring(item, CONFIG_DEFAULT_FLASH_ADDRESS);
+                    HEX2DEC(CONFIG_DEFAULT_FLASH_ADDRESS, &BurnerConfigInfo.FlashAddress);
+                }
+            } else {
+                cJSON_DeleteItemFromObject(root, "flashAddr");
+                cJSON_AddStringToObject(root, "flashAddr", CONFIG_DEFAULT_FLASH_ADDRESS);
+                HEX2DEC(CONFIG_DEFAULT_FLASH_ADDRESS, &BurnerConfigInfo.FlashAddress);
+            }
+        } else {
+            cJSON_AddStringToObject(root, "flashAddr", CONFIG_DEFAULT_FLASH_ADDRESS);
+            HEX2DEC(CONFIG_DEFAULT_FLASH_ADDRESS, &BurnerConfigInfo.FlashAddress);
+        }
         /* 更新版本信息 */
         if ((item = cJSON_GetObjectItem(root, "version")) != NULL) {
             cJSON_SetValuestring(item, SYSTEM_VERSION);
@@ -316,7 +334,7 @@ void BurnerConfig(void) {
         char* json = cJSON_PrintUnformatted(root);   // 将JSON对象转换为字符串
         if (crc != CRC32_Update(0, json, strlen(json))) {
             f_res = f_lseek(file, 0);
-            f_res = f_write(file, json, strlen(json), &r_cnt);
+            f_res = f_write(file, json, strlen(json), &rw_cnt);
             f_res = f_truncate(file);
         }
         cJSON_Delete(root);
@@ -338,13 +356,13 @@ void BurnerConfig(void) {
     if ((f_res = f_open(file, Readme_Path, FA_WRITE | FA_READ | FA_OPEN_ALWAYS)) != FR_OK) {
         goto ex;
     }
-    if ((f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &r_cnt)) != FR_OK) {
+    if ((f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &rw_cnt)) != FR_OK) {
         goto ex;
     }
-    crc = CRC32_Update(0, str_buf, r_cnt);   // 计算CRC32校验码
+    crc = CRC32_Update(0, str_buf, rw_cnt);   // 计算CRC32校验码
     if (crc != CRC32_Update(0, (void*) ConfigReadme, strlen(ConfigReadme))) {
         f_res = f_lseek(file, 0);
-        f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &r_cnt);
+        f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &rw_cnt);
         f_res = f_truncate(file);
     }
     f_close(file);
@@ -364,4 +382,30 @@ ex:
         vPortFree(str_buf);
     }
     return;
+}
+
+static uint8_t HEX2DEC(char* hex, uint32_t* dec) {
+    if (hex == NULL || dec == NULL) {
+        return 0;   // 参数错误
+    }
+    uint32_t value = 0;
+    if (hex[0] == '0' && ((hex[1] == 'x') || (hex[1] == 'X'))) {
+        for (uint8_t i = 2; (hex[i] != '\0') && (i < 10); i++) {
+            if (hex[i] >= '0' && hex[i] <= '9') {
+                value <<= 4;
+                value |= (hex[i] - '0');
+            } else if (hex[i] >= 'A' && hex[i] <= 'F') {
+                value <<= 4;
+                value |= (hex[i] - 'A' + 10);
+            } else if (hex[i] >= 'a' && hex[i] <= 'f') {
+                value <<= 4;
+                value |= (hex[i] - 'a' + 10);
+            } else {
+                return 0;   // 非法字符
+            }
+        }
+        *dec = value;
+        return 1;   // 成功转换
+    }
+    return 0;   // 非法格式
 }

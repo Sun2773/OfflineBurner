@@ -5,7 +5,6 @@
 #include "stdlib.h"
 #include "stm32f10x.h"
 
-#define BURNER_TARGET_ADDRESS  0x08000000     // 烧录目标地址
 #define BURNER_AUTO_START_TIME (1000 / 100)   // 烧录目标地址
 #define BURNER_AUTO_END_TIME   (500 / 100)    // 烧录目标地址
 

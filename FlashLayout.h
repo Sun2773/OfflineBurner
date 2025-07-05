@@ -21,8 +21,11 @@
  */
 
 #define SPI_FLASH_CONFIG_ADDRESS      (0x00000000)   // 配置保存地址
+#define SPI_FLASH_CONFIG_SIZE         (0x00001000)   // 配置保存大小 (4K)
 #define SPI_FLASH_FIRMWARE_ADDRESS    (0x00001000)   // 固件保存地址
+#define SPI_FLASH_FIRMWARE_SIZE       (0x00020000)   // 固件保存大小 (128K)
 #define SPI_FLASH_PROGRAM_ADDRESS     (0x00100000)   // 程序保存地址
+#define SPI_FLASH_PROGRAM_SIZE        (0x00300000)   // 程序保存大小 (3M)
 #define SPI_FLASH_FILE_SYSTEM_ADDRESS (0x00400000)   // 文件系统地址
 
 /*

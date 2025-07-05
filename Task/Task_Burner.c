@@ -183,7 +183,7 @@ void Burner_Exe(void) {
     while (BurnerCtrl.Info.ProgramSize - BurnerCtrl.Info.FinishSize) {
         uint32_t rw_cnt = 0;   // 读写计数
         uint32_t f_addr = BurnerConfigInfo.FileAddress;
-        uint32_t t_addr = BURNER_TARGET_ADDRESS;
+        uint32_t t_addr = BurnerConfigInfo.FlashAddress;
         if ((BurnerCtrl.Info.ProgramSize - BurnerCtrl.Info.FinishSize) > CONFIG_BUFFER_SIZE) {
             /* 检查剩余字节数,若剩余字节大于缓存,读取缓存大小文件 */
             rw_cnt = CONFIG_BUFFER_SIZE;
