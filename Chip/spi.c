@@ -54,11 +54,12 @@ void SPI1_SetSpeed(uint8_t baud) {
  */
 uint8_t SPI1_ReadWriteByte(uint8_t byte) {
     uint8_t res = 0;
+    uint16_t timeout = 0x7FF;
     SPI_Cmd(SPI1, ENABLE);
-    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET) {
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET && timeout--) {
     }
     SPI_I2S_SendData(SPI1, byte);
-    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET) {
+    while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET && timeout--) {
     }
     res = SPI_I2S_ReceiveData(SPI1);
     SPI_Cmd(SPI1, DISABLE);

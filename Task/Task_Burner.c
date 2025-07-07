@@ -12,7 +12,10 @@
 extern uint32_t SysTick_Get(void);   // 获取系统滴答计数值
 extern void     Delay(uint32_t);     // 获取系统滴答计数值
 
-BurnerCtrl_t BurnerCtrl;
+BurnerCtrl_t BurnerCtrl = {
+    .StartTimer = BURNER_AUTO_START_TIME,
+    .EndTimer = BURNER_AUTO_END_TIME,
+};
 
 /**
  * @brief  检测目标
@@ -114,6 +117,7 @@ void Burner_Exe(void) {
         BurnerCtrl.Error = BURNER_ERROR_CHIP_UNKNOWN;   // SWD初始化失败
         goto exit;                                      // 初始化失败
     }
+
     /* 初步匹配编程算法 */
     BurnerCtrl.FlashBlob = FlashBlob_Get(BurnerCtrl.Info.DEV_ID & 0xFFF, 0);
     if (BurnerCtrl.FlashBlob == NULL) {
@@ -140,9 +144,6 @@ void Burner_Exe(void) {
         Delay(10);
         /* 初始化接口 */
         if (swd_init_debug() == 0) {
-            continue;
-        }
-        if (0 == swd_set_target_state_hw(RESET_PROGRAM)) {
             continue;
         }
         LED_OnOff(RUN);

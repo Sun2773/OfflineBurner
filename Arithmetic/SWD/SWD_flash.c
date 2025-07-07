@@ -31,9 +31,16 @@ error_t target_flash_uninit(void) {
     if (FlashBlob == NULL) {
         return ERROR_FAILURE;
     }
-    swd_set_target_state_hw(RESET_RUN);
 
-    swd_off();
+    if (swd_flash_syscall_exec(&FlashBlob->sys_call_s,
+                               FlashBlob->uninit,
+                               0,
+                               0,
+                               0,
+                               0) == 0) {
+        return ERROR_UINIT;
+    }
+
     return ERROR_SUCCESS;
 }
 
