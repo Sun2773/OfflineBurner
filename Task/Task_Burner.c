@@ -7,6 +7,7 @@
 #include "SWD_host.h"
 #include "buzzer.h"
 #include "heap.h"
+#include "hw_config.h"
 #include "led.h"
 
 extern uint32_t SysTick_Get(void);   // 获取系统滴答计数值
@@ -14,7 +15,7 @@ extern void     Delay(uint32_t);     // 获取系统滴答计数值
 
 BurnerCtrl_t BurnerCtrl = {
     .StartTimer = BURNER_AUTO_START_TIME,
-    .EndTimer = BURNER_AUTO_END_TIME,
+    .EndTimer   = BURNER_AUTO_END_TIME,
 };
 
 /**
@@ -63,6 +64,14 @@ void Burner_Detection(void) {
                 BurnerCtrl.EndTimer = BURNER_AUTO_END_TIME;
             }
             break;
+
+        case BURNER_STATE_LOCK:
+            if (USB_StateGet() == 0) {
+                BurnerCtrl.State = BURNER_STATE_IDLE;
+            }
+            BurnerCtrl.StartTimer = BURNER_AUTO_START_TIME;
+            BurnerCtrl.EndTimer   = BURNER_AUTO_END_TIME;
+            break;
     }
 }
 
@@ -73,6 +82,10 @@ void Burner_Detection(void) {
  */
 void Burner_Exe(void) {
     uint32_t tick = SysTick_Get();
+    if (USB_StateGet() != 0) {
+        BurnerCtrl.State = BURNER_STATE_LOCK;
+        return;
+    }
     /* 等待开始命令 */
     if (BurnerCtrl.State != BURNER_STATE_START) {
         return;

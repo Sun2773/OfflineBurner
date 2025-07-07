@@ -1,5 +1,6 @@
 #include "Task_Key.h"
 #include "Task_Burner.h"
+#include "buzzer.h"
 
 /**
  * @brief  按键处理任务
@@ -19,7 +20,7 @@ void Key_Task(void) {
                 key_trigger = 1;
                 key_tim     = 0;
                 if (Key_LongPressEvent(key_last)) {
-                    // Beep(BEEP_Short);
+                    Beep(1000);
                 }
             }
         } else {
@@ -61,6 +62,7 @@ static uint8_t Key_ClickEvent(uint32_t key) {
  * @retval 1: 事件处理成功, 0: 事件处理失败
  */
 static uint8_t Key_LongPressEvent(uint32_t key) {
+    USB_Mount();
     return 1;
 }
 

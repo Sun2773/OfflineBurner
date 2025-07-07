@@ -3214,6 +3214,18 @@
         <file>
             <name>$PROJ_DIR$\..\Task\Task_Key.h</name>
         </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_Led.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_Led.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_USB.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Task\Task_USB.h</name>
+        </file>
     </group>
     <group>
         <name>Arithmetic</name>

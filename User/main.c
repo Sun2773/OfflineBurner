@@ -19,6 +19,8 @@
 #include "BurnerConfig.h"
 #include "Task_Burner.h"
 #include "Task_Key.h"
+#include "Task_Led.h"
+#include "Task_USB.h"
 
 #include "hw_config.h"
 #include "usb_desc.h"
@@ -50,9 +52,10 @@ uint32_t SysTick_Get(void);       // 获取系统滴答计数值
 TaskUnti_t TaskList[] = {
     /* 任务钩子，执行周期 */
     {TaskNull, 10},
-    {LED_Task, 500},      // LED任务，每500ms执行一次
+    {LED_Task, 50},       // LED任务，每500ms执行一次
     {Key_Task, 10},       // 按键任务，每10ms执行一次
     {Burner_Task, 100},   // 烧录任务，每100ms执行一次
+    {USB_Task, 100},      // 烧录任务，每100ms执行一次
 
     // 在上面添加任务。。。。
 };

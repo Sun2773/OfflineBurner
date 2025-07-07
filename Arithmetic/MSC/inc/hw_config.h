@@ -52,6 +52,9 @@
 
 /* Exported functions ------------------------------------------------------- */
 void Set_System(void);
+void USB_Mount(void);
+void USB_Unload(void);
+uint8_t USB_StateGet(void);
 void Set_USBClock(void);
 void Enter_LowPowerMode(void);
 void Leave_LowPowerMode(void);

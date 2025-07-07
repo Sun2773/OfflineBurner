@@ -29,6 +29,7 @@ typedef enum {
     BURNER_STATE_READY,      // 准备状态
     BURNER_STATE_RUNNING,    // 运行状态
     BURNER_STATE_FINISH,     // 完成状态
+    BURNER_STATE_LOCK,       // 锁定状态
 } Burner_State_t;
 
 typedef struct {

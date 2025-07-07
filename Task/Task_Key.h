@@ -5,7 +5,7 @@
 #include "stm32f10x.h"
 
 #define Key_SHORT_TIME  3     // 按键短按时间
-#define Key_LONG_TIME   100   // 按键长按时间
+#define Key_LONG_TIME   200   // 按键长按时间
 #define Key_ALWAYS_TIME 20    // 按键一直按时间
 
 void           Key_Task(void);                       // 按键处理任务
