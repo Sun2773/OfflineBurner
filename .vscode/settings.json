@@ -157,7 +157,9 @@
         "task_beep.h": "c",
         "usb_lib.h": "c",
         "heap.h": "c",
-        "float.h": "c"
+        "float.h": "c",
+        "configreadme.h": "c",
+        "task_led.h": "c"
     },
     "files.autoGuessEncoding": true,
     "C_Cpp.default.configurationProvider": "iarsystems.iar-build"
