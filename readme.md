@@ -1,6 +1,6 @@
 # OfflineBurner 离线编程器
 
-[![Version](https://img.shields.io/badge/version-0.07-blue.svg)](https://github.com/your-repo/OfflineBurner)
+[![Version](https://img.shields.io/badge/version-0.07-blue.svg)](https://github.com/Sun2773/OfflineBurner)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-STM32F103-orange.svg)](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)
 
@@ -111,7 +111,7 @@ SPI Flash 布局 (16MB):
 
 ### 1. 获取项目
 ```bash
-git clone https://github.com/your-repo/OfflineBurner.git
+git clone https://github.com/Sun2773/OfflineBurner.git
 cd OfflineBurner
 ```
 
@@ -393,8 +393,8 @@ OfflineBurner/
 
 ## 联系方式
 
-- 项目主页: [GitHub Repository](https://github.com/your-repo/OfflineBurner)
-- 问题反馈: [Issues](https://github.com/your-repo/OfflineBurner/issues)
+- 项目主页: [GitHub Repository](https://github.com/Sun2773/OfflineBurner)
+- 问题反馈: [Issues](https://github.com/Sun2773/OfflineBurner/issues)
 - 技术支持: your-email@example.com
 
 ---
