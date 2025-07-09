@@ -6,6 +6,7 @@
 #include "Version.h"
 #include "cJSON.h"
 #include "crc.h"
+#include "flash_blob.h"
 #include "heap.h"
 #include "led.h"
 #include "string.h"
@@ -363,6 +364,22 @@ void BurnerConfig(void) {
     if (crc != CRC32_Update(0, (void*) ConfigReadme, strlen(ConfigReadme))) {
         f_res = f_lseek(file, 0);
         f_res = f_write(file, ConfigReadme, strlen(ConfigReadme), &rw_cnt);
+        f_res = f_truncate(file);
+    }
+    f_close(file);
+
+    /********************************* 检查支持列表文件 *********************************/
+    if ((f_res = f_open(file, Supported_Path, FA_WRITE | FA_READ | FA_OPEN_ALWAYS)) != FR_OK) {
+        goto ex;
+    }
+    if ((f_res = f_read(file, str_buf, CONFIG_BUFFER_SIZE, &rw_cnt)) != FR_OK) {
+        goto ex;
+    }
+    crc = CRC32_Update(0, str_buf, rw_cnt);   // 计算CRC32校验码
+    FlashBlob_ListStr(str_buf);               // 获取支持列表字符串
+    if (crc != CRC32_Update(0, (void*) str_buf, strlen(str_buf))) {
+        f_res = f_lseek(file, 0);
+        f_res = f_write(file, str_buf, strlen(str_buf), &rw_cnt);
         f_res = f_truncate(file);
     }
     f_close(file);

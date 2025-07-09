@@ -41,5 +41,6 @@ typedef struct {
 } FlashBlobList_t;
 
 FlashBlobList_t* FlashBlob_Get(uint16_t id, uint16_t flash_size);
+void             FlashBlob_ListStr(char* str);
 
 #endif

@@ -1,6 +1,7 @@
 #include "Task_Key.h"
 #include "Task_Burner.h"
 #include "buzzer.h"
+#include "hw_config.h"
 
 /**
  * @brief  按键处理任务

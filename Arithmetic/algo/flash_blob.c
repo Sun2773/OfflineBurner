@@ -1,5 +1,6 @@
 #include "flash_blob.h"
 #include "stdlib.h"
+#include "string.h"
 
 extern const program_target_t _stm32f0xx_opt_;
 extern const program_target_t _stm32f0xx_64_;
@@ -77,7 +78,6 @@ const FlashBlobList_t FlashBlobList[] = {
         .prog_flash    = &_stm32f10x_128_,   // Flash编程算法
         .prog_opt      = &_stm32f10x_opt_,   // 选项字编程算法
     },
-
     {
         /* STM32F10x_HD: 高容量产品 256K~512K */
         .DevId         = 0x414,              // 产品ID
@@ -133,4 +133,22 @@ FlashBlobList_t* FlashBlob_Get(uint16_t id, uint16_t flash_size) {
         }
     }
     return NULL;   // 未找到对应的编程算法
+}
+
+/**
+ * @brief  获取算法列表字符串
+ * @note   
+ * @param  str: 字符串缓冲区
+ * @retval None
+ */
+void FlashBlob_ListStr(char* str) {
+    *str = '\0';   // 清空字符串
+    for (size_t i = 0; i < sizeof(FlashBlobList) / sizeof(FlashBlobList[0]); i++) {
+        if (strstr(str, FlashBlobList[i].Name) != NULL) {
+            /* 如果设备名称已存在，则跳过 */
+            continue;
+        }
+        strcat(str, FlashBlobList[i].Name);   // 添加设备名称
+        strcat(str, "\r\n");                  // 添加换行符
+    }
 }
