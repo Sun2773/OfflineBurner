@@ -12,6 +12,9 @@
 
 #define CONFIG_BUFFER_SIZE 1024   // 配置缓冲区大小
 
+#define CONFIG_BUFFER1_SIZE (CONFIG_BUFFER_SIZE - CONFIG_BUFFER2_SIZE)   // 配置缓冲区1大小
+#define CONFIG_BUFFER2_SIZE (128)                                        // 配置缓冲区2大小
+
 #define CONFIG_DEFAULT_AUTO_BURNER   1              // 自动烧录标志
 #define CONFIG_DEFAULT_CHIP_ERASE    0              // 擦除全片
 #define CONFIG_DEFAULT_CHIP_LOCK     0              // 锁定Flash

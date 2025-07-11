@@ -21,7 +21,7 @@
 #define W25QX_ManufactDeviceID 0x90
 #define W25QX_JedecDeviceID    0x9F
 
-#define W25QXX_BLOCK_SIZE (4096)
+#define W25QXX_BLOCK_SIZE (0x1000)   // 4K
 
 #define W25QXX_CS_RCCCLOCK RCC_APB2Periph_GPIOA
 #define W25QXX_CS_PORT     GPIOA
