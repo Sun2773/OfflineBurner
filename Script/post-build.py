@@ -323,7 +323,7 @@ def main():
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if 'File.Open' in line:
-                    lines[i] = f'  File.Open ("$(ProjectDir)/../../Output/{project}{file_suffix}.out");\n'
+                    lines[i] = f'  File.Open ("$(ProjectDir)/../Output/{project}{file_suffix}.out");\n'
                     break
             f.seek(0)
             f.writelines(lines)

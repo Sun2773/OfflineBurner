@@ -53,7 +53,7 @@ def main():
         PROJ_FNAME   = sys.argv[5]  # 项目名
         
         # 定义输出目录
-        OUTPUT_DIR = os.path.join(PROJ_DIR, '..', '..', 'Output')
+        OUTPUT_DIR = os.path.join(PROJ_DIR, '..', 'Output')
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         # 提取版本信息
         VERSION_FILE_PATH = os.path.join(PROJ_DIR, '..', 'Version.h')

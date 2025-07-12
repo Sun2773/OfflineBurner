@@ -303,7 +303,6 @@ void BurnerConfig(void) {
                             }
                             w_addr -= start_addr;                  // 减去起始地址
                             w_addr += SPI_FLASH_PROGRAM_ADDRESS;   // 烧录地址
-                            // FLASH_W_BUFFER(data, w_addr, *len);    // 通过缓存写入
                             if (prog_size < w_addr + *len) {
                                 prog_size = w_addr + *len;   // 更新烧录大小
                             }
