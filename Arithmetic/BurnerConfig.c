@@ -107,6 +107,11 @@ void BurnerConfig(void) {
         strcpy(str_buf, Firmware_Path);      // 复制固件路径
         strcat(str_buf, "/");                // 追加斜杠
         strcat(str_buf, file_info->fname);   // 追加文件名
+
+        /* 取消只读属性 */
+        if ((file_info->fattrib & AM_RDO) != 0) {
+            f_chmod(str_buf, file_info->fattrib & ~AM_RDO, AM_RDO);
+        }
         /* 打开固件文件 */
         if (f_open(file, str_buf, FA_READ) != FR_OK) {
             break;
@@ -185,6 +190,11 @@ void BurnerConfig(void) {
         *BurnerConfigInfo.FilePath = '\0';                     // 清空文件路径
         strcat(BurnerConfigInfo.FilePath, Flash_Path);         // 复制Flash路径
         strcat(BurnerConfigInfo.FilePath, file_info->fname);   // 追加文件名
+
+        /* 取消只读属性 */
+        if ((file_info->fattrib & AM_RDO) != 0) {
+            f_chmod(BurnerConfigInfo.FilePath, file_info->fattrib & ~AM_RDO, AM_RDO);
+        }
         /* 打开固件文件 */
         if (f_open(file, BurnerConfigInfo.FilePath, FA_READ) != FR_OK) {
             break;
