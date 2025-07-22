@@ -17,7 +17,6 @@ extern const program_target_t _stm32f3xx_opt_;
 extern const program_target_t _stm32f3xx_512_;
 
 extern const program_target_t _stm32f40xxx_41xxx_opt_;
-extern const program_target_t _stm32f4xx_512_;
 extern const program_target_t _stm32f4xx_1024_;
 
 const FlashBlobList_t FlashBlobList[] = {
@@ -125,16 +124,7 @@ const FlashBlobList_t FlashBlobList[] = {
         .DevId         = 0x413,                                 // 产品ID
         .Name          = "STM32F405xx/07xx STM32F415xx/17xx",   // 产品名称
         .FlashSizeAddr = 0x1FFF7A22,                            // Flash大小寄存器地址
-        .FlashSize     = {128, 512},                            // Flash大小范围
-        .prog_flash    = &_stm32f4xx_512_,                      // Flash编程算法
-        .prog_opt      = &_stm32f40xxx_41xxx_opt_,              // 选项字编程算法
-    },
-    {
-        /* STM32F405xx/07xx STM32F415xx/17xx */
-        .DevId         = 0x413,                                 // 产品ID
-        .Name          = "STM32F405xx/07xx STM32F415xx/17xx",   // 产品名称
-        .FlashSizeAddr = 0x1FFF7A22,                            // Flash大小寄存器地址
-        .FlashSize     = {1024, 1024},                          // Flash大小范围
+        .FlashSize     = {128, 1024},                           // Flash大小范围
         .prog_flash    = &_stm32f4xx_1024_,                     // Flash编程算法
         .prog_opt      = &_stm32f40xxx_41xxx_opt_,              // 选项字编程算法
     },

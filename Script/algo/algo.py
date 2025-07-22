@@ -381,16 +381,16 @@ def get_user_file_selection(flm_files):
         return False, flm_files
     
     print("Available FLM files:")
+    print(f"  0.\tProcess all files")
     for i, flm in enumerate(flm_files):
         print(f"  {i+1}.\t{flm}")
-    print(f"  {len(flm_files)+1}.\tProcess all files")
     
     try:
-        choice = int(input("Select FLM file (number): ")) - 1
-        if choice == len(flm_files):
+        choice = int(input("Select FLM file (number): "))
+        if choice == 0:
             return True, flm_files  # 处理所有文件
-        elif 0 <= choice < len(flm_files):
-            return False, [flm_files[choice]]  # 处理单个文件
+        elif 1 <= choice <= len(flm_files):
+            return False, [flm_files[choice-1]]  # 处理单个文件
         else:
             print("Invalid choice, using first file")
             return False, [flm_files[0]]

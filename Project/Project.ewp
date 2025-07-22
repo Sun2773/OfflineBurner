@@ -3284,9 +3284,6 @@
                 <file>
                     <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F4xx_1024.c</name>
                 </file>
-                <file>
-                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F4xx_512.c</name>
-                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\Arithmetic\algo\flash_blob.c</name>
