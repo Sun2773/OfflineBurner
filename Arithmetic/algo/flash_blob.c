@@ -10,6 +10,12 @@ extern const program_target_t _stm32f10x_opt_;
 extern const program_target_t _stm32f10x_128_;
 extern const program_target_t _stm32f10x_512_;
 
+extern const program_target_t _stm32f2xx_opt_;
+extern const program_target_t _stm32f2xx_1024_;
+
+extern const program_target_t _stm32f3xx_opt_;
+extern const program_target_t _stm32f3xx_512_;
+
 extern const program_target_t _stm32f40xxx_41xxx_opt_;
 extern const program_target_t _stm32f4xx_512_;
 extern const program_target_t _stm32f4xx_1024_;
@@ -97,6 +103,24 @@ const FlashBlobList_t FlashBlobList[] = {
         .prog_opt      = &_stm32f10x_opt_,   // 选项字编程算法
     },
     {
+        /* STM32F2xx */
+        .DevId         = 0x411,               // 产品ID
+        .Name          = "STM32F2xx",         // 产品名称
+        .FlashSizeAddr = 0x1FFF7A22,          // Flash大小寄存器地址
+        .FlashSize     = {128, 1024},         // Flash大小范围
+        .prog_flash    = &_stm32f2xx_1024_,   // Flash编程算法
+        .prog_opt      = &_stm32f2xx_opt_,    // 选项字编程算法
+    },
+    {
+        /* STM32F3xx */
+        .DevId         = 0x432,              // 产品ID
+        .Name          = "STM32F3xx",        // 产品名称
+        .FlashSizeAddr = 0x1FFFF7CC,         // Flash大小寄存器地址
+        .FlashSize     = {16, 512},          // Flash大小范围
+        .prog_flash    = &_stm32f3xx_512_,   // Flash编程算法
+        .prog_opt      = &_stm32f3xx_opt_,   // 选项字编程算法
+    },
+    {
         /* STM32F405xx/07xx STM32F415xx/17xx */
         .DevId         = 0x413,                                 // 产品ID
         .Name          = "STM32F405xx/07xx STM32F415xx/17xx",   // 产品名称
@@ -137,7 +161,7 @@ FlashBlobList_t* FlashBlob_Get(uint16_t id, uint16_t flash_size) {
 
 /**
  * @brief  获取算法列表字符串
- * @note   
+ * @note
  * @param  str: 字符串缓冲区
  * @retval None
  */

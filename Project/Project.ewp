@@ -3259,6 +3259,24 @@
                 </file>
             </group>
             <group>
+                <name>STM32F2</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F2\STM32F2xx_1024.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F2\STM32F2xx_OPT.c</name>
+                </file>
+            </group>
+            <group>
+                <name>STM32F3</name>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F3\STM32F3xx_512.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F3\STM32F3xx_OPT.c</name>
+                </file>
+            </group>
+            <group>
                 <name>STM32F4</name>
                 <file>
                     <name>$PROJ_DIR$\..\Arithmetic\algo\STM32F4\STM32F40xxx_41xxx_OPT.c</name>
