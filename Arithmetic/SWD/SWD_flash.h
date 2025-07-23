@@ -21,17 +21,20 @@ typedef enum {
     ERROR_ERASE_SECTOR,
     ERROR_ERASE_ALL,
     ERROR_WRITE,
-
+    ERROR_SET_RDP,
+    ERROR_VERIFY,
     // Add new values here
 
     ERROR_COUNT
 } error_t;
 
-error_t target_flash_init(const program_target_t* prog, uint32_t flash_start);
-error_t target_flash_uninit(void);
-error_t target_flash_program_page(uint32_t addr, const uint8_t* buf, uint32_t size);
-error_t target_flash_erase_sector(uint32_t addr);
-error_t target_flash_erase_chip(void);
-uint8_t target_flash_sector_integer(uint32_t addr);
+error_t  target_flash_init(const program_target_t* prog, uint32_t flash_start);
+error_t  target_flash_uninit(void);
+error_t  target_flash_program_page(uint32_t addr, const uint8_t* buf, uint32_t size);
+error_t  target_flash_erase_sector(uint32_t addr);
+error_t  target_flash_erase_chip(void);
+error_t  target_flash_set_rdp(void);
+uint32_t target_flash_verify(uint32_t init, uint32_t addr, uint32_t size);
+uint8_t  target_flash_sector_integer(uint32_t addr);
 
 #endif   // __SWD_FLASH_H__

@@ -125,7 +125,7 @@ const FlashBlobList_t FlashBlobList[] = {
         .Name          = "STM32F405xx/07xx STM32F415xx/17xx",   // 产品名称
         .FlashSizeAddr = 0x1FFF7A22,                            // Flash大小寄存器地址
         .FlashSize     = {128, 1024},                           // Flash大小范围
-        .prog_flash    = &_stm32f4xx_1024_,                     // Flash编程算法
+        .prog_flash    = &_stm32f4xx_1024_,                          // Flash编程算法
         .prog_opt      = &_stm32f40xxx_41xxx_opt_,              // 选项字编程算法
     },
 };

@@ -15,6 +15,18 @@ typedef enum {
     RUN              // Resume the target without resetting it
 } TARGET_RESET_STATE;
 
+typedef struct
+{
+    uint32_t select;
+    uint32_t csw;
+} DAP_STATE;
+
+typedef struct
+{
+    uint32_t r[16];
+    uint32_t xpsr;
+} DEBUG_STATE;
+
 uint8_t swd_init(void);
 uint8_t swd_off(void);
 uint8_t swd_init_debug(void);
@@ -29,5 +41,10 @@ uint8_t swd_flash_syscall_exec(const program_syscall_t* sysCallParam, uint32_t e
 void    swd_set_target_reset(uint8_t asserted);
 uint8_t swd_set_target_state_hw(TARGET_RESET_STATE state);
 uint8_t swd_set_target_state_sw(TARGET_RESET_STATE state);
+
+uint8_t swd_write_debug_state(DEBUG_STATE* state);
+uint8_t swd_wait_until_halted(void);
+uint8_t swd_read_core_register(uint32_t n, uint32_t* val);
+uint8_t swd_write_core_register(uint32_t n, uint32_t val);
 
 #endif

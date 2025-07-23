@@ -20,6 +20,8 @@ typedef struct {
     const uint32_t          erase_chip;            // 全片擦除函数地址
     const uint32_t          erase_sector;          // 扇区擦除函数地址
     const uint32_t          program_page;          // 扇区擦除函数地址
+    const uint32_t          set_rdp;               // 设置RDP函数地址
+    const uint32_t          verify;                // 验证函数地址
     const program_syscall_t sys_call_s;            // 系统调用参数
     const uint32_t          program_buffer;        // 编程缓冲区地址
     const uint32_t          algo_start;            // 算法代码起始地址

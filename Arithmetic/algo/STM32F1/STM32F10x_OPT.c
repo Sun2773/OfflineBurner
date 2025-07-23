@@ -73,6 +73,8 @@ const program_target_t _stm32f10x_opt_ = {
     0x2000005B,   // EraseChip
     0x200000E3,   // EraseSector
     0x20000127,   // ProgramPage
+    0x00000000,   // SetRDP
+    0x00000000,   // Verify
     {
         0x20000001,   // BKPT : 断点地址 (算法起始+1，Thumb模式)
         0x20000800,   // RSB  : 静态数据基址

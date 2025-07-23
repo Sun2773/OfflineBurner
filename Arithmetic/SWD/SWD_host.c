@@ -32,22 +32,7 @@
 // #define SCB_AIRCR_PRIGROUP_Pos              8
 // #define SCB_AIRCR_PRIGROUP_Msk             (7UL << SCB_AIRCR_PRIGROUP_Pos)
 
-typedef struct
-{
-    uint32_t select;
-    uint32_t csw;
-} DAP_STATE;
-
-typedef struct
-{
-    uint32_t r[16];
-    uint32_t xpsr;
-} DEBUG_STATE;
-
 static DAP_STATE dap_state;
-
-static uint8_t swd_read_core_register(uint32_t n, uint32_t* val);
-static uint8_t swd_write_core_register(uint32_t n, uint32_t val);
 
 void delaymS(uint32_t ms) {
     uint32_t cnt = SystemCoreClock / 4 / 1000 * ms;
@@ -506,7 +491,7 @@ uint8_t swd_write_memory(uint32_t address, uint8_t* data, uint32_t size) {
 }
 
 // Execute system call.
-static uint8_t swd_write_debug_state(DEBUG_STATE* state) {
+uint8_t swd_write_debug_state(DEBUG_STATE* state) {
     uint32_t i, status;
 
     if (!swd_write_dp(DP_SELECT, 0)) {
@@ -553,7 +538,7 @@ static uint8_t swd_write_debug_state(DEBUG_STATE* state) {
     return 1;
 }
 
-static uint8_t swd_read_core_register(uint32_t n, uint32_t* val) {
+uint8_t swd_read_core_register(uint32_t n, uint32_t* val) {
     int i = 0, timeout = 100;
 
     if (!swd_write_word(DCRSR, n)) {
@@ -582,7 +567,7 @@ static uint8_t swd_read_core_register(uint32_t n, uint32_t* val) {
     return 1;
 }
 
-static uint8_t swd_write_core_register(uint32_t n, uint32_t val) {
+uint8_t swd_write_core_register(uint32_t n, uint32_t val) {
     int i = 0, timeout = 100;
 
     if (!swd_write_word(DCRDR, val)) {
@@ -607,7 +592,7 @@ static uint8_t swd_write_core_register(uint32_t n, uint32_t val) {
     return 0;
 }
 
-static uint8_t swd_wait_until_halted(void) {
+uint8_t swd_wait_until_halted(void) {
     // Wait for target to stop
     uint32_t val, i, timeout = MAX_TIMEOUT;
 
