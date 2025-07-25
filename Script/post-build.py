@@ -1,78 +1,70 @@
 # -*- coding: UTF-8 -*- 
 """
-后期构建脚本 - 处理编译后的固件文件
+Post-build script for firmware processing
 
-该脚本用于处理编译后的固件，包括生成bin文件、合并bootloader、
-记录版本信息等操作。
+This script handles firmware files after compilation, including:
+- Converting ELF to binary files
+- Merging bootloader with application
+- Version information management
+
+Features:
+- Cross-platform compatibility using pyelftools
+- Improved error handling and logging
+- JSON-based configuration management
 """
 import subprocess
 import os
 import sys
 import shutil
-from typing import Tuple, Optional
+import json
+from typing import Tuple, Optional, Dict, Any
+from elftools.elf.elffile import ELFFile
 
-# 常量定义
+# Constants
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJ_DIR = os.path.dirname(CURRENT_PATH)
-OUTPUT_DIR = ""
-BOOTLOADER_PATH = "Bootloader/Burner-Boot.bin"
-OBJCOPY_EXE_PATH = os.path.join(CURRENT_PATH, 'arm-none-eabi-objcopy.exe')
+CONFIG_FILE = os.path.join(CURRENT_PATH, 'build_config.json')
+DEFAULT_BOOTLOADER_PATH = "Bootloader/Burner-Boot.bin"
 PROJECT_KEY = "PROJECT_NAME "
 VERSION_KEY = "SYSTEM_VERSION "
 BIN_OFFSET = 0x2000
-FILE_SIZE_OFFSET = 0x01C4
 
-def has_git_changes() -> bool:
-    """
-    检查Git仓库是否有文件变更
+class BuildConfig:
+    """Build configuration management"""
+    def __init__(self, config_file: str):
+        self.config_file = config_file
+        self.config = self._load_config()
     
-    Returns:
-        bool: 如有文件变更返回True，否则返回False
-    """
-    try:
-        # 检查暂存区和工作区是否有变更
-        result = subprocess.run(
-            ['git', 'status', '--porcelain'], 
-            capture_output=True, 
-            text=True, 
-            cwd=PROJ_DIR
-        )
-        
-        if result.returncode != 0:
-            print("Git command execution failed, assuming changes exist")
-            return True
-        
-        # 如果git status输出为空，表示没有变更
-        if not result.stdout.strip():
-            print("No file changes in project, skipping file processing")
-            return False
-        
-        print("File changes detected in project, file processing required")
-        return True
-    except Exception as e:
-        print(f"Error checking Git status: {e}, assuming changes exist")
-        return True
+    def _load_config(self) -> Dict[str, Any]:
+        """Load configuration file"""
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Failed to load config: {e}")
+        return {'bootloader_path': DEFAULT_BOOTLOADER_PATH}
+    
+    def save_config(self) -> None:
+        """Save configuration file"""
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(self.config, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Failed to save config: {e}")
+    
+    def get_bootloader_path(self) -> str:
+        """Get bootloader path"""
+        return self.config.get('bootloader_path', DEFAULT_BOOTLOADER_PATH)
+    
+    def set_bootloader_path(self, path: str) -> None:
+        """Set bootloader path"""
+        self.config['bootloader_path'] = path
+        self.save_config()
 
 def has_git_changes_in_directory(directory_path: str) -> bool:
-    """
-    检查Git仓库中特定目录是否有文件变更
-    
-    Args:
-        directory_path: 要检查的目录路径（相对于仓库根目录）
-        
-    Returns:
-        bool: 如有文件变更返回True，否则返回False
-    """
+    """Check if there are Git changes in specified directory"""
     try:
-        # 构建完整路径
-        full_path = os.path.join(PROJ_DIR, directory_path)
-        
-        # 检查目录是否存在
-        if not os.path.exists(full_path):
-            print(f"Directory {directory_path} does not exist, skipping check")
-            return False
-        
-        # 检查指定目录下的暂存区和工作区是否有变更
         result = subprocess.run(
             ['git', 'status', '--porcelain', directory_path], 
             capture_output=True, 
@@ -81,30 +73,21 @@ def has_git_changes_in_directory(directory_path: str) -> bool:
         )
         
         if result.returncode != 0:
-            print(f"Git command execution failed for directory {directory_path}, assuming changes exist")
+            print(f"Git check failed for {directory_path}, assuming changes exist")
             return True
         
-        # 如果git status输出为空，表示没有变更
         if not result.stdout.strip():
-            print(f"No file changes detected in directory: {directory_path}")
+            print(f"No changes detected in: {directory_path}")
             return False
         
-        print(f"File changes detected in directory: {directory_path}")
+        print(f"Changes detected in: {directory_path}")
         return True
     except Exception as e:
-        print(f"Error checking Git status for directory {directory_path}: {e}, assuming changes exist")
+        print(f"Git check error for {directory_path}: {e}, assuming changes exist")
         return True
 
 def extract_project_and_version(src_file: str) -> Tuple[Optional[str], Optional[str]]:
-    """
-    从源文件中提取工程名和版本号
-    
-    Args:
-        src_file: 源文件路径
-        
-    Returns:
-        Tuple[Optional[str], Optional[str]]: 工程名和版本号元组
-    """
+    """Extract project name and version from source file"""
     project = None
     version = None
     try:
@@ -118,20 +101,14 @@ def extract_project_and_version(src_file: str) -> Tuple[Optional[str], Optional[
                     break
         return project, version
     except Exception as e:
-        print(f"Failed to read version information: {e}")
+        print(f"Failed to read version info: {e}")
         return None, None
 
-
 def clear_directory(directory: str) -> None:
-    """
-    清空指定目录下的文件
-    
-    Args:
-        directory: 要清空的目录路径
-    """
+    """Clear all files in specified directory"""
     if not os.path.exists(directory):
         os.makedirs(directory)
-        print(f"Directory created: {directory}")
+        print(f"Created directory: {directory}")
         return
         
     for item in os.listdir(directory):
@@ -142,127 +119,124 @@ def clear_directory(directory: str) -> None:
             except Exception as e:
                 print(f"Failed to delete file {item_path}: {e}")
 
-
 def copy_file(src_path: str, dest_path: str) -> bool:
-    """
-    复制文件到指定目录
-    
-    Args:
-        src_path: 源文件路径
-        dest_path: 目标文件路径
-    
-    Returns:
-        bool: 复制成功返回True，失败返回False
-    """
+    """Copy file to destination"""
     try:
         shutil.copy(src_path, dest_path)
-        print(f'File copied successfully: {dest_path}')
+        print(f'File copied: {dest_path}')
         return True
     except Exception as e:
-        print(f'File copy failed {src_path} -> {dest_path}: {e}')
+        print(f'Copy failed {src_path} -> {dest_path}: {e}')
         return False
 
 
-def run_objcopy(exe_path: str, out_path: str, bin_path: str) -> bool:
-    """
-    执行 objcopy 命令生成 bin 文件
-    
-    Args:
-        exe_path: objcopy可执行文件路径
-        out_path: .out文件路径
-        bin_path: 输出的bin文件路径
-        
-    Returns:
-        bool: 执行成功返回True，失败返回False
-    """
+def elf_to_binary(elf_path: str, bin_path: str) -> bool:
+    """Convert ELF file to binary using pyelftools"""
     try:
-        subprocess.run([exe_path, '-O', 'binary', out_path, bin_path], check=True)
-        file_size = os.stat(bin_path).st_size
-        print(f'Binary file generated: {os.path.basename(bin_path)} ({file_size} bytes)')
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f'objcopy command execution failed: {e}')
-        return False
+        with open(elf_path, 'rb') as elf_file:
+            elffile = ELFFile(elf_file)
+            
+            # Find all loadable segments
+            loadable_segments = []
+            min_addr = float('inf')
+            max_addr = 0
+            
+            for segment in elffile.iter_segments():
+                if segment['p_type'] == 'PT_LOAD' and segment['p_filesz'] > 0:
+                    loadable_segments.append(segment)
+                    min_addr = min(min_addr, segment['p_paddr'])
+                    max_addr = max(max_addr, segment['p_paddr'] + segment['p_memsz'])
+            
+            if not loadable_segments:
+                print("Error: No loadable segments found in ELF file")
+                return False
+            
+            # Create binary data buffer
+            binary_size = max_addr - min_addr
+            binary_data = bytearray(binary_size)
+            
+            # Fill segment data
+            for segment in loadable_segments:
+                start_offset = segment['p_paddr'] - min_addr
+                segment_data = segment.data()
+                binary_data[start_offset:start_offset + len(segment_data)] = segment_data
+                
+                print(f"Loaded segment: addr 0x{segment['p_paddr']:08X}, size {segment['p_filesz']} bytes")
+            
+            # Write binary file
+            with open(bin_path, 'wb') as bin_file:
+                bin_file.write(binary_data)
+            
+            file_size = len(binary_data)
+            print(f'Binary generated: {os.path.basename(bin_path)} ({file_size} bytes)')
+            print(f'Address range: 0x{min_addr:08X} - 0x{max_addr:08X}')
+            return True
+            
     except Exception as e:
-        print(f'Error generating binary file: {e}')
+        print(f'ELF to binary conversion failed: {e}')
         return False
 
 
 def merge_files(bootloader_path: str, bin_path: str, target_path: str, bin_offset: int) -> bool:
-    """
-    合并 bootloader 和 bin 文件到目标文件
-    
-    Args:
-        bootloader_path: bootloader文件路径
-        bin_path: bin文件路径
-        target_path: 合并后的目标文件路径
-        bin_offset: bin文件的偏移量
-        
-    Returns:
-        bool: 合并成功返回True，失败返回False
-    """
+    """Merge bootloader and binary files"""
     try:
         with open(target_path, 'wb') as f_target:
-            # 写入bootloader
+            # Write bootloader
             with open(bootloader_path, 'rb') as f_boot:
                 boot_data = f_boot.read()
                 f_target.write(boot_data)
-                boot_size = len(boot_data)
             
-            # 填充空白区域
+            # Fill gap with 0xFF
             fill_data = b'\xFF' * (bin_offset - f_target.tell())
             f_target.write(fill_data)
             
-            # 写入应用程序
+            # Write application
             with open(bin_path, 'rb') as f_bin:
                 bin_data = f_bin.read()
                 f_target.write(bin_data)
-                bin_size = len(bin_data)
-            
-            # # 写入bootloader大小信息
-            # f_target.seek(FILE_SIZE_OFFSET)
-            # f_target.write(boot_size.to_bytes(4, byteorder='little'))
-            
-            # # 写入应用程序大小信息
-            # f_target.seek(bin_offset + FILE_SIZE_OFFSET)
-            # f_target.write(bin_size.to_bytes(4, byteorder='little'))
         
         total_size = os.stat(target_path).st_size
-        print(f'File merge completed: {os.path.basename(target_path)} ({total_size} bytes)')
+        print(f'Merge completed: {os.path.basename(target_path)} ({total_size} bytes)')
         return True
     except Exception as e:
-        print(f'Error merging files: {e}')
+        print(f'Merge failed: {e}')
         return False
 
 def main():
-    """主函数: 处理编译后的固件文件"""
-    global BOOTLOADER_PATH  # 声明使用全局变量
+    """Main function: Process firmware files after build"""
+    build_config = BuildConfig(CONFIG_FILE)
+    
     try:
-        # 获取命令行参数
-        if len(sys.argv) < 5:
-            print("Insufficient parameters: build mode, output path and project name required")
+        # Parse command line arguments
+        if len(sys.argv) < 6:
+            print("Usage: post-build.py <CONFIG> <TARGET_DIR> <TARGET_NAME> <PROJ_DIR> <PROJ_NAME>")
             sys.exit(1)
             
-        # 解析参数
-        CONFIG_NAME  = sys.argv[1]  # 配置名称
-        TARGET_DIR   = sys.argv[2]  # 输出目录
-        TARGET_BNAME = sys.argv[3]  # 输出文件名
-        PROJ_DIR     = sys.argv[4]  # 项目目录
-        PROJ_FNAME   = sys.argv[5]  # 项目名        
+        CONFIG_NAME = sys.argv[1]   # Build configuration
+        TARGET_DIR = sys.argv[2]    # Target directory
+        TARGET_BNAME = sys.argv[3]  # Target base name
+        PROJ_DIR = sys.argv[4]      # Project directory
+        PROJ_FNAME = sys.argv[5]    # Project file name
         OUTPUT_DIR = os.path.join(PROJ_DIR, '..', 'Output')
 
-        # 提取版本信息
+        print(f"Build config: {CONFIG_NAME}")
+        print(f"Project dir: {PROJ_DIR}")
+        print(f"Output dir: {OUTPUT_DIR}")
+
+        # Extract version information
         VERSION_FILE_PATH = os.path.join(PROJ_DIR, '..', 'Version.h')
         project, version = extract_project_and_version(VERSION_FILE_PATH)
         if not project or not version:
-            print("Unable to get project name or version number")
+            print("Failed to get project name or version")
             sys.exit(1)
             
-        # 生成文件路径
+        print(f"Project: {project} v{version}")
+            
+        # Generate file paths
         elf_file_path = os.path.join(TARGET_DIR, f'{TARGET_BNAME}.out')
     
         if CONFIG_NAME == 'Bootloader':
-            file_suffix = f'-Boot'
+            file_suffix = '-Boot'
         elif CONFIG_NAME == 'Debug':
             file_suffix = f'-{version}-Alpha'
         else:
@@ -271,7 +245,12 @@ def main():
         bin_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}.bin')
         out_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}.out')
 
-        # 检查是否需要处理文件
+        # Verify input file exists
+        if not os.path.exists(elf_file_path):
+            print(f"Error: ELF file not found: {elf_file_path}")
+            sys.exit(1)
+
+        # Check if processing is needed
         needs_processing = (
             has_git_changes_in_directory(os.path.join(PROJ_DIR, '..')) or 
             not os.path.exists(out_file_path) or 
@@ -279,58 +258,62 @@ def main():
         )
 
         if needs_processing:
-            print("Starting firmware file processing...")
+            print("Starting firmware processing...")
             clear_directory(os.path.join(OUTPUT_DIR, CONFIG_NAME))
             
             if not copy_file(elf_file_path, out_file_path):
                 sys.exit(1)
                 
-            if not run_objcopy(OBJCOPY_EXE_PATH, out_file_path, bin_file_path):
+            # Convert ELF to binary using pyelftools
+            if not elf_to_binary(out_file_path, bin_file_path):
                 sys.exit(1)
 
             if CONFIG_NAME == "Bootloader":
-                # Bootloader 文件处理
-                BOOTLOADER_PATH = os.path.join(CONFIG_NAME, f'{project}{file_suffix}.bin').replace('\\', '/')
-                # 将新生成的文件路径保存到本脚本文件
-                path = os.path.abspath(__file__)
-                with open(path, 'r+', encoding='utf-8') as f:
+                # Update bootloader path in config
+                bootloader_rel_path = os.path.join(CONFIG_NAME, f'{project}{file_suffix}.bin').replace('\\', '/')
+                build_config.set_bootloader_path(bootloader_rel_path)
+                print(f"Bootloader path updated: {bootloader_rel_path}")
+            else:
+                # Merge bootloader with application
+                bootloader_rel_path = build_config.get_bootloader_path()
+                bootloader_full_path = os.path.join(OUTPUT_DIR, bootloader_rel_path)
+                target_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}+boot.bin')
+                
+                if os.path.exists(bootloader_full_path):
+                    if not merge_files(bootloader_full_path, bin_file_path, target_file_path, BIN_OFFSET):
+                        sys.exit(1)
+                    print(f"Bootloader merged: {os.path.basename(target_file_path)}")
+                else:
+                    print(f"Warning: Bootloader not found: {bootloader_full_path}")
+                    print("Please build Bootloader configuration first")
+        else:
+            print("No processing needed (no changes detected)")
+    
+        # Update debug configuration
+        jdebug_file = os.path.join(PROJ_DIR, f'{PROJ_FNAME}.jdebug')
+        if os.path.exists(jdebug_file):
+            try:
+                with open(jdebug_file, "r+", encoding='utf-8') as f:
                     lines = f.readlines()
                     for i, line in enumerate(lines):
-                        if 'BOOTLOADER_PATH = ' in line:
-                            lines[i] = f'BOOTLOADER_PATH = "{BOOTLOADER_PATH}"\n'
+                        if 'File.Open' in line:
+                            lines[i] = f'  File.Open ("$(ProjectDir)/../Output/{CONFIG_NAME}/{project}{file_suffix}.out");\n'
                             break
                     f.seek(0)
                     f.writelines(lines)
                     f.truncate()
-                print(f"Bootloder Update: {BOOTLOADER_PATH}")
-            else:
-                # 应用程序文件处理，合并 bootloader 和 bin 文件
-                BOOTLOADER_PATH = os.path.join(OUTPUT_DIR, BOOTLOADER_PATH)
-                target_file_path = os.path.join(OUTPUT_DIR, CONFIG_NAME, f'{project}{file_suffix}+boot.bin')
-                if os.path.exists(BOOTLOADER_PATH):
-                    if not merge_files(BOOTLOADER_PATH, bin_file_path, target_file_path, BIN_OFFSET):
-                        sys.exit(1)
-                    print(f"Bootloader merged with application: {os.path.basename(target_file_path)}")
-                else:
-                    print(f"Bootloader file does not exist: {BOOTLOADER_PATH}")
-                pass
-
+                print(f"Debug config updated: {jdebug_file}")
+            except Exception as e:
+                print(f"Failed to update debug config: {e}")
         else:
-            print("Skipping file processing")
-    
-            
-        with open(os.path.join(PROJ_DIR, f'{PROJ_FNAME}.jdebug'), "r+") as f:
-            lines = f.readlines()
-            for i, line in enumerate(lines):
-                if 'File.Open' in line:
-                    lines[i] = f'  File.Open ("$(ProjectDir)/../Output/{project}{file_suffix}.out");\n'
-                    break
-            f.seek(0)
-            f.writelines(lines)
-            f.truncate()
+            print(f"Warning: Debug config not found: {jdebug_file}")
+        
+        print("Firmware processing completed!")
         
     except Exception as e:
-        print(f"Error occurred during processing: {e}")
+        print(f"Processing error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 

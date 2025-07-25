@@ -1,1 +1,1 @@
-pip install pypinyin pyserial PyQt5 pyelftools
+pip install pyelftools

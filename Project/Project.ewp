@@ -694,7 +694,7 @@
             <name>BUILDACTION</name>
             <archiveVersion>1</archiveVersion>
             <data>
-                <prebuild>python $PROJ_DIR$\..\Script\pre-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</prebuild>
+                <prebuild></prebuild>
                 <postbuild>python $PROJ_DIR$\..\Script\post-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</postbuild>
             </data>
         </settings>
@@ -1760,7 +1760,7 @@
             <name>BUILDACTION</name>
             <archiveVersion>1</archiveVersion>
             <data>
-                <prebuild>python $PROJ_DIR$\..\Script\pre-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</prebuild>
+                <prebuild></prebuild>
                 <postbuild>python $PROJ_DIR$\..\Script\post-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</postbuild>
             </data>
         </settings>
@@ -2827,7 +2827,7 @@
             <name>BUILDACTION</name>
             <archiveVersion>1</archiveVersion>
             <data>
-                <prebuild>python $PROJ_DIR$\..\Script\pre-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</prebuild>
+                <prebuild></prebuild>
                 <postbuild>python $PROJ_DIR$\..\Script\post-build.py $CONFIG_NAME$ $TARGET_DIR$ $TARGET_BNAME$ $PROJ_DIR$ $PROJ_FNAME$</postbuild>
             </data>
         </settings>
