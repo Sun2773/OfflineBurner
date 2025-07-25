@@ -14,10 +14,12 @@ typedef enum {
     BURNER_ERROR_BUFFER,          // 缓存分配失败
     BURNER_ERROR_OPT_INIT,        // 选项字初始化失败
     BURNER_ERROR_OPT_ERASE,       // 选项字擦除失败
+    BURNER_ERROR_OTP_SETRDP,      // 选项字设置RDP失败
     BURNER_ERROR_FLASH_INIT,      // Flash初始化失败
     BURNER_ERROR_FLASH_ALGO,      // Flash编程算法错误
     BURNER_ERROR_FLASH_ERASE,     // Flash擦除失败
     BURNER_ERROR_FLASH_PROGRAM,   // Flash编程失败
+    BURNER_ERROR_FLASH_VERIFY,    // Flash校验失败
     BURNER_ERROR_CHIP_UNKNOWN,    // 未知芯片
     BURNER_ERROR_READ_FAIL,       // 读取失败
     BURNER_ERROR_FLASH_SIZE,      // 读取Flash大小失败

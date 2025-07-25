@@ -27,24 +27,24 @@ typedef struct
     uint32_t xpsr;
 } DEBUG_STATE;
 
-uint8_t swd_init(void);
-uint8_t swd_off(void);
-uint8_t swd_init_debug(void);
-uint8_t swd_read_idcode(uint32_t* id);
-uint8_t swd_read_dp(uint8_t adr, uint32_t* val);
-uint8_t swd_write_dp(uint8_t adr, uint32_t val);
-uint8_t swd_read_ap(uint32_t adr, uint32_t* val);
-uint8_t swd_write_ap(uint32_t adr, uint32_t val);
-uint8_t swd_read_memory(uint32_t address, uint8_t* data, uint32_t size);
-uint8_t swd_write_memory(uint32_t address, uint8_t* data, uint32_t size);
-uint8_t swd_flash_syscall_exec(const program_syscall_t* sysCallParam, uint32_t entry, uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
+int8_t  swd_init(void);
+int8_t  swd_off(void);
+int8_t  swd_init_debug(void);
+int8_t  swd_read_idcode(uint32_t* id);
+int8_t  swd_read_dp(uint8_t adr, uint32_t* val);
+int8_t  swd_write_dp(uint8_t adr, uint32_t val);
+int8_t  swd_read_ap(uint32_t adr, uint32_t* val);
+int8_t  swd_write_ap(uint32_t adr, uint32_t val);
+int8_t  swd_read_memory(uint32_t address, uint8_t* data, uint32_t size);
+int8_t  swd_write_memory(uint32_t address, uint8_t* data, uint32_t size);
+int32_t swd_flash_syscall_exec(const program_syscall_t* sysCallParam, uint32_t entry, uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
 void    swd_set_target_reset(uint8_t asserted);
-uint8_t swd_set_target_state_hw(TARGET_RESET_STATE state);
-uint8_t swd_set_target_state_sw(TARGET_RESET_STATE state);
+int8_t  swd_set_target_state_hw(TARGET_RESET_STATE state);
+int8_t  swd_set_target_state_sw(TARGET_RESET_STATE state);
 
-uint8_t swd_write_debug_state(DEBUG_STATE* state);
-uint8_t swd_wait_until_halted(void);
-uint8_t swd_read_core_register(uint32_t n, uint32_t* val);
-uint8_t swd_write_core_register(uint32_t n, uint32_t val);
+int8_t swd_write_debug_state(DEBUG_STATE* state);
+int8_t swd_wait_until_halted(void);
+int8_t swd_read_core_register(uint32_t n, uint32_t* val);
+int8_t swd_write_core_register(uint32_t n, uint32_t val);
 
 #endif

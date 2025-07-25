@@ -18,11 +18,12 @@
 static uint8_t HEX2DEC(char* hex, uint32_t* dec);
 
 BurnerConfigInfo_t BurnerConfigInfo = {
-    .FilePath   = "",
-    .AutoBurner = 1,
-    .ChipErase  = 0,
-    .ChipLock   = 0,
-    .AutoRun    = 1,
+    .FilePath       = "",
+    .AutoBurner     = CONFIG_DEFAULT_AUTO_BURNER,
+    .ChipErase      = CONFIG_DEFAULT_CHIP_ERASE,
+    .ReadProtection = CONFIG_DEFAULT_READ_PROTECTION,
+    .AutoRun        = CONFIG_DEFAULT_AUTO_RUN,
+    .Verify         = CONFIG_DEFAULT_VERIFY,
 };
 
 /**
@@ -31,15 +32,16 @@ BurnerConfigInfo_t BurnerConfigInfo = {
  * @retval None
  */
 void BurnerConfig(void) {
-    FATFS*   fs                 = NULL;    // 文件系统对象
-    FIL*     file               = NULL;    // 文件对象
-    FILINFO* file_info          = NULL;    // 文件信息对象
-    FRESULT  f_res              = FR_OK;   // FATFS操作结果
-    char*    str_buf            = NULL;    // 字符串缓冲区
-    UINT     r_cnt              = 0;       // 读取结果
-    uint32_t w_addr             = 0;       // 读写地址
-    uint32_t crc                = 0;       // CRC校验码
-    uint8_t  burner_addr_update = 0;       // 烧录地址更新标志
+    FATFS*   fs                 = NULL;                       // 文件系统对象
+    FIL*     file               = NULL;                       // 文件对象
+    FILINFO* file_info          = NULL;                       // 文件信息对象
+    FRESULT  f_res              = FR_OK;                      // FATFS操作结果
+    char*    str_buf            = NULL;                       // 字符串缓冲区
+    UINT     r_cnt              = 0;                          // 读取结果
+    uint32_t w_addr             = 0;                          // 读写地址
+    uint32_t verify_addr        = SPI_FLASH_VERIFY_ADDRESS;   // 程序校验地址
+    uint32_t crc                = 0;                          // CRC校验码
+    uint8_t  burner_addr_update = 0;                          // 烧录地址更新标志
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);   // 使能PWR和BKP外设时钟
     PWR_BackupAccessCmd(ENABLE);
@@ -215,9 +217,8 @@ void BurnerConfig(void) {
                     SPI_FLASH_Erase(w_addr);
                     LED_OnOff(ERR);
                 }
-                SPI_FLASH_Write(str_buf, w_addr, r_cnt);
-                /* 计数 */
-                prog_size += r_cnt;
+                SPI_FLASH_Write(str_buf, w_addr, r_cnt);   // 写入数据
+                prog_size += r_cnt;                        // 计数
                 LED_OnOff(RUN);
             }
         } /* 判断是否为hex文件 */
@@ -389,6 +390,25 @@ void BurnerConfig(void) {
 
         BurnerConfigInfo.FileAddress = SPI_FLASH_PROGRAM_ADDRESS;   // 获取文件地址
         BurnerConfigInfo.FileSize    = prog_size;                   // 获取文件大小
+
+        /********************************* 计算校验码 *********************************/
+        prog_size = 0;   // 重置烧录大小
+        while (BurnerConfigInfo.FileSize - prog_size) {
+            if ((BurnerConfigInfo.FileSize - prog_size) > CONFIG_BUFFER_SIZE) {
+                r_cnt = CONFIG_BUFFER_SIZE;   // 读取大小
+            } else {
+                r_cnt = (BurnerConfigInfo.FileSize - prog_size);   // 剩余大小
+            }
+            SPI_FLASH_Read(str_buf,
+                           BurnerConfigInfo.FileAddress + prog_size,
+                           r_cnt);
+            crc = CRC32_Update(0, str_buf, r_cnt);         // 计算CRC32校验码
+            W25QXX_WriteAutoErase(&crc, verify_addr, 4);   // 写入CRC校验码
+            verify_addr += 4;                              // 更新校验地址
+            prog_size += r_cnt;                            // 更新烧录大小
+            LED_OnOff(RUN);
+        }
+        LED_Off(RUN);
     } while (0);
 
     /********************************* 检查配置文件 *********************************/
@@ -443,8 +463,9 @@ void BurnerConfig(void) {
         /* 更新配置项 */
         CONFIG_OBJECT_INT(root, "autoBurn", uint8_t, BurnerConfigInfo.AutoBurner, CONFIG_DEFAULT_AUTO_BURNER);
         CONFIG_OBJECT_INT(root, "chipErase", uint8_t, BurnerConfigInfo.ChipErase, CONFIG_DEFAULT_CHIP_ERASE);
-        // CONFIG_OBJECT_INT(root, "chipLock", uint8_t, BurnerConfigInfo.ChipLock, CONFIG_DEFAULT_CHIP_LOCK);
+        CONFIG_OBJECT_INT(root, "readProtection", uint8_t, BurnerConfigInfo.ReadProtection, CONFIG_DEFAULT_READ_PROTECTION);
         CONFIG_OBJECT_INT(root, "autoRun", uint8_t, BurnerConfigInfo.AutoRun, CONFIG_DEFAULT_AUTO_RUN);
+        CONFIG_OBJECT_INT(root, "verify", uint8_t, BurnerConfigInfo.Verify, CONFIG_DEFAULT_VERIFY);
         /* 烧录地址 */
         if ((item = cJSON_GetObjectItem(root, "flashAddr")) != NULL) {
             if (cJSON_IsString(item)) {
