@@ -1,31 +1,32 @@
 # OfflineBurner 离线编程器
 
-[![Version](https://img.shields.io/badge/version-0.11-yellow.svg)](https://github.com/Sun2773/OfflineBurner)
+[![Version](https://img.shields.io/badge/version-0.12-yellow.svg)](https://github.com/Sun2773/OfflineBurner)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-STM32F103-orange.svg)](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)
 [![Hardware](https://img.shields.io/badge/hardware-立创-blue.svg)](https://oshwhub.com/xiaoxunweixun/burner)
 
 ## 项目简介
 
-Burner 是一款基于**STM32F103**的离线编程器，支持对各种 STM32 系列微控制器进行离线烧录。该编程器操作简单，免驱动，具有U盘拖拽式固件传输功能，可脱离PC独立完成目标芯片的程序烧录工作。
+Burner 是一款基于**STM32F103**的离线编程器，支持对各种 STM32 系列微控制器进行离线烧录。该编程器操作简单，免驱动，具有**U盘**拖拽式固件传输功能，可脱离**PC**独立完成目标芯片的程序烧录工作。不需要上位机，所以windows，MAC，Android端都可以用，可以挂载U盘即可，支持FAT文件系统的设备都可以使用。
 
 ### 核心优势
 
 - 🚀 **即插即用**: 免驱动，插入即可使用
-- 📂 **拖拽式操作**: 如同普通 U 盘，直接拖拽 .bin 文件
+- 📂 **拖拽式操作**: 如同普通 U盘，直接拖拽 .bin 文件
 - 🔌 **离线工作**: 无需 PC 连接，独立完成烧录任务
 - 💡 **智能提示**: LED 和声音状态反馈
+- 📱 **跨平台可用**: 支持windows，MAC，Android端
 
 ## 主要特性
 
 - 🔥 **离线烧录**: 支持脱离 PC 独立完成 STM32 芯片烧录
-- 💾 **U 盘模式**: 拖拽式固件文件传输，无需专用软件
+- 💾 **U盘模式**: 拖拽式固件文件传输，无需专用软件
 - 🎯 **多芯片支持**: 支持 STM32F0/F1/F2/F3/F4 系列芯片，可自行增加烧录算法支持更多芯片
 - ⚡ **SWD 接口**: 通过 SWD 协议进行目标芯片编程
 - 🔧 **智能识别**: 自动检测目标板连接并触发烧录
 - 🔊 **状态指示**: LED 和蜂鸣器丰富的状态提示
-- 🛡️ **IAP 升级**: 支持通过 U 盘 进行固件升级
-- 🎮 **按键操作**: 支持手动触发烧录和 U 盘 挂载
+- 🛡️ **IAP 升级**: 支持通过 U盘 进行固件升级
+- 🎮 **按键操作**: 支持手动触发烧录和 U盘 挂载
 
 ## 硬件架构
 
@@ -35,8 +36,6 @@ Burner 是一款基于**STM32F103**的离线编程器，支持对各种 STM32 �
 - **存储**: 外部 SPI Flash (16MB)
 - **接口**: USB 2.0 Full Speed
 - **调试**: SWD 接口
--
--
 
 ## 开发环境
 
@@ -202,8 +201,8 @@ const FlashBlobList_t FlashBlobList[] = {
 ### 快速使用步骤
 
 1. **连接电脑**：将编程器插入电脑 USB 口
-2. **挂载 U 盘**：长按按键直至蜂鸣器长鸣，U 盘 挂载成功
-3. **拖入固件**：将目标程序(.bin 文件)直接拖入 U 盘 (可修改配置文件)
+2. **挂载 U盘**：长按按键直至蜂鸣器长鸣，U盘 挂载成功
+3. **拖入固件**：将目标程序(.bin 文件)直接拖入 U盘 (可修改配置文件)
 4. **断开重启**：重新为编程器上电，等待绿灯 500ms 周期闪烁(处理完成)
 5. **连接目标**：通过 SWD 接口连接目标 STM32 单片机
 6. **自动烧录**：连接目标板后自动触发烧录 (autoBurn=1)
@@ -213,9 +212,9 @@ const FlashBlobList_t FlashBlobList[] = {
 
 如需升级编程器固件：
 
-1. 在编程器 U 盘中创建一个名为 `firmware` 的文件夹
+1. 在编程器U盘中创建一个名为 `firmware` 的文件夹
 2. 将新的固件文件放入 `firmware` 文件夹下
-3. 重新为编程器上电，等待绿色指示灯 500ms 周期闪烁即升级完成
+3. 重新为编程器上电，等待绿色指示灯500ms周期闪烁即升级完成
 4. **注意**: 升级过程中红灯闪烁属正常现象，不要断电
 
 ### 重要注意事项
@@ -236,14 +235,15 @@ const FlashBlobList_t FlashBlobList[] = {
 #### LED 状态指示
 
 - 🟢 **绿灯闪烁**: 正在烧录
-- 🟢 **绿灯 500ms 周期闪烁**: 设备空闲/处理完成
+- 🟢 **绿灯500ms周期闪烁**: 设备空闲/处理完成
 - 🔴 **红灯闪烁**: 正在处理文件
 - 🔴 **红灯常亮**: 编程失败 (同时蜂鸣器长鸣)
-- 🟢 **绿灯呼吸**: U 盘模式
+- 🟢 **绿灯呼吸**: U盘模式
 
 ## 开源平台
 
-- 📋 **软件开源**: [GitHub Repository](https://github.com/Sun2773/OfflineBurner)
+- 📋 **软件开源**: [GitHub](https://github.com/Sun2773/OfflineBurner)
+- 📋 **软件开源**: [Gitee](https://gitee.com/SUN2773/OfflineBurner)
 - 🔧 **硬件开源**: [立创开源硬件平台](https://oshwhub.com/xiaoxunweixun/burner)
 
 ---

@@ -5,8 +5,10 @@
 #include "stdlib.h"
 #include "stm32f10x.h"
 
-#define BURNER_AUTO_START_TIME (1000 / 100)   // 烧录目标地址
-#define BURNER_AUTO_END_TIME   (500 / 100)    // 烧录目标地址
+#define BURNER_AUTO_START_TIME (1000 / 100)   // 识别后启动烧录时间
+#define BURNER_AUTO_END_TIME   (500 / 100)    // 断开后结束烧录时间
+
+#define BURNER_RETRY_COUNT 2   // 烧录失败重试次数
 
 typedef enum {
     BURNER_ERROR_NONE = 0,        // 无错误
@@ -35,13 +37,15 @@ typedef enum {
 } Burner_State_t;
 
 typedef struct {
-    uint8_t          Online;       // 在线状态
-    Burner_State_t   State;        // 工作状态
-    uint8_t*         Buffer;       // 烧录数据缓冲区
-    Burner_Error_t   Error;        // 错误码
-    int16_t          StartTimer;   // 启动计时器
-    int16_t          EndTimer;     // 结束计时器
-    FlashBlobList_t* FlashBlob;    // 当前Flash编程算法
+    uint8_t          Online;                          // 在线状态
+    uint8_t          ErrCnt;                          // 错误计数
+    int16_t          StartTimer;                      // 启动计时器
+    int16_t          EndTimer;                        // 结束计时器
+    Burner_State_t   State;                           // 工作状态
+    Burner_Error_t   Error;                           // 错误码
+    Burner_Error_t   ErrorList[BURNER_RETRY_COUNT];   // 错误码
+    uint8_t*         Buffer;                          // 烧录数据缓冲区
+    FlashBlobList_t* FlashBlob;                       // 当前Flash编程算法
 
     struct {
         uint32_t ChipIdcode;   // 芯片ID

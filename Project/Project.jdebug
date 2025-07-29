@@ -31,7 +31,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
-  File.Open ("$(ProjectDir)/../Output/Release/Burner-0.11.out");
+  File.Open ("$(ProjectDir)/../Output/Release/Burner-0.12.out");
   Project.SetOSPlugin ("$(InstallDir)/Plugins/OS/FreeRTOSPlugin_CM3.js");
 }
 

@@ -93,8 +93,10 @@ void Burner_Exe(void) {
         return;
     }
     /* 复位编程信息 */
-    BurnerCtrl.State = BURNER_STATE_RUNNING;
-    BurnerCtrl.Error = BURNER_ERROR_NONE;
+    BurnerCtrl.State  = BURNER_STATE_RUNNING;
+    BurnerCtrl.Error  = BURNER_ERROR_NONE;
+    BurnerCtrl.ErrCnt = 0;
+    memset(&BurnerCtrl.ErrorList, 0, sizeof(BurnerCtrl.ErrorList));
     memset(&BurnerCtrl.Info, 0, sizeof(BurnerCtrl.Info));
 
     LED_Off(ERR);
@@ -107,6 +109,7 @@ void Burner_Exe(void) {
     }
     /* 蜂鸣器短鸣 */
     Beep(150);
+start:
     /* 初始化接口 */
     if (swd_init_debug() != 0) {
         BurnerCtrl.Error = BURNER_ERROR_INIT;   // SWD初始化失败
@@ -161,7 +164,7 @@ void Burner_Exe(void) {
     target_flash_uninit();
 
     /* 等待响应 */
-    for (uint16_t i = 0; i < 100; i++) {
+    for (uint16_t i = 0; i < 200; i++) {
         Delay(10);
         /* 初始化接口 */
         if (swd_init_debug() != 0) {
@@ -309,7 +312,16 @@ void Burner_Exe(void) {
     }
 
 exit:
-    if (BurnerCtrl.Error == BURNER_ERROR_NONE) {
+    if ((BurnerCtrl.Error != BURNER_ERROR_BUFFER) &&
+        (BurnerCtrl.Error != BURNER_ERROR_NONE) &&
+        (BurnerCtrl.ErrCnt <= BURNER_RETRY_COUNT)) {
+        /* 烧录失败重试 */
+        BurnerCtrl.ErrorList[BurnerCtrl.ErrCnt] = BurnerCtrl.Error;    // 记录错误码
+        BurnerCtrl.Error                        = BURNER_ERROR_NONE;   // 清除错误码
+        BurnerCtrl.ErrCnt++;                                           // 错误计数加1
+        goto start;
+    } else if (BurnerCtrl.Error == BURNER_ERROR_NONE) {
+        /* 烧录成功 */
         Beep(300);
     } else {
         Beep(2000);
